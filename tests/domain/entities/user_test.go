@@ -1,10 +1,13 @@
 package entities_test
 
 import (
-	uuid "github.com/satori/go.uuid"
-	"github.com/stretchr/testify/require"
+	"errors"
 	"testing"
 	"time"
+
+	"github.com/asaskevich/govalidator"
+	uuid "github.com/satori/go.uuid"
+	"github.com/stretchr/testify/require"
 )
 
 type Book struct {
@@ -27,11 +30,24 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+func (user *User) isValid() error {
+	validEmail := govalidator.IsEmail(user.Email)
+	if !validEmail {
+		return errors.New("Invalid email!")
+	}
+	return nil
+}
+
 func NewUser(name string, userName string, email string) (*User, error) {
 	user := User{
 		Name:     name,
 		UserName: userName,
 		Email:    email,
+	}
+
+	err := user.isValid()
+	if err != nil {
+		return nil, err
 	}
 
 	user.ID = uuid.NewV4().String()
@@ -58,4 +74,16 @@ func TestUser_New(t *testing.T) {
 	require.Equal(t, fakeName, newUser.Name)
 	require.Equal(t, fakeUserName, newUser.UserName)
 	require.Equal(t, fakeEmail, newUser.Email)
+}
+
+func TestUser_New_WithInvalidEmail(t *testing.T) {
+	fakeName := "any_name"
+	fakeUserName := "any_user_name"
+	fakeEmail := "any_invalid_email"
+
+	newUser, err := NewUser(fakeName, fakeUserName, fakeEmail)
+
+	require.Error(t, err)
+	require.Nil(t, newUser)
+	require.Equal(t, err.Error(), "Invalid email!")
 }

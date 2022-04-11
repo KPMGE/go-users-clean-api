@@ -2,12 +2,11 @@ package entities_test
 
 import (
 	"errors"
-	"testing"
-	"time"
-
 	"github.com/asaskevich/govalidator"
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/require"
+	"testing"
+	"time"
 )
 
 type Book struct {
@@ -21,13 +20,13 @@ type Book struct {
 }
 
 type User struct {
-	ID        string    `json:"id"`
-	Name      string    `json:"name"`
-	UserName  string    `json:"user_name"`
-	Email     string    `json:"email"`
+	ID        string    `json:"id" valid:"uuid"`
+	Name      string    `json:"name" valid:"notnull"`
+	UserName  string    `json:"user_name" valid:"notnull"`
+	Email     string    `json:"email" valid:"email"`
 	Books     []*Book   `json:"books"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time `json:"created_at" valid:"-"`
+	UpdatedAt time.Time `json:"updated_at" valid:"-"`
 }
 
 func (user *User) isValid() error {
@@ -35,6 +34,12 @@ func (user *User) isValid() error {
 	if !validEmail {
 		return errors.New("Invalid email!")
 	}
+
+	_, err := govalidator.ValidateStruct(user)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -86,4 +91,22 @@ func TestUser_New_WithInvalidEmail(t *testing.T) {
 	require.Error(t, err)
 	require.Nil(t, newUser)
 	require.Equal(t, err.Error(), "Invalid email!")
+}
+
+func TestUser_New_WithNullFields(t *testing.T) {
+	fakeName := "any_name"
+	fakeUserName := "any_user_name"
+	fakeEmail := "any_invalid_email"
+
+	newUser, err := NewUser("", fakeUserName, fakeEmail)
+	require.Error(t, err)
+	require.Nil(t, newUser)
+
+	newUser, err = NewUser(fakeName, "", fakeEmail)
+	require.Error(t, err)
+	require.Nil(t, newUser)
+
+	newUser, err = NewUser(fakeName, fakeUserName, "")
+	require.Error(t, err)
+	require.Nil(t, newUser)
 }

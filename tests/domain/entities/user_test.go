@@ -9,24 +9,25 @@ import (
 	"time"
 )
 
+type Base struct {
+	ID        string    `json:"id" valid:"uuid"`
+	CreatedAt time.Time `json:"created_at" valid:"-"`
+	UpdatedAt time.Time `json:"updated_at" valid:"-"`
+}
+
 type Book struct {
-	ID        string    `json:"id"`
-	Title     string    `json:"title"`
-	Author    string    `json:"author"`
-	Price     float64   `json:"price"`
-	User      *User     `json:"user"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Title  string  `json:"title"`
+	Author string  `json:"author"`
+	Price  float64 `json:"price"`
+	User   *User   `json:"user"`
 }
 
 type User struct {
-	ID        string    `json:"id" valid:"uuid"`
-	Name      string    `json:"name" valid:"notnull"`
-	UserName  string    `json:"user_name" valid:"notnull"`
-	Email     string    `json:"email" valid:"email"`
-	Books     []*Book   `json:"books"`
-	CreatedAt time.Time `json:"created_at" valid:"-"`
-	UpdatedAt time.Time `json:"updated_at" valid:"-"`
+	Base
+	Name     string  `json:"name" valid:"notnull"`
+	UserName string  `json:"user_name" valid:"notnull"`
+	Email    string  `json:"email" valid:"email"`
+	Books    []*Book `json:"books"`
 }
 
 func (user *User) isValid() error {

@@ -24,10 +24,10 @@ type Book struct {
 
 type User struct {
 	Base
-	Name     string  `json:"name" valid:"notnull"`
-	UserName string  `json:"user_name" valid:"notnull"`
+	Name     string  `json:"name" valid:"required"`
+	UserName string  `json:"user_name" valid:"required"`
 	Email    string  `json:"email" valid:"email"`
-	Books    []*Book `json:"books"`
+	Books    []*Book `json:"books" valid:"-"`
 }
 
 func (user *User) isValid() error {
@@ -51,24 +51,24 @@ func NewUser(name string, userName string, email string) (*User, error) {
 		Email:    email,
 	}
 
-	err := user.isValid()
-	if err != nil {
-		return nil, err
-	}
-
 	user.ID = uuid.NewV4().String()
 	user.Books = nil
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 
+	err := user.isValid()
+	if err != nil {
+		return nil, err
+	}
+
 	return &user, nil
 }
 
-func TestUser_New(t *testing.T) {
-	fakeName := "any_name"
-	fakeUserName := "any_user_name"
-	fakeEmail := "any_valid_email@gmail.com"
+const fakeName string = "any_name"
+const fakeUserName string = "any_user_name"
+const fakeEmail string = "any_valid_email@gmail.com"
 
+func TestUser_New(t *testing.T) {
 	newUser, err := NewUser(fakeName, fakeUserName, fakeEmail)
 
 	require.Nil(t, err)
@@ -83,11 +83,7 @@ func TestUser_New(t *testing.T) {
 }
 
 func TestUser_New_WithInvalidEmail(t *testing.T) {
-	fakeName := "any_name"
-	fakeUserName := "any_user_name"
-	fakeEmail := "any_invalid_email"
-
-	newUser, err := NewUser(fakeName, fakeUserName, fakeEmail)
+	newUser, err := NewUser(fakeName, fakeUserName, "any_invalid_email")
 
 	require.Error(t, err)
 	require.Nil(t, newUser)
@@ -95,10 +91,6 @@ func TestUser_New_WithInvalidEmail(t *testing.T) {
 }
 
 func TestUser_New_WithNullFields(t *testing.T) {
-	fakeName := "any_name"
-	fakeUserName := "any_user_name"
-	fakeEmail := "any_invalid_email"
-
 	newUser, err := NewUser("", fakeUserName, fakeEmail)
 	require.Error(t, err)
 	require.Nil(t, newUser)

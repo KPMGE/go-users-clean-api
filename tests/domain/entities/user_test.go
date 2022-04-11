@@ -55,4 +55,7 @@ func TestUser_New(t *testing.T) {
 	require.NotNil(t, newUser.ID)
 	require.NotNil(t, newUser.UpdatedAt)
 	require.NotNil(t, newUser.CreatedAt)
+	require.Equal(t, fakeName, newUser.Name)
+	require.Equal(t, fakeUserName, newUser.UserName)
+	require.Equal(t, fakeEmail, newUser.Email)
 }

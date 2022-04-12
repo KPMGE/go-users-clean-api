@@ -1,9 +1,11 @@
 package usecases_test
 
 import (
+	"errors"
+	"testing"
+
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 type AccountRepository interface {
@@ -34,6 +36,11 @@ func (useCase *AddAccountUseCase) addAccount(userName string, email string, pass
 		UserName: account.UserName,
 		Email:    account.Email,
 	}
+
+	if password != confirmPassword {
+		return nil, errors.New("password and confirmPassword must match")
+	}
+
 	return &output, nil
 }
 
@@ -91,4 +98,13 @@ func TestAddAccountUseCase_WithRightData(t *testing.T) {
 	require.Equal(t, hasher.input, fakePassword)
 	require.Equal(t, createdAccount.Email, fakeEmail)
 	require.Equal(t, createdAccount.UserName, fakeUserName)
+}
+
+func TestAddAccountUseCase_WithDifferentPasswordAndConfirmPassword(t *testing.T) {
+	sut, _, _ := makeSut()
+	createdAccount, err := sut.addAccount(fakeUserName, fakeEmail, fakePassword, "any_other_value")
+
+	require.Error(t, err)
+	require.Nil(t, createdAccount)
+	require.Equal(t, err.Error(), "password and confirmPassword must match")
 }

@@ -15,13 +15,6 @@ type Base struct {
 	UpdatedAt time.Time `json:"updated_at" valid:"-"`
 }
 
-type Book struct {
-	Title  string  `json:"title"`
-	Author string  `json:"author"`
-	Price  float64 `json:"price"`
-	User   *User   `json:"user"`
-}
-
 type User struct {
 	Base
 	Name     string  `json:"name" valid:"required"`

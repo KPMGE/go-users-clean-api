@@ -19,6 +19,9 @@ func TestNewAccount_WithRightData(t *testing.T) {
 	require.Equal(t, account.Email, fakeAccountEmail)
 	require.Equal(t, account.UserName, fakeAccountUserName)
 	require.Equal(t, account.Password, fakeAccountPassword)
+	require.NotNil(t, account.ID, fakeAccountPassword)
+	require.NotNil(t, account.CreatedAt, fakeAccountPassword)
+	require.NotNil(t, account.UpdatedAt, fakeAccountPassword)
 }
 
 func TestNewAccount_WithInvalidEmail(t *testing.T) {

@@ -3,9 +3,12 @@ package entities
 import (
 	"errors"
 	"github.com/asaskevich/govalidator"
+	uuid "github.com/satori/go.uuid"
+	"time"
 )
 
 type Account struct {
+	Base
 	UserName string `json:"user_name" valid:"required"`
 	Email    string `json:"email" valid:"required"`
 	Password string `json:"password" valid:"required"`
@@ -31,6 +34,10 @@ func NewAccount(userName string, email string, password string) (*Account, error
 		UserName: userName,
 		Password: password,
 	}
+
+	account.CreatedAt = time.Now()
+	account.UpdatedAt = time.Now()
+	account.ID = uuid.NewV4().String()
 
 	err := account.isValid()
 	if err != nil {

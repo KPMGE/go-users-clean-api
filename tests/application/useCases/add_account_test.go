@@ -53,7 +53,8 @@ func (hasher *hasherSpy) hash(plainText string) string {
 	return "hashed_plain_text"
 }
 
-type FakeAccountRepository struct{}
+type FakeAccountRepository struct {
+}
 
 func (repo *FakeAccountRepository) checkAccountByEmail(email string) bool {
 	return true
@@ -75,11 +76,15 @@ const fakeUserName string = "any_user_name"
 const fakeEmail string = "any_valid_email@gmail.com"
 const fakePassword string = "any_password"
 
-func TestAddAccountUseCase_WithRightData(t *testing.T) {
+func makeSut() (*AddAccountUseCase, *hasherSpy, *FakeAccountRepository) {
 	repo := NewFakeAccountRepository()
 	hasher := NewHasherSpy()
 	sut := NewAddAccountUseCase(repo, hasher)
+	return sut, hasher, repo
+}
 
+func TestAddAccountUseCase_WithRightData(t *testing.T) {
+	sut, hasher, _ := makeSut()
 	createdAccount, err := sut.addAccount(fakeUserName, fakeEmail, fakePassword, fakePassword)
 
 	require.Nil(t, err)

@@ -23,15 +23,29 @@ const (
 	fakePrice       float64 = 5.3
 )
 
-func NewBook(title string, author string, description string, price float64) (*Book, error) {
+func makeFakeUser() *User {
+	user := User{
+		Name:     "any_name",
+		UserName: "any_user_name",
+		Email:    "any_valid_email@gmail.com",
+	}
+
+	user.ID = "any_id"
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
+
+	return &user
+}
+
+func NewBook(title string, author string, description string, price float64, user *User) (*Book, error) {
 	book := Book{
+		User:        user,
 		Title:       title,
 		Author:      author,
 		Description: description,
 		Price:       price,
 	}
 
-	book.User = nil
 	book.ID = uuid.NewV4().String()
 	book.CreatedAt = time.Now()
 	book.UpdatedAt = time.Now()
@@ -40,12 +54,14 @@ func NewBook(title string, author string, description string, price float64) (*B
 }
 
 func TestNewBook_WithRighData(t *testing.T) {
-	newBook, err := NewBook(fakeTitle, fakeAuthor, fakeDescription, fakePrice)
+	fakeUser := makeFakeUser()
+	newBook, err := NewBook(fakeTitle, fakeAuthor, fakeDescription, fakePrice, fakeUser)
 
 	require.Nil(t, err)
 	require.NotEmpty(t, newBook.CreatedAt)
 	require.NotEmpty(t, newBook.UpdatedAt)
 	require.NotEmpty(t, newBook.ID)
+	require.Equal(t, newBook.User, fakeUser)
 	require.Equal(t, newBook.Title, fakeTitle)
 	require.Equal(t, newBook.Author, fakeAuthor)
 	require.Equal(t, newBook.Price, fakePrice)

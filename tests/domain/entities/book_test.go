@@ -5,17 +5,18 @@ import (
 	"testing"
 	"time"
 
+	"github.com/asaskevich/govalidator"
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/require"
 )
 
 type Book struct {
 	Base
-	Title       string  `json:"title"`
-	Author      string  `json:"author"`
-	Price       float64 `json:"price"`
-	Description string  `json:"description"`
-	User        *User   `json:"user"`
+	Title       string  `json:"title" valid:"required"`
+	Author      string  `json:"author" valid:"required"`
+	Price       float64 `json:"price" valid:"required"`
+	Description string  `json:"description" valid:"required"`
+	User        *User   `json:"user" valid:"required"`
 }
 
 const (
@@ -32,7 +33,7 @@ func makeFakeUser() *User {
 		Email:    "any_valid_email@gmail.com",
 	}
 
-	user.ID = "any_id"
+	user.ID = uuid.NewV4().String()
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 
@@ -42,6 +43,10 @@ func makeFakeUser() *User {
 func (book *Book) isValid() error {
 	if book.Price <= 0 {
 		return errors.New("Price must be greater than 0!")
+	}
+	_, err := govalidator.ValidateStruct(book)
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -89,4 +94,20 @@ func TestNewBook_WithPriceLessThanOrEqualTo0(t *testing.T) {
 	require.Error(t, err)
 	require.Nil(t, newBook)
 	require.Equal(t, err.Error(), "Price must be greater than 0!")
+}
+
+func TestNewBook_WithNullFields(t *testing.T) {
+	fakeUser := makeFakeUser()
+
+	newBook, err := NewBook("", fakeAuthor, fakeDescription, fakePrice, fakeUser)
+	require.Error(t, err)
+	require.Nil(t, newBook)
+
+	newBook, err = NewBook(fakeTitle, "", fakeDescription, fakePrice, fakeUser)
+	require.Error(t, err)
+	require.Nil(t, newBook)
+
+	newBook, err = NewBook(fakeTitle, fakeAuthor, "", fakePrice, fakeUser)
+	require.Error(t, err)
+	require.Nil(t, newBook)
 }

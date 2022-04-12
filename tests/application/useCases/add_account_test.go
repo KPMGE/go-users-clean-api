@@ -3,7 +3,6 @@ package usecases_test
 import (
 	"errors"
 	"testing"
-
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/stretchr/testify/require"
 )
@@ -37,6 +36,11 @@ func (useCase *AddAccountUseCase) addAccount(userName string, email string, pass
 		Email:    account.Email,
 	}
 
+	emailTaken := useCase.accountRepository.checkAccountByEmail(email)
+	if emailTaken {
+		return nil, errors.New("email already taken")
+	}
+
 	if password != confirmPassword {
 		return nil, errors.New("password and confirmPassword must match")
 	}
@@ -61,10 +65,11 @@ func (hasher *hasherSpy) hash(plainText string) string {
 }
 
 type FakeAccountRepository struct {
+	checkAccountOutput bool
 }
 
 func (repo *FakeAccountRepository) checkAccountByEmail(email string) bool {
-	return true
+	return repo.checkAccountOutput
 }
 
 func (repo *FakeAccountRepository) save(accout *entities.Account) error {
@@ -107,4 +112,15 @@ func TestAddAccountUseCase_WithDifferentPasswordAndConfirmPassword(t *testing.T)
 	require.Error(t, err)
 	require.Nil(t, createdAccount)
 	require.Equal(t, err.Error(), "password and confirmPassword must match")
+}
+
+func TestAddAccountUseCase_WithEmailAlreadyTaken(t *testing.T) {
+	sut, _, repo := makeSut()
+	repo.checkAccountOutput = true
+
+	createdAccount, err := sut.addAccount(fakeUserName, "already_taken_email@gmail.com", fakePassword, fakePassword)
+
+	require.Error(t, err)
+	require.Nil(t, createdAccount)
+	require.Equal(t, err.Error(), "email already taken")
 }

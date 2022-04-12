@@ -1,10 +1,12 @@
 package entities_test
 
 import (
-	uuid "github.com/satori/go.uuid"
-	"github.com/stretchr/testify/require"
+	"errors"
 	"testing"
 	"time"
+
+	uuid "github.com/satori/go.uuid"
+	"github.com/stretchr/testify/require"
 )
 
 type Book struct {
@@ -37,6 +39,13 @@ func makeFakeUser() *User {
 	return &user
 }
 
+func (book *Book) isValid() error {
+	if book.Price <= 0 {
+		return errors.New("Price must be greater than 0!")
+	}
+	return nil
+}
+
 func NewBook(title string, author string, description string, price float64, user *User) (*Book, error) {
 	book := Book{
 		User:        user,
@@ -49,6 +58,11 @@ func NewBook(title string, author string, description string, price float64, use
 	book.ID = uuid.NewV4().String()
 	book.CreatedAt = time.Now()
 	book.UpdatedAt = time.Now()
+
+	err := book.isValid()
+	if err != nil {
+		return nil, err
+	}
 
 	return &book, nil
 }
@@ -66,4 +80,13 @@ func TestNewBook_WithRighData(t *testing.T) {
 	require.Equal(t, newBook.Author, fakeAuthor)
 	require.Equal(t, newBook.Price, fakePrice)
 	require.Equal(t, newBook.Description, fakeDescription)
+}
+
+func TestNewBook_WithPriceLessThanOrEqualTo0(t *testing.T) {
+	fakeUser := makeFakeUser()
+	newBook, err := NewBook(fakeTitle, fakeAuthor, fakeDescription, 0, fakeUser)
+
+	require.Error(t, err)
+	require.Nil(t, newBook)
+	require.Equal(t, err.Error(), "Price must be greater than 0!")
 }

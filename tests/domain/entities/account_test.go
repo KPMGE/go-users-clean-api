@@ -2,16 +2,15 @@ package entities_test
 
 import (
 	"errors"
-	"testing"
-
 	"github.com/asaskevich/govalidator"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 type Account struct {
-	UserName string
-	Email    string
-	Password string
+	UserName string `json:"user_name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 const (

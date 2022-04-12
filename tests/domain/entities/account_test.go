@@ -8,9 +8,9 @@ import (
 )
 
 type Account struct {
-	UserName string `json:"user_name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	UserName string `json:"user_name" valid:"required"`
+	Email    string `json:"email" valid:"required"`
+	Password string `json:"password" valid:"required"`
 }
 
 const (
@@ -24,6 +24,12 @@ func (account *Account) isValid() error {
 	if !validEmail {
 		return errors.New("Invalid email!")
 	}
+
+	_, err := govalidator.ValidateStruct(account)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -57,4 +63,18 @@ func TestNewAccount_WithInvalidEmail(t *testing.T) {
 	require.Nil(t, account)
 	require.Error(t, err)
 	require.Equal(t, err.Error(), "Invalid email!")
+}
+
+func TestNewAccount_WithBlankFields(t *testing.T) {
+	account, err := NewAccount("", fakeAccountEmail, fakeAccountPassword)
+	require.Nil(t, account)
+	require.Error(t, err)
+
+	account, err = NewAccount(fakeAccountUserName, "", fakeAccountPassword)
+	require.Nil(t, account)
+	require.Error(t, err)
+
+	account, err = NewAccount(fakeAccountUserName, fakeAccountEmail, "")
+	require.Nil(t, account)
+	require.Error(t, err)
 }

@@ -7,8 +7,8 @@ type AddAccountOutputDTO struct {
 }
 
 type AddAccountInputDTO struct {
-	UserName        string `json:"user_name"`
+	UserName        string `json:"userName"`
 	Email           string `json:"email"`
 	Password        string `json:"password"`
-	ConfirmPassword string `json:"confirm_password"`
+	ConfirmPassword string `json:"confirmPassword"`
 }

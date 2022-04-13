@@ -75,3 +75,16 @@ func TestAddAccountController_WithRightData(t *testing.T) {
 	require.Equal(t, httpResponse.StatusCode, 200)
 	require.NotNil(t, httpResponse.Body)
 }
+
+func TestAddAccountController_WithInvalidData(t *testing.T) {
+	repo := repositories.NewInmemoryAccountRepository()
+	hasher := NewFakeHasher()
+	useCase := usecases.NewAddAccountUseCase(repo, hasher)
+	controller := NewAddAccountController(useCase)
+
+	request := makeFakeRequest()
+	request.Body.Email = "invalid_email"
+	httpResponse := controller.Handle(request)
+
+	require.Equal(t, httpResponse.StatusCode, 400)
+}

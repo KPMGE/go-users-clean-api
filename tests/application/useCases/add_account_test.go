@@ -1,18 +1,20 @@
 package usecases_test
 
 import (
+	"testing"
+
+	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 const fakeUserName string = "any_user_name"
 const fakeEmail string = "any_valid_email@gmail.com"
 const fakePassword string = "any_password"
 
-func makeFakeInput() *usecases.AddAccountInputDTO {
-	return &usecases.AddAccountInputDTO{
+func makeFakeInput() *dto.AddAccountInputDTO {
+	return &dto.AddAccountInputDTO{
 		UserName:        fakeUserName,
 		Email:           fakeEmail,
 		Password:        fakePassword,

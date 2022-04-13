@@ -3,6 +3,7 @@ package usecases
 import (
 	"errors"
 	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
+	"github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 )
 
@@ -11,20 +12,7 @@ type AddAccountUseCase struct {
 	hasher            protocols.Hasher
 }
 
-type AddAccountOutputDTO struct {
-	ID       string
-	UserName string
-	Email    string
-}
-
-type AddAccountInputDTO struct {
-	UserName        string `json:"user_name"`
-	Email           string `json:"email"`
-	Password        string `json:"password"`
-	ConfirmPassword string `json:"confirm_password"`
-}
-
-func (useCase *AddAccountUseCase) AddAccount(input *AddAccountInputDTO) (*AddAccountOutputDTO, error) {
+func (useCase *AddAccountUseCase) AddAccount(input *dto.AddAccountInputDTO) (*dto.AddAccountOutputDTO, error) {
 	emailTaken := useCase.accountRepository.CheckAccountByEmail(input.Email)
 	if emailTaken {
 		return nil, errors.New("email already taken")
@@ -51,7 +39,7 @@ func (useCase *AddAccountUseCase) AddAccount(input *AddAccountInputDTO) (*AddAcc
 		return nil, err
 	}
 
-	output := AddAccountOutputDTO{
+	output := dto.AddAccountOutputDTO{
 		ID:       account.ID,
 		UserName: account.UserName,
 		Email:    account.Email,

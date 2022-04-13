@@ -12,6 +12,6 @@ func Ok(data interface{}) *protocols.HttpResponse {
 func BadRequest(err error) *protocols.HttpResponse {
 	return &protocols.HttpResponse{
 		StatusCode: 400,
-		Body:       err,
+		Body:       err.Error(),
 	}
 }

@@ -10,7 +10,7 @@ import (
 type AccountRepository interface {
 	checkAccountByEmail(email string) bool
 	checkAccountByUserName(userName string) bool
-	save(accout *entities.Account) error
+	save(account *entities.Account) error
 }
 
 type Hasher interface {
@@ -29,14 +29,6 @@ type AddAccountOutputDTO struct {
 }
 
 func (useCase *AddAccountUseCase) addAccount(userName string, email string, password string, confirmPassword string) (*AddAccountOutputDTO, error) {
-	account, _ := entities.NewAccount(userName, email, password)
-	useCase.hasher.hash(password)
-	output := AddAccountOutputDTO{
-		ID:       account.ID,
-		UserName: account.UserName,
-		Email:    account.Email,
-	}
-
 	emailTaken := useCase.accountRepository.checkAccountByEmail(email)
 	if emailTaken {
 		return nil, errors.New("email already taken")
@@ -49,6 +41,20 @@ func (useCase *AddAccountUseCase) addAccount(userName string, email string, pass
 
 	if password != confirmPassword {
 		return nil, errors.New("password and confirmPassword must match")
+	}
+
+	hashedPassword := useCase.hasher.hash(password)
+	account, _ := entities.NewAccount(userName, email, hashedPassword)
+
+	output := AddAccountOutputDTO{
+		ID:       account.ID,
+		UserName: account.UserName,
+		Email:    account.Email,
+	}
+
+	err := useCase.accountRepository.save(account)
+	if err != nil {
+		return nil, err
 	}
 
 	return &output, nil
@@ -67,10 +73,11 @@ type hasherSpy struct {
 
 func (hasher *hasherSpy) hash(plainText string) string {
 	hasher.input = plainText
-	return "hashed_plain_text"
+	return "hashed_text"
 }
 
 type FakeAccountRepository struct {
+	input               *entities.Account
 	checkAccountOutput  bool
 	checkUserNameOutput bool
 }
@@ -83,7 +90,8 @@ func (repo *FakeAccountRepository) checkAccountByUserName(userName string) bool 
 	return repo.checkUserNameOutput
 }
 
-func (repo *FakeAccountRepository) save(accout *entities.Account) error {
+func (repo *FakeAccountRepository) save(account *entities.Account) error {
+	repo.input = account
 	return nil
 }
 
@@ -107,13 +115,14 @@ func makeSut() (*AddAccountUseCase, *hasherSpy, *FakeAccountRepository) {
 }
 
 func TestAddAccountUseCase_WithRightData(t *testing.T) {
-	sut, hasher, _ := makeSut()
+	sut, hasher, repo := makeSut()
 	createdAccount, err := sut.addAccount(fakeUserName, fakeEmail, fakePassword, fakePassword)
 
 	require.Nil(t, err)
 	require.Equal(t, hasher.input, fakePassword)
 	require.Equal(t, createdAccount.Email, fakeEmail)
 	require.Equal(t, createdAccount.UserName, fakeUserName)
+	require.Equal(t, repo.input.Password, "hashed_text")
 }
 
 func TestAddAccountUseCase_WithDifferentPasswordAndConfirmPassword(t *testing.T) {

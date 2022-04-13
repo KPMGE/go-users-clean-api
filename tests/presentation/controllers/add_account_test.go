@@ -27,18 +27,26 @@ type AddAccountRequest struct {
 	Body *dto.AddAccountInputDTO
 }
 
+func ok(data interface{}) *HttpResponse {
+	return &HttpResponse{
+		StatusCode: 200,
+		Body:       data,
+	}
+}
+
+func badRequest(err error) *HttpResponse {
+	return &HttpResponse{
+		StatusCode: 400,
+		Body:       err,
+	}
+}
+
 func (controller *AddAccountController) Handle(request *AddAccountRequest) *HttpResponse {
 	output, err := controller.useCase.AddAccount(request.Body)
 	if err != nil {
-		return &HttpResponse{
-			StatusCode: 400,
-			Body:       err,
-		}
+		return badRequest(err)
 	}
-	return &HttpResponse{
-		StatusCode: 200,
-		Body:       output,
-	}
+	return ok(output)
 }
 
 type FakeHasher struct{}

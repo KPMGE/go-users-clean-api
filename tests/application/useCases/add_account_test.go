@@ -28,23 +28,30 @@ type AddAccountOutputDTO struct {
 	Email    string
 }
 
-func (useCase *AddAccountUseCase) addAccount(userName string, email string, password string, confirmPassword string) (*AddAccountOutputDTO, error) {
-	emailTaken := useCase.accountRepository.checkAccountByEmail(email)
+type AddAccountInputDTO struct {
+	UserName        string
+	Email           string
+	Password        string
+	ConfirmPassword string
+}
+
+func (useCase *AddAccountUseCase) addAccount(input *AddAccountInputDTO) (*AddAccountOutputDTO, error) {
+	emailTaken := useCase.accountRepository.checkAccountByEmail(input.Email)
 	if emailTaken {
 		return nil, errors.New("email already taken")
 	}
 
-	userNameTaken := useCase.accountRepository.checkAccountByUserName(userName)
+	userNameTaken := useCase.accountRepository.checkAccountByUserName(input.UserName)
 	if userNameTaken {
 		return nil, errors.New("username already taken")
 	}
 
-	if password != confirmPassword {
+	if input.Password != input.ConfirmPassword {
 		return nil, errors.New("password and confirmPassword must match")
 	}
 
-	hashedPassword := useCase.hasher.hash(password)
-	account, err := entities.NewAccount(userName, email, hashedPassword)
+	hashedPassword := useCase.hasher.hash(input.Password)
+	account, err := entities.NewAccount(input.UserName, input.Email, hashedPassword)
 
 	if err != nil {
 		return nil, err
@@ -111,6 +118,15 @@ const fakeUserName string = "any_user_name"
 const fakeEmail string = "any_valid_email@gmail.com"
 const fakePassword string = "any_password"
 
+func makeFakeInput() *AddAccountInputDTO {
+	return &AddAccountInputDTO{
+		UserName:        fakeUserName,
+		Email:           fakeEmail,
+		Password:        fakePassword,
+		ConfirmPassword: fakePassword,
+	}
+}
+
 func makeSut() (*AddAccountUseCase, *hasherSpy, *FakeAccountRepository) {
 	repo := NewFakeAccountRepository()
 	hasher := NewHasherSpy()
@@ -120,7 +136,8 @@ func makeSut() (*AddAccountUseCase, *hasherSpy, *FakeAccountRepository) {
 
 func TestAddAccountUseCase_WithRightData(t *testing.T) {
 	sut, hasher, repo := makeSut()
-	createdAccount, err := sut.addAccount(fakeUserName, fakeEmail, fakePassword, fakePassword)
+	fakeInput := makeFakeInput()
+	createdAccount, err := sut.addAccount(fakeInput)
 
 	require.Nil(t, err)
 	require.Equal(t, hasher.input, fakePassword)
@@ -131,7 +148,10 @@ func TestAddAccountUseCase_WithRightData(t *testing.T) {
 
 func TestAddAccountUseCase_WithDifferentPasswordAndConfirmPassword(t *testing.T) {
 	sut, _, _ := makeSut()
-	createdAccount, err := sut.addAccount(fakeUserName, fakeEmail, fakePassword, "any_other_value")
+	fakeInput := makeFakeInput()
+	fakeInput.ConfirmPassword = "any_different_password"
+
+	createdAccount, err := sut.addAccount(fakeInput)
 
 	require.Error(t, err)
 	require.Nil(t, createdAccount)
@@ -141,8 +161,9 @@ func TestAddAccountUseCase_WithDifferentPasswordAndConfirmPassword(t *testing.T)
 func TestAddAccountUseCase_WithEmailAlreadyTaken(t *testing.T) {
 	sut, _, repo := makeSut()
 	repo.checkAccountOutput = true
+	fakeInput := makeFakeInput()
 
-	createdAccount, err := sut.addAccount(fakeUserName, "already_taken_email@gmail.com", fakePassword, fakePassword)
+	createdAccount, err := sut.addAccount(fakeInput)
 
 	require.Error(t, err)
 	require.Nil(t, createdAccount)
@@ -151,9 +172,10 @@ func TestAddAccountUseCase_WithEmailAlreadyTaken(t *testing.T) {
 
 func TestAddAccountUseCase_WithUsernameAlreadyTaken(t *testing.T) {
 	sut, _, repo := makeSut()
+	fakeInput := makeFakeInput()
 	repo.checkUserNameOutput = true
 
-	createdAccount, err := sut.addAccount("already_taken_username", fakeEmail, fakePassword, fakePassword)
+	createdAccount, err := sut.addAccount(fakeInput)
 
 	require.Error(t, err)
 	require.Nil(t, createdAccount)
@@ -165,19 +187,27 @@ func TestAddAccountUseCase_WithBlankFields(t *testing.T) {
 	repo.checkUserNameOutput = false
 	repo.checkUserNameOutput = false
 
-	createdAccount, err := sut.addAccount("", fakeEmail, fakePassword, fakePassword)
+	fakeInput := makeFakeInput()
+	fakeInput.UserName = ""
+	createdAccount, err := sut.addAccount(fakeInput)
 	require.Error(t, err)
 	require.Nil(t, createdAccount)
 
-	createdAccount, err = sut.addAccount(fakeUserName, "", fakePassword, fakePassword)
+	fakeInput = makeFakeInput()
+	fakeInput.Password = ""
+	createdAccount, err = sut.addAccount(fakeInput)
 	require.Error(t, err)
 	require.Nil(t, createdAccount)
 
-	createdAccount, err = sut.addAccount(fakeUserName, fakeEmail, "", fakePassword)
+	fakeInput = makeFakeInput()
+	fakeInput.ConfirmPassword = ""
+	createdAccount, err = sut.addAccount(fakeInput)
 	require.Error(t, err)
 	require.Nil(t, createdAccount)
 
-	createdAccount, err = sut.addAccount(fakeUserName, fakeEmail, fakePassword, "")
+	fakeInput = makeFakeInput()
+	fakeInput.Email = ""
+	createdAccount, err = sut.addAccount(fakeInput)
 	require.Error(t, err)
 	require.Nil(t, createdAccount)
 }

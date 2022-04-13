@@ -44,17 +44,21 @@ func (useCase *AddAccountUseCase) addAccount(userName string, email string, pass
 	}
 
 	hashedPassword := useCase.hasher.hash(password)
-	account, _ := entities.NewAccount(userName, email, hashedPassword)
+	account, err := entities.NewAccount(userName, email, hashedPassword)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = useCase.accountRepository.save(account)
+	if err != nil {
+		return nil, err
+	}
 
 	output := AddAccountOutputDTO{
 		ID:       account.ID,
 		UserName: account.UserName,
 		Email:    account.Email,
-	}
-
-	err := useCase.accountRepository.save(account)
-	if err != nil {
-		return nil, err
 	}
 
 	return &output, nil
@@ -154,4 +158,26 @@ func TestAddAccountUseCase_WithUsernameAlreadyTaken(t *testing.T) {
 	require.Error(t, err)
 	require.Nil(t, createdAccount)
 	require.Equal(t, err.Error(), "username already taken")
+}
+
+func TestAddAccountUseCase_WithBlankFields(t *testing.T) {
+	sut, _, repo := makeSut()
+	repo.checkUserNameOutput = false
+	repo.checkUserNameOutput = false
+
+	createdAccount, err := sut.addAccount("", fakeEmail, fakePassword, fakePassword)
+	require.Error(t, err)
+	require.Nil(t, createdAccount)
+
+	createdAccount, err = sut.addAccount(fakeUserName, "", fakePassword, fakePassword)
+	require.Error(t, err)
+	require.Nil(t, createdAccount)
+
+	createdAccount, err = sut.addAccount(fakeUserName, fakeEmail, "", fakePassword)
+	require.Error(t, err)
+	require.Nil(t, createdAccount)
+
+	createdAccount, err = sut.addAccount(fakeUserName, fakeEmail, fakePassword, "")
+	require.Error(t, err)
+	require.Nil(t, createdAccount)
 }

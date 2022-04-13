@@ -2,34 +2,10 @@ package usecases_test
 
 import (
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
-	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
-
-type FakeAccountRepository struct {
-	input               *entities.Account
-	checkAccountOutput  bool
-	checkUserNameOutput bool
-}
-
-func (repo *FakeAccountRepository) CheckAccountByEmail(email string) bool {
-	return repo.checkAccountOutput
-}
-
-func (repo *FakeAccountRepository) CheckAccountByUserName(userName string) bool {
-	return repo.checkUserNameOutput
-}
-
-func (repo *FakeAccountRepository) Save(account *entities.Account) error {
-	repo.input = account
-	return nil
-}
-
-func NewFakeAccountRepository() *FakeAccountRepository {
-	return &FakeAccountRepository{}
-}
 
 const fakeUserName string = "any_user_name"
 const fakeEmail string = "any_valid_email@gmail.com"
@@ -44,8 +20,8 @@ func makeFakeInput() *usecases.AddAccountInputDTO {
 	}
 }
 
-func makeSut() (*usecases.AddAccountUseCase, *mocks_test.HasherSpy, *FakeAccountRepository) {
-	repo := NewFakeAccountRepository()
+func makeSut() (*usecases.AddAccountUseCase, *mocks_test.HasherSpy, *mocks_test.FakeAccountRepository) {
+	repo := mocks_test.NewFakeAccountRepository()
 	hasher := mocks_test.NewHasherSpy()
 	sut := usecases.NewAddAccountUseCase(repo, hasher)
 	return sut, hasher, repo
@@ -60,7 +36,7 @@ func TestAddAccountUseCase_WithRightData(t *testing.T) {
 	require.Equal(t, hasher.Input, fakePassword)
 	require.Equal(t, createdAccount.Email, fakeEmail)
 	require.Equal(t, createdAccount.UserName, fakeUserName)
-	require.Equal(t, repo.input.Password, "hashed_text")
+	require.Equal(t, repo.Input.Password, "hashed_text")
 }
 
 func TestAddAccountUseCase_WithDifferentPasswordAndConfirmPassword(t *testing.T) {
@@ -77,7 +53,7 @@ func TestAddAccountUseCase_WithDifferentPasswordAndConfirmPassword(t *testing.T)
 
 func TestAddAccountUseCase_WithEmailAlreadyTaken(t *testing.T) {
 	sut, _, repo := makeSut()
-	repo.checkAccountOutput = true
+	repo.CheckAccountOutput = true
 	fakeInput := makeFakeInput()
 
 	createdAccount, err := sut.AddAccount(fakeInput)
@@ -90,7 +66,7 @@ func TestAddAccountUseCase_WithEmailAlreadyTaken(t *testing.T) {
 func TestAddAccountUseCase_WithUsernameAlreadyTaken(t *testing.T) {
 	sut, _, repo := makeSut()
 	fakeInput := makeFakeInput()
-	repo.checkUserNameOutput = true
+	repo.CheckUserNameOutput = true
 
 	createdAccount, err := sut.AddAccount(fakeInput)
 
@@ -101,8 +77,8 @@ func TestAddAccountUseCase_WithUsernameAlreadyTaken(t *testing.T) {
 
 func TestAddAccountUseCase_WithBlankFields(t *testing.T) {
 	sut, _, repo := makeSut()
-	repo.checkUserNameOutput = false
-	repo.checkUserNameOutput = false
+	repo.CheckUserNameOutput = false
+	repo.CheckUserNameOutput = false
 
 	fakeInput := makeFakeInput()
 	fakeInput.UserName = ""

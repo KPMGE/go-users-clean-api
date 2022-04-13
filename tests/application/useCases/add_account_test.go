@@ -2,24 +2,16 @@ package usecases_test
 
 import (
 	"errors"
+	"testing"
+
+	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
-type AccountRepository interface {
-	checkAccountByEmail(email string) bool
-	checkAccountByUserName(userName string) bool
-	save(account *entities.Account) error
-}
-
-type Hasher interface {
-	hash(plainText string) string
-}
-
 type AddAccountUseCase struct {
-	accountRepository AccountRepository
-	hasher            Hasher
+	accountRepository protocols.AccountRepository
+	hasher            protocols.Hasher
 }
 
 type AddAccountOutputDTO struct {
@@ -36,12 +28,12 @@ type AddAccountInputDTO struct {
 }
 
 func (useCase *AddAccountUseCase) addAccount(input *AddAccountInputDTO) (*AddAccountOutputDTO, error) {
-	emailTaken := useCase.accountRepository.checkAccountByEmail(input.Email)
+	emailTaken := useCase.accountRepository.CheckAccountByEmail(input.Email)
 	if emailTaken {
 		return nil, errors.New("email already taken")
 	}
 
-	userNameTaken := useCase.accountRepository.checkAccountByUserName(input.UserName)
+	userNameTaken := useCase.accountRepository.CheckAccountByUserName(input.UserName)
 	if userNameTaken {
 		return nil, errors.New("username already taken")
 	}
@@ -50,14 +42,14 @@ func (useCase *AddAccountUseCase) addAccount(input *AddAccountInputDTO) (*AddAcc
 		return nil, errors.New("password and confirmPassword must match")
 	}
 
-	hashedPassword := useCase.hasher.hash(input.Password)
+	hashedPassword := useCase.hasher.Hash(input.Password)
 	account, err := entities.NewAccount(input.UserName, input.Email, hashedPassword)
 
 	if err != nil {
 		return nil, err
 	}
 
-	err = useCase.accountRepository.save(account)
+	err = useCase.accountRepository.Save(account)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +63,7 @@ func (useCase *AddAccountUseCase) addAccount(input *AddAccountInputDTO) (*AddAcc
 	return &output, nil
 }
 
-func NewAddAccountUseCase(accountRepository AccountRepository, hasher Hasher) *AddAccountUseCase {
+func NewAddAccountUseCase(accountRepository protocols.AccountRepository, hasher protocols.Hasher) *AddAccountUseCase {
 	return &AddAccountUseCase{
 		accountRepository: accountRepository,
 		hasher:            hasher,
@@ -82,7 +74,7 @@ type hasherSpy struct {
 	input string
 }
 
-func (hasher *hasherSpy) hash(plainText string) string {
+func (hasher *hasherSpy) Hash(plainText string) string {
 	hasher.input = plainText
 	return "hashed_text"
 }
@@ -93,15 +85,15 @@ type FakeAccountRepository struct {
 	checkUserNameOutput bool
 }
 
-func (repo *FakeAccountRepository) checkAccountByEmail(email string) bool {
+func (repo *FakeAccountRepository) CheckAccountByEmail(email string) bool {
 	return repo.checkAccountOutput
 }
 
-func (repo *FakeAccountRepository) checkAccountByUserName(userName string) bool {
+func (repo *FakeAccountRepository) CheckAccountByUserName(userName string) bool {
 	return repo.checkUserNameOutput
 }
 
-func (repo *FakeAccountRepository) save(account *entities.Account) error {
+func (repo *FakeAccountRepository) Save(account *entities.Account) error {
 	repo.input = account
 	return nil
 }

@@ -4,14 +4,11 @@ import (
 	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/infrasctructure/repositories"
+	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
+	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
-
-type HttpResponse struct {
-	StatusCode int
-	Body       interface{}
-}
 
 type AddAccountController struct {
 	useCase *usecases.AddAccountUseCase
@@ -27,26 +24,12 @@ type AddAccountRequest struct {
 	Body *dto.AddAccountInputDTO
 }
 
-func ok(data interface{}) *HttpResponse {
-	return &HttpResponse{
-		StatusCode: 200,
-		Body:       data,
-	}
-}
-
-func badRequest(err error) *HttpResponse {
-	return &HttpResponse{
-		StatusCode: 400,
-		Body:       err,
-	}
-}
-
-func (controller *AddAccountController) Handle(request *AddAccountRequest) *HttpResponse {
+func (controller *AddAccountController) Handle(request *AddAccountRequest) *protocols.HttpResponse {
 	output, err := controller.useCase.AddAccount(request.Body)
 	if err != nil {
-		return badRequest(err)
+		return helpers.BadRequest(err)
 	}
-	return ok(output)
+	return helpers.Ok(output)
 }
 
 type FakeHasher struct{}

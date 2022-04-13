@@ -1,13 +1,15 @@
 package repositories
 
-import "github.com/KPMGE/go-users-clean-api/src/domain/entities"
+import (
+	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
+)
 
-type InMemoryAccountRepository struct {
-	accounts []*entities.Account
-}
+var accounts []*entities.Account
+
+type InMemoryAccountRepository struct{}
 
 func (repo *InMemoryAccountRepository) CheckAccountByEmail(email string) bool {
-	for _, account := range repo.accounts {
+	for _, account := range accounts {
 		if account.Email == email {
 			return true
 		}
@@ -16,7 +18,7 @@ func (repo *InMemoryAccountRepository) CheckAccountByEmail(email string) bool {
 }
 
 func (repo *InMemoryAccountRepository) CheckAccountByUserName(userName string) bool {
-	for _, account := range repo.accounts {
+	for _, account := range accounts {
 		if account.UserName == userName {
 			return true
 		}
@@ -25,7 +27,7 @@ func (repo *InMemoryAccountRepository) CheckAccountByUserName(userName string) b
 }
 
 func (repo *InMemoryAccountRepository) Save(account *entities.Account) error {
-	repo.accounts = append(repo.accounts, account)
+	accounts = append(accounts, account)
 	return nil
 }
 

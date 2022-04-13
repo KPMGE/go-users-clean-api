@@ -63,28 +63,29 @@ func makeFakeRequest() *AddAccountRequest {
 	}
 }
 
-func TestAddAccountController_WithRightData(t *testing.T) {
+func makeSut() *AddAccountController {
 	repo := repositories.NewInmemoryAccountRepository()
 	hasher := NewFakeHasher()
 	useCase := usecases.NewAddAccountUseCase(repo, hasher)
-	controller := NewAddAccountController(useCase)
+	sut := NewAddAccountController(useCase)
+	return sut
+}
 
+func TestAddAccountController_WithRightData(t *testing.T) {
+	sut := makeSut()
 	request := makeFakeRequest()
-	httpResponse := controller.Handle(request)
+	httpResponse := sut.Handle(request)
 
 	require.Equal(t, httpResponse.StatusCode, 200)
 	require.NotNil(t, httpResponse.Body)
 }
 
 func TestAddAccountController_WithInvalidData(t *testing.T) {
-	repo := repositories.NewInmemoryAccountRepository()
-	hasher := NewFakeHasher()
-	useCase := usecases.NewAddAccountUseCase(repo, hasher)
-	controller := NewAddAccountController(useCase)
+	sut := makeSut()
 
 	request := makeFakeRequest()
 	request.Body.Email = "invalid_email"
-	httpResponse := controller.Handle(request)
+	httpResponse := sut.Handle(request)
 
 	require.Equal(t, httpResponse.StatusCode, 400)
 }

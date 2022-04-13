@@ -29,10 +29,10 @@ type AddAccountOutputDTO struct {
 }
 
 type AddAccountInputDTO struct {
-	UserName        string
-	Email           string
-	Password        string
-	ConfirmPassword string
+	UserName        string `json:"user_name"`
+	Email           string `json:"email"`
+	Password        string `json:"password"`
+	ConfirmPassword string `json:"confirm_password"`
 }
 
 func (useCase *AddAccountUseCase) addAccount(input *AddAccountInputDTO) (*AddAccountOutputDTO, error) {

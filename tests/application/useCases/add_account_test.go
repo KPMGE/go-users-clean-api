@@ -1,21 +1,12 @@
 package usecases_test
 
 import (
-	"testing"
-
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
+	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
-
-type hasherSpy struct {
-	input string
-}
-
-func (hasher *hasherSpy) Hash(plainText string) string {
-	hasher.input = plainText
-	return "hashed_text"
-}
 
 type FakeAccountRepository struct {
 	input               *entities.Account
@@ -36,10 +27,6 @@ func (repo *FakeAccountRepository) Save(account *entities.Account) error {
 	return nil
 }
 
-func NewHasherSpy() *hasherSpy {
-	return &hasherSpy{}
-}
-
 func NewFakeAccountRepository() *FakeAccountRepository {
 	return &FakeAccountRepository{}
 }
@@ -57,9 +44,9 @@ func makeFakeInput() *usecases.AddAccountInputDTO {
 	}
 }
 
-func makeSut() (*usecases.AddAccountUseCase, *hasherSpy, *FakeAccountRepository) {
+func makeSut() (*usecases.AddAccountUseCase, *mocks_test.HasherSpy, *FakeAccountRepository) {
 	repo := NewFakeAccountRepository()
-	hasher := NewHasherSpy()
+	hasher := mocks_test.NewHasherSpy()
 	sut := usecases.NewAddAccountUseCase(repo, hasher)
 	return sut, hasher, repo
 }
@@ -70,7 +57,7 @@ func TestAddAccountUseCase_WithRightData(t *testing.T) {
 	createdAccount, err := sut.AddAccount(fakeInput)
 
 	require.Nil(t, err)
-	require.Equal(t, hasher.input, fakePassword)
+	require.Equal(t, hasher.Input, fakePassword)
 	require.Equal(t, createdAccount.Email, fakeEmail)
 	require.Equal(t, createdAccount.UserName, fakeUserName)
 	require.Equal(t, repo.input.Password, "hashed_text")

@@ -6,7 +6,6 @@ import (
 
 	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
-	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/KPMGE/go-users-clean-api/src/infrasctructure/repositories"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
@@ -36,9 +35,14 @@ func (controller *AddUserController) Handle(request *HttpRequest) *protocols.Htt
 		panic(err)
 	}
 
-	newUser, err := entities.NewUser(inputUser.Name, inputUser.UserName, inputUser.Email)
+	// newUser, err := entities.NewUser(inputUser.Name, inputUser.UserName, inputUser.Email)
+	// if err != nil {
+	// 	return nil
+	// }
+
+	newUser, err := controller.useCase.Add(&inputUser)
 	if err != nil {
-		return nil
+		return helpers.BadRequest(err)
 	}
 
 	output := dto.NewAddUserOutputDTO(newUser.ID, newUser.Name, newUser.UserName, newUser.Email)
@@ -46,6 +50,7 @@ func (controller *AddUserController) Handle(request *HttpRequest) *protocols.Htt
 	if err != nil {
 		panic(err)
 	}
+
 	return helpers.Ok(string(outputJson))
 }
 
@@ -97,4 +102,14 @@ func TestAdduserController_WithCorrectInput(t *testing.T) {
 	require.NotNil(t, bodyObj.ID)
 	require.Equal(t, bodyObj.Email, fakeEmail)
 	require.Equal(t, bodyObj.UserName, fakeUserName)
+}
+
+func TestAdduserController_WithInvalidEmail(t *testing.T) {
+	sut := makeAddUserControllerSut()
+	fakeRequest := makeFakeAddUserRequest(fakeName, fakeUserName, "invalid email")
+
+	httpResponse := sut.Handle(fakeRequest)
+
+	require.Equal(t, 400, httpResponse.StatusCode)
+	require.Equal(t, "Invalid email!", httpResponse.JsonBody)
 }

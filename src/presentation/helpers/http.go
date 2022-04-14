@@ -15,3 +15,10 @@ func BadRequest(err error) *protocols.HttpResponse {
 		JsonBody:   err.Error(),
 	}
 }
+
+func ServerError(err error) *protocols.HttpResponse {
+	return &protocols.HttpResponse{
+		StatusCode: 500,
+		JsonBody:   err.Error(),
+	}
+}

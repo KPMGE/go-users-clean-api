@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
+	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/stretchr/testify/require"
 )
@@ -23,12 +24,8 @@ func NewUserRepositorySpy() *UserRepositorySpy {
 	return &UserRepositorySpy{}
 }
 
-type UserRepository interface {
-	Save(user *entities.User) error
-}
-
 type AddUserUseCase struct {
-	userRepository UserRepository
+	userRepository protocols.UserRepository
 }
 
 func (useCase *AddUserUseCase) Add(input *dto.AddUserInputDTO) (*dto.AddUserOutputDTO, error) {
@@ -46,7 +43,7 @@ func (useCase *AddUserUseCase) Add(input *dto.AddUserInputDTO) (*dto.AddUserOutp
 	return output, nil
 }
 
-func NewAddUserUseCase(repo UserRepository) *AddUserUseCase {
+func NewAddUserUseCase(repo protocols.UserRepository) *AddUserUseCase {
 	return &AddUserUseCase{
 		userRepository: repo,
 	}

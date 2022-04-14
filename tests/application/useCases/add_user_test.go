@@ -28,11 +28,28 @@ type AddUserInputDTO struct {
 	Email    string
 }
 
+func NewAddUserInputDTO(name string, userName string, email string) *AddUserInputDTO {
+	return &AddUserInputDTO{
+		Name:     name,
+		Email:    email,
+		UserName: userName,
+	}
+}
+
 type AddUserOutputDTO struct {
 	ID       string
 	Name     string
 	UserName string
 	Email    string
+}
+
+func NewAddUserOutputDTO(id string, name string, userName string, email string) *AddUserOutputDTO {
+	return &AddUserOutputDTO{
+		Name:     name,
+		Email:    email,
+		ID:       id,
+		UserName: userName,
+	}
 }
 
 type UserRepository interface {
@@ -54,13 +71,8 @@ func (useCase *AddUserUseCase) Add(input *AddUserInputDTO) (*AddUserOutputDTO, e
 		return nil, err
 	}
 
-	output := AddUserOutputDTO{
-		ID:       newUser.ID,
-		Name:     newUser.Name,
-		UserName: newUser.UserName,
-		Email:    newUser.Email,
-	}
-	return &output, nil
+	output := NewAddUserOutputDTO(newUser.ID, newUser.Name, newUser.UserName, newUser.Email)
+	return output, nil
 }
 
 func NewAddUserUseCase(repo UserRepository) *AddUserUseCase {
@@ -77,11 +89,7 @@ func makeAddUserSut() (*AddUserUseCase, *UserRepositorySpy) {
 }
 
 func makeFakeValidAddUserInput() *AddUserInputDTO {
-	return &AddUserInputDTO{
-		Name:     "any_name",
-		UserName: "any_username",
-		Email:    "any_valid_email@gmail.com",
-	}
+	return NewAddUserInputDTO("any_name", "any_username", "any_valid_email@gmail.com")
 }
 
 func TestAddUser_WithRightInput(t *testing.T) {

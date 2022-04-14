@@ -32,13 +32,8 @@ func (controller *AddUserController) Handle(request *HttpRequest) *protocols.Htt
 	var inputUser dto.AddUserInputDTO
 	err := json.Unmarshal(request.Body, &inputUser)
 	if err != nil {
-		panic(err)
+		return helpers.ServerError(err)
 	}
-
-	// newUser, err := entities.NewUser(inputUser.Name, inputUser.UserName, inputUser.Email)
-	// if err != nil {
-	// 	return nil
-	// }
 
 	newUser, err := controller.useCase.Add(&inputUser)
 	if err != nil {
@@ -48,7 +43,7 @@ func (controller *AddUserController) Handle(request *HttpRequest) *protocols.Htt
 	output := dto.NewAddUserOutputDTO(newUser.ID, newUser.Name, newUser.UserName, newUser.Email)
 	outputJson, err := json.Marshal(output)
 	if err != nil {
-		panic(err)
+		return helpers.ServerError(err)
 	}
 
 	return helpers.Ok(string(outputJson))
@@ -112,4 +107,14 @@ func TestAdduserController_WithInvalidEmail(t *testing.T) {
 
 	require.Equal(t, 400, httpResponse.StatusCode)
 	require.Equal(t, "Invalid email!", httpResponse.JsonBody)
+}
+
+func TestAdduserController_WithInvalidJsonInput(t *testing.T) {
+	sut := makeAddUserControllerSut()
+	fakeRequest := NewHtppRequest([]byte("invalid json"), nil)
+
+	httpResponse := sut.Handle(fakeRequest)
+
+	require.Equal(t, 500, httpResponse.StatusCode)
+	require.NotNil(t, httpResponse.JsonBody)
 }

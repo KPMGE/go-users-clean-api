@@ -42,7 +42,11 @@ func (controller *AddUserController) Handle(request *HttpRequest) *protocols.Htt
 	}
 
 	output := dto.NewAddUserOutputDTO(newUser.ID, newUser.Name, newUser.UserName, newUser.Email)
-	return helpers.Ok(output)
+	outputJson, err := json.Marshal(output)
+	if err != nil {
+		panic(err)
+	}
+	return helpers.Ok(string(outputJson))
 }
 
 func NewAddUserController(useCase *usecases.AddUserUseCase) *AddUserController {
@@ -51,8 +55,12 @@ func NewAddUserController(useCase *usecases.AddUserUseCase) *AddUserController {
 	}
 }
 
+const fakeName string = "any_name"
+const fakeUserName string = "any_username"
+const fakeEmail string = "any_valid_email@gmail.com"
+
 func makeFakeValidRequest() *HttpRequest {
-	input := dto.NewAddUserInputDTO("any_name", "any_username", "any_valid_email@gmail.com")
+	input := dto.NewAddUserInputDTO(fakeName, fakeUserName, fakeEmail)
 	jsonEntry, err := json.Marshal(input)
 
 	if err != nil {
@@ -62,14 +70,30 @@ func makeFakeValidRequest() *HttpRequest {
 	return NewHtppRequest(jsonEntry, nil)
 }
 
-func TestAdduserController_WithCorrectInput(t *testing.T) {
+func makeAddUserControllerSut() *AddUserController {
 	repo := repositories.NewInMemoryUserRepository()
 	useCase := usecases.NewAddUserUseCase(repo)
 	sut := NewAddUserController(useCase)
-	fakeRequest := makeFakeValidRequest()
+	return sut
+}
 
+func convertJsonToAccoutOutputDTO(data string) *dto.AddAccountOutputDTO {
+	var bodyObj dto.AddAccountOutputDTO
+	err := json.Unmarshal([]byte(data), &bodyObj)
+	if err != nil {
+		panic(err)
+	}
+	return &bodyObj
+}
+
+func TestAdduserController_WithCorrectInput(t *testing.T) {
+	sut := makeAddUserControllerSut()
+	fakeRequest := makeFakeValidRequest()
 	httpResponse := sut.Handle(fakeRequest)
+	bodyObj := convertJsonToAccoutOutputDTO(httpResponse.JsonBody)
 
 	require.Equal(t, 200, httpResponse.StatusCode)
-	require.NotNil(t, httpResponse.Body)
+	require.NotNil(t, bodyObj.ID)
+	require.Equal(t, bodyObj.Email, fakeEmail)
+	require.Equal(t, bodyObj.UserName, fakeUserName)
 }

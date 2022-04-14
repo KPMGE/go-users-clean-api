@@ -66,14 +66,20 @@ func NewAddUserUseCase(repo UserRepository) *AddUserUseCase {
 	}
 }
 
-func TestAddUser_WithRightInput(t *testing.T) {
+func makeAddUserSut() (*AddUserUseCase, *UserRepositorySpy) {
 	repo := NewUserRepositorySpy()
 	sut := NewAddUserUseCase(repo)
+	return sut, repo
+}
+
+func TestAddUser_WithRightInput(t *testing.T) {
 	fakeInput := AddUserInputDTO{
 		Name:     "any_name",
 		UserName: "any_username",
 		Email:    "any_valid_email@gmail.com",
 	}
+
+	sut, repo := makeAddUserSut()
 
 	output, err := sut.Add(&fakeInput)
 

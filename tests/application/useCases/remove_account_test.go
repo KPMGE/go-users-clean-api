@@ -1,40 +1,20 @@
 package usecases_test
 
 import (
-	"errors"
-	"testing"
-
-	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
+	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 const fakeAccountId string = "any_valid_account_id"
 
-type RemoveAccountUseCase struct {
-	accountRepository protocols.AccountRepository
-}
-
-func NewRemoveAccountUseCase(repo protocols.AccountRepository) *RemoveAccountUseCase {
-	return &RemoveAccountUseCase{
-		accountRepository: repo,
-	}
-}
-
-func (useCase *RemoveAccountUseCase) Remove(accountId string) (string, error) {
-	foundAccount := useCase.accountRepository.FindAccountById(accountId)
-	if foundAccount == nil {
-		return "", errors.New("there is no account with this id")
-	}
-	return "account deleted", nil
-}
-
-func MakeSut() (*RemoveAccountUseCase, *mocks_test.FakeAccountRepository) {
+func MakeSut() (*usecases.RemoveAccountUseCase, *mocks_test.FakeAccountRepository) {
 	repo := mocks_test.NewFakeAccountRepository()
 	fakeAccont, _ := entities.NewAccount("any_username", "any_valid_email@gmail.com", "any_password")
 	repo.FindAccountByIdOutput = fakeAccont
-	sut := NewRemoveAccountUseCase(repo)
+	sut := usecases.NewRemoveAccountUseCase(repo)
 	return sut, repo
 }
 

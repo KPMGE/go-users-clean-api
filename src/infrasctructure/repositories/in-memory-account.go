@@ -31,6 +31,15 @@ func (repo *InMemoryAccountRepository) Save(account *entities.Account) error {
 	return nil
 }
 
+func (repo *InMemoryAccountRepository) FindAccountById(accountId string) *entities.Account {
+	for _, account := range accounts {
+		if account.ID == accountId {
+			return account
+		}
+	}
+	return nil
+}
+
 func NewInmemoryAccountRepository() *InMemoryAccountRepository {
 	return &InMemoryAccountRepository{}
 }

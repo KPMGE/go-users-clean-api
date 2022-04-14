@@ -4,27 +4,13 @@ import (
 	"errors"
 	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
-	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
+	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
-type UserRepositorySpy struct {
-	AddInput  *entities.User
-	AddOutput error
-}
-
-func (repo *UserRepositorySpy) Save(user *entities.User) error {
-	repo.AddInput = user
-	return repo.AddOutput
-}
-
-func NewUserRepositorySpy() *UserRepositorySpy {
-	return &UserRepositorySpy{}
-}
-
-func makeAddUserSut() (*usecases.AddUserUseCase, *UserRepositorySpy) {
-	repo := NewUserRepositorySpy()
+func makeAddUserSut() (*usecases.AddUserUseCase, *mocks_test.UserRepositorySpy) {
+	repo := mocks_test.NewUserRepositorySpy()
 	repo.AddOutput = nil
 	sut := usecases.NewAddUserUseCase(repo)
 	return sut, repo
@@ -51,8 +37,7 @@ func TestAddUser_WithRightInput(t *testing.T) {
 }
 
 func TestAddUser_WithInvalidEmail(t *testing.T) {
-	repo := NewUserRepositorySpy()
-	sut := usecases.NewAddUserUseCase(repo)
+	sut, _ := makeAddUserSut()
 	fakeInput := makeFakeValidAddUserInput()
 	fakeInput.Email = "invalid_email"
 
@@ -64,8 +49,7 @@ func TestAddUser_WithInvalidEmail(t *testing.T) {
 }
 
 func TestAddUser_WithBlankFields(t *testing.T) {
-	repo := NewUserRepositorySpy()
-	sut := usecases.NewAddUserUseCase(repo)
+	sut, _ := makeAddUserSut()
 
 	fakeInput := makeFakeValidAddUserInput()
 	fakeInput.Name = ""
@@ -87,9 +71,8 @@ func TestAddUser_WithBlankFields(t *testing.T) {
 }
 
 func TestAddUser_WhenRepositoryReturnsError(t *testing.T) {
-	repo := NewUserRepositorySpy()
+	sut, repo := makeAddUserSut()
 	repo.AddOutput = errors.New("some error")
-	sut := usecases.NewAddUserUseCase(repo)
 	fakeInput := makeFakeValidAddUserInput()
 
 	output, err := sut.Add(fakeInput)

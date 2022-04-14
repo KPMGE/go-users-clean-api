@@ -12,23 +12,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type HttpRequest struct {
-	Params []byte
-	Body   []byte
-}
-
-func NewHtppRequest(body []byte, params []byte) *HttpRequest {
-	return &HttpRequest{
-		Body:   body,
-		Params: params,
-	}
-}
-
 type AddUserController struct {
 	useCase *usecases.AddUserUseCase
 }
 
-func (controller *AddUserController) Handle(request *HttpRequest) *protocols.HttpResponse {
+func (controller *AddUserController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
 	var inputUser dto.AddUserInputDTO
 	err := json.Unmarshal(request.Body, &inputUser)
 	if err != nil {
@@ -59,7 +47,7 @@ const fakeName string = "any_name"
 const fakeUserName string = "any_username"
 const fakeEmail string = "any_valid_email@gmail.com"
 
-func makeFakeAddUserRequest(name string, userName string, email string) *HttpRequest {
+func makeFakeAddUserRequest(name string, userName string, email string) *protocols.HttpRequest {
 	input := dto.NewAddUserInputDTO(name, userName, email)
 	jsonEntry, err := json.Marshal(input)
 
@@ -67,7 +55,7 @@ func makeFakeAddUserRequest(name string, userName string, email string) *HttpReq
 		panic("Error generating json")
 	}
 
-	return NewHtppRequest(jsonEntry, nil)
+	return protocols.NewHtppRequest(jsonEntry, nil)
 }
 
 func makeAddUserControllerSut() *AddUserController {
@@ -130,7 +118,7 @@ func TestAdduserController_WithBlankFields(t *testing.T) {
 
 func TestAdduserController_WithInvalidJsonInput(t *testing.T) {
 	sut := makeAddUserControllerSut()
-	fakeRequest := NewHtppRequest([]byte("invalid json"), nil)
+	fakeRequest := protocols.NewHtppRequest([]byte("invalid json"), nil)
 
 	httpResponse := sut.Handle(fakeRequest)
 

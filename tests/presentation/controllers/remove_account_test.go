@@ -2,7 +2,6 @@ package controllers_test
 
 import (
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
-	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
@@ -11,8 +10,7 @@ import (
 
 func MakeSut() (*controllers.RemoveAccountController, *mocks_test.FakeAccountRepository) {
 	repo := mocks_test.NewFakeAccountRepository()
-	fakeAccount, _ := entities.NewAccount("any_username", "any_valid_email@gmail.com", "any_pass")
-	repo.FindAccountByIdOutput = fakeAccount
+	repo.DeleteAccountByIdOutput = true
 	useCase := usecases.NewRemoveAccountUseCase(repo)
 	sut := controllers.NewRemoveAccountController(useCase)
 	return sut, repo
@@ -28,7 +26,7 @@ func TestRemoveAccountController_WithCorrectID(t *testing.T) {
 
 func TestRemoveAccountController_WithWrongID(t *testing.T) {
 	sut, repo := MakeSut()
-	repo.FindAccountByIdOutput = nil
+	repo.DeleteAccountByIdOutput = false
 
 	httpResponse := sut.Handle("any_invalid_id")
 

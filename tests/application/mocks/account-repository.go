@@ -3,10 +3,10 @@ package mocks_test
 import "github.com/KPMGE/go-users-clean-api/src/domain/entities"
 
 type FakeAccountRepository struct {
-	Input                 *entities.Account
-	CheckAccountOutput    bool
-	CheckUserNameOutput   bool
-	FindAccountByIdOutput *entities.Account
+	Input                   *entities.Account
+	CheckAccountOutput      bool
+	CheckUserNameOutput     bool
+	DeleteAccountByIdOutput bool
 }
 
 func (repo *FakeAccountRepository) CheckAccountByEmail(email string) bool {
@@ -22,8 +22,8 @@ func (repo *FakeAccountRepository) Save(account *entities.Account) error {
 	return nil
 }
 
-func (repo *FakeAccountRepository) FindAccountById(accountId string) *entities.Account {
-	return repo.FindAccountByIdOutput
+func (repo *FakeAccountRepository) DeleteAccountById(accountId string) bool {
+	return repo.DeleteAccountByIdOutput
 }
 
 func NewFakeAccountRepository() *FakeAccountRepository {

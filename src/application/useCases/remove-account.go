@@ -10,8 +10,8 @@ type RemoveAccountUseCase struct {
 }
 
 func (useCase *RemoveAccountUseCase) Remove(accountId string) (string, error) {
-	foundAccount := useCase.accountRepository.FindAccountById(accountId)
-	if foundAccount == nil {
+	foundAccount := useCase.accountRepository.DeleteAccountById(accountId)
+	if !foundAccount {
 		return "", errors.New("there is no account with this id")
 	}
 	return "account deleted", nil

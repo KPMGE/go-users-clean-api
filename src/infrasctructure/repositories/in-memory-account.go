@@ -31,13 +31,16 @@ func (repo *InMemoryAccountRepository) Save(account *entities.Account) error {
 	return nil
 }
 
-func (repo *InMemoryAccountRepository) FindAccountById(accountId string) *entities.Account {
-	for _, account := range accounts {
-		if account.ID == accountId {
-			return account
+func (repo *InMemoryAccountRepository) DeleteAccountById(accountId string) bool {
+	var newList []*entities.Account
+	for index, account := range accounts {
+		if account.ID != accountId {
+			newList[index] = account
 		}
 	}
-	return nil
+	wasRemoved := len(newList) == len(accounts)
+	accounts = newList
+	return wasRemoved
 }
 
 func NewInmemoryAccountRepository() *InMemoryAccountRepository {

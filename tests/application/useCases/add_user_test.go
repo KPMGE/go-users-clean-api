@@ -12,7 +12,7 @@ type UserRepositorySpy struct {
 	AddOutput error
 }
 
-func (repo *UserRepositorySpy) Add(user *entities.User) error {
+func (repo *UserRepositorySpy) Save(user *entities.User) error {
 	repo.AddInput = user
 	return repo.AddOutput
 }
@@ -35,7 +35,7 @@ type AddUserOutputDTO struct {
 }
 
 type UserRepository interface {
-	Add(user *entities.User) error
+	Save(user *entities.User) error
 }
 
 type AddUserUseCase struct {
@@ -44,6 +44,7 @@ type AddUserUseCase struct {
 
 func (useCase *AddUserUseCase) Add(input *AddUserInputDTO) (*AddUserOutputDTO, error) {
 	newUser, _ := entities.NewUser(input.Name, input.UserName, input.Email)
+	useCase.userRepository.Save(newUser)
 	output := AddUserOutputDTO{
 		ID:       newUser.ID,
 		Name:     newUser.Name,
@@ -75,4 +76,7 @@ func TestAddUser_WithRightInput(t *testing.T) {
 	require.Equal(t, output.UserName, fakeInput.UserName)
 	require.Equal(t, output.Name, fakeInput.Name)
 	require.NotNil(t, output.ID)
+	require.Equal(t, repo.AddInput.Name, fakeInput.Name)
+	require.Equal(t, repo.AddInput.Email, fakeInput.Email)
+	require.Equal(t, repo.AddInput.UserName, fakeInput.UserName)
 }

@@ -7,41 +7,10 @@ import (
 	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/infrasctructure/repositories"
-	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
+	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 	"github.com/stretchr/testify/require"
 )
-
-type AddUserController struct {
-	useCase *usecases.AddUserUseCase
-}
-
-func (controller *AddUserController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
-	var inputUser dto.AddUserInputDTO
-	err := json.Unmarshal(request.Body, &inputUser)
-	if err != nil {
-		return helpers.ServerError(err)
-	}
-
-	newUser, err := controller.useCase.Add(&inputUser)
-	if err != nil {
-		return helpers.BadRequest(err)
-	}
-
-	output := dto.NewAddUserOutputDTO(newUser.ID, newUser.Name, newUser.UserName, newUser.Email)
-	outputJson, err := json.Marshal(output)
-	if err != nil {
-		return helpers.ServerError(err)
-	}
-
-	return helpers.Ok(string(outputJson))
-}
-
-func NewAddUserController(useCase *usecases.AddUserUseCase) *AddUserController {
-	return &AddUserController{
-		useCase: useCase,
-	}
-}
 
 const fakeName string = "any_name"
 const fakeUserName string = "any_username"
@@ -58,10 +27,10 @@ func makeFakeAddUserRequest(name string, userName string, email string) *protoco
 	return protocols.NewHtppRequest(jsonEntry, nil)
 }
 
-func makeAddUserControllerSut() *AddUserController {
+func makeAddUserControllerSut() *controllers.AddUserController {
 	repo := repositories.NewInMemoryUserRepository()
 	useCase := usecases.NewAddUserUseCase(repo)
-	sut := NewAddUserController(useCase)
+	sut := controllers.NewAddUserController(useCase)
 	return sut
 }
 

@@ -72,16 +72,19 @@ func makeAddUserSut() (*AddUserUseCase, *UserRepositorySpy) {
 	return sut, repo
 }
 
-func TestAddUser_WithRightInput(t *testing.T) {
-	fakeInput := AddUserInputDTO{
+func makeFakeValidAddUserInput() *AddUserInputDTO {
+	return &AddUserInputDTO{
 		Name:     "any_name",
 		UserName: "any_username",
 		Email:    "any_valid_email@gmail.com",
 	}
+}
 
+func TestAddUser_WithRightInput(t *testing.T) {
+	fakeInput := makeFakeValidAddUserInput()
 	sut, repo := makeAddUserSut()
 
-	output, err := sut.Add(&fakeInput)
+	output, err := sut.Add(fakeInput)
 
 	require.Nil(t, err)
 	require.Equal(t, output.Email, fakeInput.Email)
@@ -93,16 +96,13 @@ func TestAddUser_WithRightInput(t *testing.T) {
 	require.Equal(t, repo.AddInput.UserName, fakeInput.UserName)
 }
 
-func TestAddUser_WithWrongInput(t *testing.T) {
+func TestAddUser_WithInvalidEmail(t *testing.T) {
 	repo := NewUserRepositorySpy()
 	sut := NewAddUserUseCase(repo)
-	fakeInput := AddUserInputDTO{
-		Name:     "any_name",
-		UserName: "any_username",
-		Email:    "invalid_email",
-	}
+	fakeInput := makeFakeValidAddUserInput()
+	fakeInput.Email = "invalid_email"
 
-	output, err := sut.Add(&fakeInput)
+	output, err := sut.Add(fakeInput)
 
 	require.Error(t, err)
 	require.Equal(t, "Invalid email!", err.Error())

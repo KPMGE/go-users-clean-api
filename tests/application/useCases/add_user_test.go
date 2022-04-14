@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/stretchr/testify/require"
 )
@@ -22,36 +23,6 @@ func NewUserRepositorySpy() *UserRepositorySpy {
 	return &UserRepositorySpy{}
 }
 
-type AddUserInputDTO struct {
-	Name     string
-	UserName string
-	Email    string
-}
-
-func NewAddUserInputDTO(name string, userName string, email string) *AddUserInputDTO {
-	return &AddUserInputDTO{
-		Name:     name,
-		Email:    email,
-		UserName: userName,
-	}
-}
-
-type AddUserOutputDTO struct {
-	ID       string
-	Name     string
-	UserName string
-	Email    string
-}
-
-func NewAddUserOutputDTO(id string, name string, userName string, email string) *AddUserOutputDTO {
-	return &AddUserOutputDTO{
-		Name:     name,
-		Email:    email,
-		ID:       id,
-		UserName: userName,
-	}
-}
-
 type UserRepository interface {
 	Save(user *entities.User) error
 }
@@ -60,7 +31,7 @@ type AddUserUseCase struct {
 	userRepository UserRepository
 }
 
-func (useCase *AddUserUseCase) Add(input *AddUserInputDTO) (*AddUserOutputDTO, error) {
+func (useCase *AddUserUseCase) Add(input *dto.AddUserInputDTO) (*dto.AddUserOutputDTO, error) {
 	newUser, err := entities.NewUser(input.Name, input.UserName, input.Email)
 	if err != nil {
 		return nil, err
@@ -71,7 +42,7 @@ func (useCase *AddUserUseCase) Add(input *AddUserInputDTO) (*AddUserOutputDTO, e
 		return nil, err
 	}
 
-	output := NewAddUserOutputDTO(newUser.ID, newUser.Name, newUser.UserName, newUser.Email)
+	output := dto.NewAddUserOutputDTO(newUser.ID, newUser.Name, newUser.UserName, newUser.Email)
 	return output, nil
 }
 
@@ -88,8 +59,8 @@ func makeAddUserSut() (*AddUserUseCase, *UserRepositorySpy) {
 	return sut, repo
 }
 
-func makeFakeValidAddUserInput() *AddUserInputDTO {
-	return NewAddUserInputDTO("any_name", "any_username", "any_valid_email@gmail.com")
+func makeFakeValidAddUserInput() *dto.AddUserInputDTO {
+	return dto.NewAddUserInputDTO("any_name", "any_username", "any_valid_email@gmail.com")
 }
 
 func TestAddUser_WithRightInput(t *testing.T) {

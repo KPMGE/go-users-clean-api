@@ -109,6 +109,25 @@ func TestAdduserController_WithInvalidEmail(t *testing.T) {
 	require.Equal(t, "Invalid email!", httpResponse.JsonBody)
 }
 
+func TestAdduserController_WithBlankFields(t *testing.T) {
+	sut := makeAddUserControllerSut()
+
+	fakeRequest := makeFakeAddUserRequest("", fakeUserName, fakeEmail)
+	httpResponse := sut.Handle(fakeRequest)
+	require.Equal(t, 400, httpResponse.StatusCode)
+	require.NotNil(t, httpResponse.JsonBody)
+
+	fakeRequest = makeFakeAddUserRequest(fakeName, "", fakeEmail)
+	httpResponse = sut.Handle(fakeRequest)
+	require.Equal(t, 400, httpResponse.StatusCode)
+	require.NotNil(t, httpResponse.JsonBody)
+
+	fakeRequest = makeFakeAddUserRequest(fakeName, fakeUserName, "")
+	httpResponse = sut.Handle(fakeRequest)
+	require.Equal(t, 400, httpResponse.StatusCode)
+	require.NotNil(t, httpResponse.JsonBody)
+}
+
 func TestAdduserController_WithInvalidJsonInput(t *testing.T) {
 	sut := makeAddUserControllerSut()
 	fakeRequest := NewHtppRequest([]byte("invalid json"), nil)

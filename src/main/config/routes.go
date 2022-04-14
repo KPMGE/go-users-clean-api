@@ -1,11 +1,11 @@
 package configuration
 
 import (
-  "github.com/gofiber/fiber/v2"
-  "github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"encoding/json"
 	"github.com/KPMGE/go-users-clean-api/src/main/factories"
-  )
+	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
+	"github.com/gofiber/fiber/v2"
+)
 
 func SetupRoutes(app *fiber.App) *fiber.Router {
 	api := app.Group("/api")
@@ -20,6 +20,13 @@ func SetupRoutes(app *fiber.App) *fiber.Router {
 
 		controller := factories.MakeAddAccountController()
 		httpResponse := controller.Handle(&accountInput)
+		return c.Status(httpResponse.StatusCode).JSON(httpResponse.Body)
+	})
+
+	api.Delete("/accounts/:accountId", func(c *fiber.Ctx) error {
+		accountId := c.Params("accountId")
+		controller := factories.MakeRemoveAccountController()
+		httpResponse := controller.Handle(accountId)
 		return c.Status(httpResponse.StatusCode).JSON(httpResponse.Body)
 	})
 

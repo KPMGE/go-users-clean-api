@@ -108,3 +108,26 @@ func TestAddUser_WithInvalidEmail(t *testing.T) {
 	require.Equal(t, "Invalid email!", err.Error())
 	require.Nil(t, output)
 }
+
+func TestAddUser_WithBlankFields(t *testing.T) {
+	repo := NewUserRepositorySpy()
+	sut := NewAddUserUseCase(repo)
+
+	fakeInput := makeFakeValidAddUserInput()
+	fakeInput.Name = ""
+	output, err := sut.Add(fakeInput)
+	require.Error(t, err)
+	require.Nil(t, output)
+
+	fakeInput = makeFakeValidAddUserInput()
+	fakeInput.UserName = ""
+	output, err = sut.Add(fakeInput)
+	require.Error(t, err)
+	require.Nil(t, output)
+
+	fakeInput = makeFakeValidAddUserInput()
+	fakeInput.Email = ""
+	output, err = sut.Add(fakeInput)
+	require.Error(t, err)
+	require.Nil(t, output)
+}

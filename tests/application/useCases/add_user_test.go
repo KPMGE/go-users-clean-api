@@ -1,6 +1,7 @@
 package usecases_test
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
@@ -44,12 +45,14 @@ type AddUserUseCase struct {
 
 func (useCase *AddUserUseCase) Add(input *AddUserInputDTO) (*AddUserOutputDTO, error) {
 	newUser, err := entities.NewUser(input.Name, input.UserName, input.Email)
-
 	if err != nil {
 		return nil, err
 	}
 
-	useCase.userRepository.Save(newUser)
+	err = useCase.userRepository.Save(newUser)
+	if err != nil {
+		return nil, err
+	}
 
 	output := AddUserOutputDTO{
 		ID:       newUser.ID,
@@ -68,6 +71,7 @@ func NewAddUserUseCase(repo UserRepository) *AddUserUseCase {
 
 func makeAddUserSut() (*AddUserUseCase, *UserRepositorySpy) {
 	repo := NewUserRepositorySpy()
+	repo.AddOutput = nil
 	sut := NewAddUserUseCase(repo)
 	return sut, repo
 }
@@ -130,4 +134,17 @@ func TestAddUser_WithBlankFields(t *testing.T) {
 	output, err = sut.Add(fakeInput)
 	require.Error(t, err)
 	require.Nil(t, output)
+}
+
+func TestAddUser_WhenRepositoryReturnsError(t *testing.T) {
+	repo := NewUserRepositorySpy()
+	repo.AddOutput = errors.New("some error")
+	sut := NewAddUserUseCase(repo)
+	fakeInput := makeFakeValidAddUserInput()
+
+	output, err := sut.Add(fakeInput)
+
+	require.Nil(t, output)
+	require.Error(t, err)
+	require.Equal(t, err.Error(), "some error")
 }

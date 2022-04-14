@@ -30,12 +30,16 @@ func (useCase *RemoveAccountUseCase) Remove(accountId string) (string, error) {
 	return "account deleted", nil
 }
 
-func TestRemoveAccount_WithCorectID(t *testing.T) {
+func MakeSut() (*RemoveAccountUseCase, *mocks_test.FakeAccountRepository) {
 	repo := mocks_test.NewFakeAccountRepository()
-	sut := NewRemoveAccountUseCase(repo)
 	fakeAccont, _ := entities.NewAccount("any_username", "any_valid_email@gmail.com", "any_password")
 	repo.FindAccountByIdOutput = fakeAccont
+	sut := NewRemoveAccountUseCase(repo)
+	return sut, repo
+}
 
+func TestRemoveAccount_WithCorectID(t *testing.T) {
+	sut, _ := MakeSut()
 	message, err := sut.Remove(fakeAccountId)
 
 	require.Nil(t, err)
@@ -43,8 +47,7 @@ func TestRemoveAccount_WithCorectID(t *testing.T) {
 }
 
 func TestRemoveAccount_WithIncorrectID(t *testing.T) {
-	repo := mocks_test.NewFakeAccountRepository()
-	sut := NewRemoveAccountUseCase(repo)
+	sut, repo := MakeSut()
 	repo.FindAccountByIdOutput = nil
 
 	message, err := sut.Remove(fakeAccountId)

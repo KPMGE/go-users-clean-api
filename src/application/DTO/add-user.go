@@ -1,9 +1,9 @@
 package dto
 
 type AddUserInputDTO struct {
-	Name     string
-	UserName string
-	Email    string
+	Name     string `json:"name"`
+	UserName string `json:"userName"`
+	Email    string `json:"email"`
 }
 
 func NewAddUserInputDTO(name string, userName string, email string) *AddUserInputDTO {
@@ -15,10 +15,10 @@ func NewAddUserInputDTO(name string, userName string, email string) *AddUserInpu
 }
 
 type AddUserOutputDTO struct {
-	ID       string
-	Name     string
-	UserName string
-	Email    string
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	UserName string `json:"userName"`
+	Email    string `json:"email"`
 }
 
 func NewAddUserOutputDTO(id string, name string, userName string, email string) *AddUserOutputDTO {

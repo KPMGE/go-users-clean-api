@@ -59,8 +59,8 @@ const fakeName string = "any_name"
 const fakeUserName string = "any_username"
 const fakeEmail string = "any_valid_email@gmail.com"
 
-func makeFakeValidRequest() *HttpRequest {
-	input := dto.NewAddUserInputDTO(fakeName, fakeUserName, fakeEmail)
+func makeFakeAddUserRequest(name string, userName string, email string) *HttpRequest {
+	input := dto.NewAddUserInputDTO(name, userName, email)
 	jsonEntry, err := json.Marshal(input)
 
 	if err != nil {
@@ -88,7 +88,8 @@ func convertJsonToAccoutOutputDTO(data string) *dto.AddAccountOutputDTO {
 
 func TestAdduserController_WithCorrectInput(t *testing.T) {
 	sut := makeAddUserControllerSut()
-	fakeRequest := makeFakeValidRequest()
+	fakeRequest := makeFakeAddUserRequest(fakeName, fakeUserName, fakeEmail)
+
 	httpResponse := sut.Handle(fakeRequest)
 	bodyObj := convertJsonToAccoutOutputDTO(httpResponse.JsonBody)
 

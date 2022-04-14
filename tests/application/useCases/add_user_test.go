@@ -43,8 +43,14 @@ type AddUserUseCase struct {
 }
 
 func (useCase *AddUserUseCase) Add(input *AddUserInputDTO) (*AddUserOutputDTO, error) {
-	newUser, _ := entities.NewUser(input.Name, input.UserName, input.Email)
+	newUser, err := entities.NewUser(input.Name, input.UserName, input.Email)
+
+	if err != nil {
+		return nil, err
+	}
+
 	useCase.userRepository.Save(newUser)
+
 	output := AddUserOutputDTO{
 		ID:       newUser.ID,
 		Name:     newUser.Name,
@@ -79,4 +85,20 @@ func TestAddUser_WithRightInput(t *testing.T) {
 	require.Equal(t, repo.AddInput.Name, fakeInput.Name)
 	require.Equal(t, repo.AddInput.Email, fakeInput.Email)
 	require.Equal(t, repo.AddInput.UserName, fakeInput.UserName)
+}
+
+func TestAddUser_WithWrongInput(t *testing.T) {
+	repo := NewUserRepositorySpy()
+	sut := NewAddUserUseCase(repo)
+	fakeInput := AddUserInputDTO{
+		Name:     "any_name",
+		UserName: "any_username",
+		Email:    "invalid_email",
+	}
+
+	output, err := sut.Add(&fakeInput)
+
+	require.Error(t, err)
+	require.Equal(t, "Invalid email!", err.Error())
+	require.Nil(t, output)
 }

@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"encoding/json"
+
 	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
@@ -26,5 +28,9 @@ func (controller *AddAccountController) Handle(request *AddAccountRequest) *prot
 	if err != nil {
 		return helpers.BadRequest(err)
 	}
-	return helpers.Ok(output)
+	outputJson, err := json.Marshal(output)
+	if err != nil {
+		panic(err)
+	}
+	return helpers.Ok(string(outputJson))
 }

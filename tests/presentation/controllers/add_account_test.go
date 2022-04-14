@@ -45,7 +45,7 @@ func TestAddAccountController_WithRightData(t *testing.T) {
 	httpResponse := sut.Handle(request)
 
 	require.Equal(t, httpResponse.StatusCode, 200)
-	require.NotNil(t, httpResponse.Body)
+	require.NotNil(t, httpResponse.JsonBody)
 }
 
 func TestAddAccountController_WithInvalidData(t *testing.T) {

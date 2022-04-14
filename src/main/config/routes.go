@@ -20,14 +20,14 @@ func SetupRoutes(app *fiber.App) *fiber.Router {
 
 		controller := factories.MakeAddAccountController()
 		httpResponse := controller.Handle(&accountInput)
-		return c.Status(httpResponse.StatusCode).JSON(httpResponse.Body)
+		return c.Status(httpResponse.StatusCode).JSON(httpResponse.JsonBody)
 	})
 
 	api.Delete("/accounts/:accountId", func(c *fiber.Ctx) error {
 		accountId := c.Params("accountId")
 		controller := factories.MakeRemoveAccountController()
 		httpResponse := controller.Handle(accountId)
-		return c.Status(httpResponse.StatusCode).JSON(httpResponse.Body)
+		return c.Status(httpResponse.StatusCode).JSON(httpResponse.JsonBody)
 	})
 
 	return &api

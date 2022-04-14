@@ -2,12 +2,11 @@ package usecases_test
 
 import (
 	"errors"
-	"testing"
-
 	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
-	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
+	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 type UserRepositorySpy struct {
@@ -24,35 +23,10 @@ func NewUserRepositorySpy() *UserRepositorySpy {
 	return &UserRepositorySpy{}
 }
 
-type AddUserUseCase struct {
-	userRepository protocols.UserRepository
-}
-
-func (useCase *AddUserUseCase) Add(input *dto.AddUserInputDTO) (*dto.AddUserOutputDTO, error) {
-	newUser, err := entities.NewUser(input.Name, input.UserName, input.Email)
-	if err != nil {
-		return nil, err
-	}
-
-	err = useCase.userRepository.Save(newUser)
-	if err != nil {
-		return nil, err
-	}
-
-	output := dto.NewAddUserOutputDTO(newUser.ID, newUser.Name, newUser.UserName, newUser.Email)
-	return output, nil
-}
-
-func NewAddUserUseCase(repo protocols.UserRepository) *AddUserUseCase {
-	return &AddUserUseCase{
-		userRepository: repo,
-	}
-}
-
-func makeAddUserSut() (*AddUserUseCase, *UserRepositorySpy) {
+func makeAddUserSut() (*usecases.AddUserUseCase, *UserRepositorySpy) {
 	repo := NewUserRepositorySpy()
 	repo.AddOutput = nil
-	sut := NewAddUserUseCase(repo)
+	sut := usecases.NewAddUserUseCase(repo)
 	return sut, repo
 }
 
@@ -78,7 +52,7 @@ func TestAddUser_WithRightInput(t *testing.T) {
 
 func TestAddUser_WithInvalidEmail(t *testing.T) {
 	repo := NewUserRepositorySpy()
-	sut := NewAddUserUseCase(repo)
+	sut := usecases.NewAddUserUseCase(repo)
 	fakeInput := makeFakeValidAddUserInput()
 	fakeInput.Email = "invalid_email"
 
@@ -91,7 +65,7 @@ func TestAddUser_WithInvalidEmail(t *testing.T) {
 
 func TestAddUser_WithBlankFields(t *testing.T) {
 	repo := NewUserRepositorySpy()
-	sut := NewAddUserUseCase(repo)
+	sut := usecases.NewAddUserUseCase(repo)
 
 	fakeInput := makeFakeValidAddUserInput()
 	fakeInput.Name = ""
@@ -115,7 +89,7 @@ func TestAddUser_WithBlankFields(t *testing.T) {
 func TestAddUser_WhenRepositoryReturnsError(t *testing.T) {
 	repo := NewUserRepositorySpy()
 	repo.AddOutput = errors.New("some error")
-	sut := NewAddUserUseCase(repo)
+	sut := usecases.NewAddUserUseCase(repo)
 	fakeInput := makeFakeValidAddUserInput()
 
 	output, err := sut.Add(fakeInput)

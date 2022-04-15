@@ -6,4 +6,5 @@ type UserRepository interface {
 	Save(user *entities.User) error
 	CheckByEmail(email string) bool
 	CheckByUserName(userName string) bool
+	List() []*entities.User
 }

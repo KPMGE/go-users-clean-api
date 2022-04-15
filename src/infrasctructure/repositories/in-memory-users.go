@@ -31,6 +31,10 @@ func (repo *InMemoryUserRepository) CheckByUserName(userName string) bool {
 	return false
 }
 
+func (repo *InMemoryUserRepository) List() []*entities.User {
+	return users
+}
+
 func NewInMemoryUserRepository() *InMemoryUserRepository {
 	return &InMemoryUserRepository{}
 }

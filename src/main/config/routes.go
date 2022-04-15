@@ -31,5 +31,12 @@ func SetupRoutes(app *fiber.App) *fiber.Router {
 		return c.Status(httpResponse.StatusCode).Send(httpResponse.JsonBody)
 	})
 
+	api.Get("/users", func(c *fiber.Ctx) error {
+		controller := factories.MakeListUsersController()
+		request := protocols.NewHtppRequest(nil, nil)
+		httpResponse := controller.Handle(request)
+		return c.Status(httpResponse.StatusCode).Send(httpResponse.JsonBody)
+	})
+
 	return &api
 }

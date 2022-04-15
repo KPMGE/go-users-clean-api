@@ -1,12 +1,15 @@
 package controllers_test
 
 import (
+	"encoding/json"
+	"testing"
+
 	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/infrasctructure/repositories"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
+	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 type FakeHasher struct{}
@@ -19,16 +22,15 @@ func NewFakeHasher() *FakeHasher {
 	return &FakeHasher{}
 }
 
-func makeFakeRequest() *controllers.AddAccountRequest {
-	fakeAccount := dto.AddAccountInputDTO{
-		UserName:        "any_username",
-		Email:           "any_valid_email@gmail.com",
-		Password:        "any_password",
-		ConfirmPassword: "any_password",
+const fakePassword string = "any_password"
+
+func makeFakeRequest(userName string, email string, password string, confirm string) *protocols.HttpRequest {
+	inputObj := dto.NewAddAccountInputDTO(userName, email, password, confirm)
+	jsonObj, err := json.Marshal(inputObj)
+	if err != nil {
+		panic(err)
 	}
-	return &controllers.AddAccountRequest{
-		Body: &fakeAccount,
-	}
+	return protocols.NewHtppRequest(jsonObj, nil)
 }
 
 func makeSut() *controllers.AddAccountController {
@@ -41,7 +43,7 @@ func makeSut() *controllers.AddAccountController {
 
 func TestAddAccountController_WithRightData(t *testing.T) {
 	sut := makeSut()
-	request := makeFakeRequest()
+	request := makeFakeRequest(fakeUserName, fakeEmail, fakePassword, fakePassword)
 	httpResponse := sut.Handle(request)
 
 	require.Equal(t, httpResponse.StatusCode, 200)
@@ -51,8 +53,7 @@ func TestAddAccountController_WithRightData(t *testing.T) {
 func TestAddAccountController_WithInvalidData(t *testing.T) {
 	sut := makeSut()
 
-	request := makeFakeRequest()
-	request.Body.Email = "invalid_email"
+	request := makeFakeRequest(fakeUserName, "any_invalid_email", fakePassword, fakePassword)
 	httpResponse := sut.Handle(request)
 
 	require.Equal(t, httpResponse.StatusCode, 400)

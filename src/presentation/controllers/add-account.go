@@ -23,8 +23,14 @@ type AddAccountRequest struct {
 	Body *dto.AddAccountInputDTO
 }
 
-func (controller *AddAccountController) Handle(request *AddAccountRequest) *protocols.HttpResponse {
-	output, err := controller.useCase.AddAccount(request.Body)
+func (controller *AddAccountController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
+	var accountInput dto.AddAccountInputDTO
+	err := json.Unmarshal(request.Body, &accountInput)
+	if err != nil {
+		return helpers.ServerError(err)
+	}
+
+	output, err := controller.useCase.AddAccount(&accountInput)
 	if err != nil {
 		return helpers.BadRequest(err)
 	}

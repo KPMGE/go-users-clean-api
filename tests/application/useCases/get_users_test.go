@@ -10,10 +10,10 @@ import (
 )
 
 type ListUsersDTO struct {
-	ID       string
-	Name     string
-	UserName string
-	Email    string
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	UserName string `json:"userNam"`
+	Email    string `json:"email"`
 }
 
 func NewListUserDTO(id string, name string, userName string, email string) *ListUsersDTO {

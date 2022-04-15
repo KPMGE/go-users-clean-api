@@ -4,31 +4,16 @@ import (
 	"testing"
 
 	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
-	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
+	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
 )
 
-type ListUsersUseCase struct {
-	userRepository protocols.UserRepository
-}
-
-func NewListUsersUseCase(repo protocols.UserRepository) *ListUsersUseCase {
-	return &ListUsersUseCase{
-		userRepository: repo,
-	}
-}
-
-func (useCase *ListUsersUseCase) List() []*dto.ListUsersDTO {
-	users := useCase.userRepository.List()
-	return dto.MapListUsersDTO(users)
-}
-
-func makeListUsersSut() (*ListUsersUseCase, *mocks_test.UserRepositorySpy) {
+func makeListUsersSut() (*usecases.ListUsersUseCase, *mocks_test.UserRepositorySpy) {
 	repo := mocks_test.NewUserRepositorySpy()
 	repo.ListUsersOutput = []*entities.User{}
-	sut := NewListUsersUseCase(repo)
+	sut := usecases.NewListUsersUseCase(repo)
 	return sut, repo
 }
 

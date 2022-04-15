@@ -13,9 +13,18 @@ func (repo *InMemoryUserRepository) Save(user *entities.User) error {
 	return nil
 }
 
-func (repo *InMemoryUserRepository) FindByEmail(email string) bool {
+func (repo *InMemoryUserRepository) CheckByEmail(email string) bool {
 	for _, user := range users {
 		if user.Email == email {
+			return true
+		}
+	}
+	return false
+}
+
+func (repo *InMemoryUserRepository) CheckByUserName(userName string) bool {
+	for _, user := range users {
+		if user.UserName == userName {
 			return true
 		}
 	}

@@ -85,11 +85,24 @@ func TestAddUser_WhenRepositoryReturnsError(t *testing.T) {
 func TestAddUser_WithSameEmail(t *testing.T) {
 	fakeInput := makeFakeValidAddUserInput()
 	sut, repo := makeAddUserSut()
-	repo.FindByEmailOutput = true
+	repo.CheckByEmailOutput = true
 
 	output, err := sut.Add(fakeInput)
 
 	require.Error(t, err)
 	require.Equal(t, err.Error(), "email already taken!")
+	require.Equal(t, fakeInput.Email, repo.CheckByEmailInput)
+	require.Nil(t, output)
+}
+
+func TestAddUser_WithSameUserName(t *testing.T) {
+	fakeInput := makeFakeValidAddUserInput()
+	sut, repo := makeAddUserSut()
+	repo.CheckByUserNameOutput = true
+
+	output, err := sut.Add(fakeInput)
+
+	require.Error(t, err)
+	require.Equal(t, err.Error(), "UserName already taken!")
 	require.Nil(t, output)
 }

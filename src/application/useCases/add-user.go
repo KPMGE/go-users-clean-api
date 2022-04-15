@@ -18,9 +18,14 @@ func (useCase *AddUserUseCase) Add(input *dto.AddUserInputDTO) (*dto.AddUserOutp
 		return nil, err
 	}
 
-	emailTaken := useCase.userRepository.FindByEmail(input.Email)
+	emailTaken := useCase.userRepository.CheckByEmail(input.Email)
 	if emailTaken {
 		return nil, errors.New("email already taken!")
+	}
+
+	userNameTaken := useCase.userRepository.CheckByUserName(input.UserName)
+	if userNameTaken {
+		return nil, errors.New("UserName already taken!")
 	}
 
 	err = useCase.userRepository.Save(newUser)

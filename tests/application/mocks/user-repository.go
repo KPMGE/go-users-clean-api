@@ -3,10 +3,12 @@ package mocks_test
 import "github.com/KPMGE/go-users-clean-api/src/domain/entities"
 
 type UserRepositorySpy struct {
-	AddInput          *entities.User
-	AddOutput         error
-	FindByEmailInput  string
-	FindByEmailOutput bool
+	AddInput              *entities.User
+	AddOutput             error
+	CheckByEmailInput     string
+	CheckByEmailOutput    bool
+	CheckByUserNameInput  string
+	CheckByUserNameOutput bool
 }
 
 func (repo *UserRepositorySpy) Save(user *entities.User) error {
@@ -14,9 +16,14 @@ func (repo *UserRepositorySpy) Save(user *entities.User) error {
 	return repo.AddOutput
 }
 
-func (repo *UserRepositorySpy) FindByEmail(email string) bool {
-	repo.FindByEmailInput = email
-	return repo.FindByEmailOutput
+func (repo *UserRepositorySpy) CheckByEmail(email string) bool {
+	repo.CheckByEmailInput = email
+	return repo.CheckByEmailOutput
+}
+
+func (repo *UserRepositorySpy) CheckByUserName(email string) bool {
+	repo.CheckByUserNameInput = email
+	return repo.CheckByUserNameOutput
 }
 
 func NewUserRepositorySpy() *UserRepositorySpy {

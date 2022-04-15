@@ -34,9 +34,9 @@ func makeAddUserControllerSut() *controllers.AddUserController {
 	return sut
 }
 
-func convertJsonToAccoutOutputDTO(data string) *dto.AddAccountOutputDTO {
+func convertJsonToAccoutOutputDTO(data []byte) *dto.AddAccountOutputDTO {
 	var bodyObj dto.AddAccountOutputDTO
-	err := json.Unmarshal([]byte(data), &bodyObj)
+	err := json.Unmarshal(data, &bodyObj)
 	if err != nil {
 		panic(err)
 	}
@@ -63,7 +63,7 @@ func TestAdduserController_WithInvalidEmail(t *testing.T) {
 	httpResponse := sut.Handle(fakeRequest)
 
 	require.Equal(t, 400, httpResponse.StatusCode)
-	require.Equal(t, "Invalid email!", httpResponse.JsonBody)
+	require.Equal(t, "Invalid email!", string(httpResponse.JsonBody))
 }
 
 func TestAdduserController_WithBlankFields(t *testing.T) {

@@ -31,7 +31,7 @@ func (controller *AddUserController) Handle(request *protocols.HttpRequest) *pro
 		return helpers.ServerError(err)
 	}
 
-	return helpers.Ok(string(outputJson))
+	return helpers.Ok(outputJson)
 }
 
 func NewAddUserController(useCase *usecases.AddUserUseCase) *AddUserController {

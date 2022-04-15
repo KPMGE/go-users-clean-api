@@ -15,7 +15,7 @@ func (controller *RemoveAccountController) Handle(accountId string) *protocols.H
 	if err != nil {
 		return helpers.BadRequest(err)
 	}
-	return helpers.Ok(message)
+	return helpers.Ok([]byte(message))
 }
 
 func NewRemoveAccountController(useCase *usecases.RemoveAccountUseCase) *RemoveAccountController {

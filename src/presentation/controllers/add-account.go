@@ -32,5 +32,5 @@ func (controller *AddAccountController) Handle(request *AddAccountRequest) *prot
 	if err != nil {
 		panic(err)
 	}
-	return helpers.Ok(string(outputJson))
+	return helpers.Ok(outputJson)
 }

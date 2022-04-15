@@ -2,7 +2,7 @@ package protocols
 
 type HttpResponse struct {
 	StatusCode int
-	JsonBody   string
+	JsonBody   []byte
 }
 
 type HttpRequest struct {

@@ -21,7 +21,7 @@ func TestRemoveAccountController_WithCorrectID(t *testing.T) {
 	httpResponse := sut.Handle("any_valid_id")
 
 	require.Equal(t, httpResponse.StatusCode, 200)
-	require.Equal(t, httpResponse.JsonBody, "account deleted")
+	require.Equal(t, string(httpResponse.JsonBody), "account deleted")
 }
 
 func TestRemoveAccountController_WithWrongID(t *testing.T) {
@@ -31,5 +31,5 @@ func TestRemoveAccountController_WithWrongID(t *testing.T) {
 	httpResponse := sut.Handle("any_invalid_id")
 
 	require.Equal(t, httpResponse.StatusCode, 400)
-	require.Equal(t, httpResponse.JsonBody, "there is no account with this id")
+	require.Equal(t, string(httpResponse.JsonBody), "there is no account with this id")
 }

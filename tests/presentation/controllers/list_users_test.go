@@ -49,3 +49,24 @@ func TestListUsersController_WithNoUsers(t *testing.T) {
 	require.Equal(t, 0, len(listObj))
 	require.Equal(t, []*dto.ListUsersDTO{}, listObj)
 }
+
+func TestListUsersController_WithTwoUsers(t *testing.T) {
+	repo := mocks_test.NewUserRepositorySpy()
+	fakeUser, _ := entities.NewUser("any_name", "any_username", "any_valid_email@gmail.com")
+	repo.ListUsersOutput = []*entities.User{fakeUser, fakeUser}
+
+	useCase := usecases.NewListUsersUseCase(repo)
+	sut := NewListUsersController(useCase)
+
+	fakeRequest := protocols.NewHtppRequest(nil, nil)
+	httpResponse := sut.Handle(fakeRequest)
+
+	var objBody []*dto.ListUsersDTO
+	err := json.Unmarshal(httpResponse.JsonBody, &objBody)
+	if err != nil {
+		panic(err)
+	}
+
+	require.Equal(t, 200, httpResponse.StatusCode)
+	require.Equal(t, 2, len(objBody))
+}

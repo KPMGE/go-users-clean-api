@@ -8,6 +8,10 @@ var accounts []*entities.Account
 
 type InMemoryAccountRepository struct{}
 
+func removeIndex(s []*entities.Account, index int) []*entities.Account {
+	return append(s[:index], s[index+1:]...)
+}
+
 func (repo *InMemoryAccountRepository) CheckAccountByEmail(email string) bool {
 	for _, account := range accounts {
 		if account.Email == email {
@@ -29,6 +33,16 @@ func (repo *InMemoryAccountRepository) CheckAccountByUserName(userName string) b
 func (repo *InMemoryAccountRepository) Save(account *entities.Account) error {
 	accounts = append(accounts, account)
 	return nil
+}
+
+func (repo *InMemoryAccountRepository) DeleteAccountById(accountId string) bool {
+	for index, account := range accounts {
+		if account.ID == accountId {
+			accounts = removeIndex(accounts, index)
+			return true
+		}
+	}
+	return false
 }
 
 func NewInmemoryAccountRepository() *InMemoryAccountRepository {

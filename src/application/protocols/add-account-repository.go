@@ -6,4 +6,5 @@ type AccountRepository interface {
 	CheckAccountByEmail(email string) bool
 	CheckAccountByUserName(userName string) bool
 	Save(account *entities.Account) error
+	DeleteAccountById(accountId string) bool
 }

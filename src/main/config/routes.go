@@ -21,7 +21,7 @@ func SetupRoutes(app *fiber.App) *fiber.Router {
 		request := protocols.NewHtppRequest(nil, []byte(accountId))
 		controller := factories.MakeRemoveAccountController()
 		httpResponse := controller.Handle(request)
-		return c.Status(httpResponse.StatusCode).JSON(httpResponse.JsonBody)
+		return c.Status(httpResponse.StatusCode).Send(httpResponse.JsonBody)
 	})
 
 	api.Post("/users", func(c *fiber.Ctx) error {

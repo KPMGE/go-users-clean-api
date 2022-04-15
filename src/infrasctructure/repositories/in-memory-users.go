@@ -4,7 +4,7 @@ import (
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 )
 
-var users []*entities.User = []*entities.User{}
+var users []*entities.User
 
 type InMemoryUserRepository struct{}
 

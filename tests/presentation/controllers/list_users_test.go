@@ -2,13 +2,14 @@ package controllers_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 
+	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
-	"github.com/KPMGE/go-users-clean-api/src/infrasctructure/repositories"
+	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
+	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
 )
 
@@ -25,7 +26,7 @@ func NewListUsersController(useCase *usecases.ListUsersUseCase) *ListUsersContro
 func (controller *ListUsersController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
 	users := controller.useCase.List()
 	jsonUsers, err := json.Marshal(users)
-	fmt.Println(users)
+
 	if err != nil {
 		panic(err)
 	}
@@ -33,12 +34,18 @@ func (controller *ListUsersController) Handle(request *protocols.HttpRequest) *p
 }
 
 func TestListUsersController_WithNoUsers(t *testing.T) {
-	repo := repositories.NewInMemoryUserRepository()
+	repo := mocks_test.NewUserRepositorySpy()
+	repo.ListUsersOutput = []*entities.User{}
 	useCase := usecases.NewListUsersUseCase(repo)
 	sut := NewListUsersController(useCase)
 
 	fakeRequest := protocols.NewHtppRequest(nil, nil)
 	httpResponse := sut.Handle(fakeRequest)
 
+	var listObj []*dto.ListUsersDTO
+	json.Unmarshal(httpResponse.JsonBody, &listObj)
+
 	require.Equal(t, 200, httpResponse.StatusCode)
+	require.Equal(t, 0, len(listObj))
+	require.Equal(t, []*dto.ListUsersDTO{}, listObj)
 }

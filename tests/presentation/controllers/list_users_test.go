@@ -28,17 +28,21 @@ func (controller *ListUsersController) Handle(request *protocols.HttpRequest) *p
 	jsonUsers, err := json.Marshal(users)
 
 	if err != nil {
-		panic(err)
+		return helpers.ServerError(err)
 	}
 	return helpers.Ok(jsonUsers)
 }
 
-func TestListUsersController_WithNoUsers(t *testing.T) {
+func MakeListUsersSut() (*ListUsersController, *mocks_test.UserRepositorySpy) {
 	repo := mocks_test.NewUserRepositorySpy()
 	repo.ListUsersOutput = []*entities.User{}
 	useCase := usecases.NewListUsersUseCase(repo)
 	sut := NewListUsersController(useCase)
+	return sut, repo
+}
 
+func TestListUsersController_WithNoUsers(t *testing.T) {
+	sut, _ := MakeListUsersSut()
 	fakeRequest := protocols.NewHtppRequest(nil, nil)
 	httpResponse := sut.Handle(fakeRequest)
 
@@ -51,12 +55,10 @@ func TestListUsersController_WithNoUsers(t *testing.T) {
 }
 
 func TestListUsersController_WithTwoUsers(t *testing.T) {
-	repo := mocks_test.NewUserRepositorySpy()
+	sut, repo := MakeListUsersSut()
+
 	fakeUser, _ := entities.NewUser("any_name", "any_username", "any_valid_email@gmail.com")
 	repo.ListUsersOutput = []*entities.User{fakeUser, fakeUser}
-
-	useCase := usecases.NewListUsersUseCase(repo)
-	sut := NewListUsersController(useCase)
 
 	fakeRequest := protocols.NewHtppRequest(nil, nil)
 	httpResponse := sut.Handle(fakeRequest)

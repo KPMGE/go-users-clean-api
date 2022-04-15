@@ -1,6 +1,8 @@
 package usecases
 
 import (
+	"errors"
+
 	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
@@ -14,6 +16,11 @@ func (useCase *AddUserUseCase) Add(input *dto.AddUserInputDTO) (*dto.AddUserOutp
 	newUser, err := entities.NewUser(input.Name, input.UserName, input.Email)
 	if err != nil {
 		return nil, err
+	}
+
+	emailTaken := useCase.userRepository.FindByEmail(input.Email)
+	if emailTaken {
+		return nil, errors.New("email already taken!")
 	}
 
 	err = useCase.userRepository.Save(newUser)

@@ -81,3 +81,15 @@ func TestAddUser_WhenRepositoryReturnsError(t *testing.T) {
 	require.Error(t, err)
 	require.Equal(t, err.Error(), "some error")
 }
+
+func TestAddUser_WithSameEmail(t *testing.T) {
+	fakeInput := makeFakeValidAddUserInput()
+	sut, repo := makeAddUserSut()
+	repo.FindByEmailOutput = true
+
+	output, err := sut.Add(fakeInput)
+
+	require.Error(t, err)
+	require.Equal(t, err.Error(), "email already taken!")
+	require.Nil(t, output)
+}

@@ -18,8 +18,9 @@ func SetupRoutes(app *fiber.App) *fiber.Router {
 
 	api.Delete("/accounts/:accountId", func(c *fiber.Ctx) error {
 		accountId := c.Params("accountId")
+		request := protocols.NewHtppRequest(nil, []byte(accountId))
 		controller := factories.MakeRemoveAccountController()
-		httpResponse := controller.Handle(accountId)
+		httpResponse := controller.Handle(request)
 		return c.Status(httpResponse.StatusCode).JSON(httpResponse.JsonBody)
 	})
 

@@ -10,8 +10,8 @@ type RemoveAccountController struct {
 	useCase *usecases.RemoveAccountUseCase
 }
 
-func (controller *RemoveAccountController) Handle(accountId string) *protocols.HttpResponse {
-	message, err := controller.useCase.Remove(accountId)
+func (controller *RemoveAccountController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
+	message, err := controller.useCase.Remove(string(request.Params))
 	if err != nil {
 		return helpers.BadRequest(err)
 	}

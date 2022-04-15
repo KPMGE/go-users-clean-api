@@ -48,11 +48,15 @@ func (useCase *ListUsersUseCase) List() []*ListUsersDTO {
 	return MapListUsersDTO(users)
 }
 
-func TestListUsersUseCase_WhenRepositoryReturnsBlankArray(t *testing.T) {
+func makeListUsersSut() (*ListUsersUseCase, *mocks_test.UserRepositorySpy) {
 	repo := mocks_test.NewUserRepositorySpy()
 	repo.ListUsersOutput = []*entities.User{}
 	sut := NewListUsersUseCase(repo)
+	return sut, repo
+}
 
+func TestListUsersUseCase_WhenRepositoryReturnsBlankArray(t *testing.T) {
+	sut, _ := makeListUsersSut()
 	users := sut.List()
 
 	require.Equal(t, []*ListUsersDTO{}, users)

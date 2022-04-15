@@ -61,3 +61,14 @@ func TestListUsersUseCase_WhenRepositoryReturnsBlankArray(t *testing.T) {
 
 	require.Equal(t, []*ListUsersDTO{}, users)
 }
+
+func TestListUsersUseCase_WhenRepositoryReturnsFilledArray(t *testing.T) {
+	sut, repo := makeListUsersSut()
+	fakeUser, _ := entities.NewUser("any_name", "any_username", "any_valid_email@gmail.com")
+	repo.ListUsersOutput = []*entities.User{fakeUser}
+	fakeList := MapListUsersDTO([]*entities.User{fakeUser})
+
+	users := sut.List()
+
+	require.ElementsMatch(t, fakeList, users)
+}

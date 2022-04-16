@@ -22,10 +22,14 @@ func (useCase *DeleteUserUseCase) Delete(userId string) (string, error) {
 	return "user deleted successfully", nil
 }
 
-func TestDeleteUserUseCase_WithRightId(t *testing.T) {
+func MakeDeleteUserSut() (*DeleteUserUseCase, *mocks_test.UserRepositorySpy) {
 	repo := mocks_test.NewUserRepositorySpy()
 	sut := NewDeleteUserUseCase(repo)
+	return sut, repo
+}
 
+func TestDeleteUserUseCase_ShouldReturnRightDataOnSuccess(t *testing.T) {
+	sut, _ := MakeDeleteUserSut()
 	message, err := sut.Delete("any_right_id")
 
 	require.Nil(t, err)

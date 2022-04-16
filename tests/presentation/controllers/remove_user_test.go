@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
-	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
+	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
@@ -12,29 +12,11 @@ import (
 
 const FAKE_OUT_MESSAGE string = "any_message_from_usecase"
 
-type DeleteUserController struct {
-	useCase *usecases.DeleteUserUseCase
-}
-
-func NewDeleteUserController(useCase *usecases.DeleteUserUseCase) *DeleteUserController {
-	return &DeleteUserController{
-		useCase: useCase,
-	}
-}
-
-func (controller *DeleteUserController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
-	message, err := controller.useCase.Delete(string(request.Params))
-	if err != nil {
-		return helpers.BadRequest(err)
-	}
-	return helpers.Ok([]byte(message))
-}
-
-func MakeDeleteUserControllerSut() (*DeleteUserController, *mocks_test.UserRepositorySpy) {
+func MakeDeleteUserControllerSut() (*controllers.DeleteUserController, *mocks_test.UserRepositorySpy) {
 	repo := mocks_test.NewUserRepositorySpy()
 	repo.CheckByIdOuput = true
 	useCase := usecases.NewDeleteUserUseCase(repo)
-	sut := NewDeleteUserController(useCase)
+	sut := controllers.NewDeleteUserController(useCase)
 	return sut, repo
 }
 

@@ -8,6 +8,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const FAKE_USER_ID string = "any_user_id"
+
 type DeleteUserUseCase struct {
 	userRepository protocols.UserRepository
 }
@@ -30,7 +32,7 @@ func MakeDeleteUserSut() (*DeleteUserUseCase, *mocks_test.UserRepositorySpy) {
 
 func TestDeleteUserUseCase_ShouldReturnRightDataOnSuccess(t *testing.T) {
 	sut, _ := MakeDeleteUserSut()
-	message, err := sut.Delete("any_right_id")
+	message, err := sut.Delete(FAKE_USER_ID)
 
 	require.Nil(t, err)
 	require.Equal(t, "user deleted successfully", message)

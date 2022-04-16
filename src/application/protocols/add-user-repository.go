@@ -7,4 +7,5 @@ type UserRepository interface {
 	CheckByEmail(email string) bool
 	CheckByUserName(userName string) bool
 	List() []*entities.User
+	Delete(userId string) error
 }

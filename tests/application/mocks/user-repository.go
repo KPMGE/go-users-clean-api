@@ -10,6 +10,8 @@ type UserRepositorySpy struct {
 	CheckByUserNameInput  string
 	CheckByUserNameOutput bool
 	ListUsersOutput       []*entities.User
+	DeleteInput           string
+	DeleteOutput          error
 }
 
 func (repo *UserRepositorySpy) Save(user *entities.User) error {
@@ -29,6 +31,11 @@ func (repo *UserRepositorySpy) CheckByUserName(email string) bool {
 
 func (repo *UserRepositorySpy) List() []*entities.User {
 	return repo.ListUsersOutput
+}
+
+func (repo *UserRepositorySpy) Delete(userId string) error {
+	repo.DeleteInput = userId
+	return repo.DeleteOutput
 }
 
 func NewUserRepositorySpy() *UserRepositorySpy {

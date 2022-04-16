@@ -8,7 +8,7 @@ var accounts []*entities.Account
 
 type InMemoryAccountRepository struct{}
 
-func removeIndex(s []*entities.Account, index int) []*entities.Account {
+func removeIndex[T any](s []T, index int) []T {
 	return append(s[:index], s[index+1:]...)
 }
 

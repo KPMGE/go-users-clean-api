@@ -26,14 +26,17 @@ func (controller *DeleteUserController) Handle(request *protocols.HttpRequest) *
 	return helpers.Ok([]byte("user deleted successfully"))
 }
 
-func TestDeleteUserController_ShouldCallUseCaseWithRightData(t *testing.T) {
+func MakeDeleteUserControllerSut() *DeleteUserController {
 	repo := mocks_test.NewUserRepositorySpy()
 	useCase := usecases.NewDeleteUserUseCase(repo)
 	sut := NewDeleteUserController(useCase)
+	return sut
+}
 
+func TestDeleteUserController_ShouldCallUseCaseWithRightData(t *testing.T) {
+	sut := MakeDeleteUserControllerSut()
 	fakeRequest := protocols.NewHtppRequest(nil, []byte("any_valid_id"))
 	httpResponse := sut.Handle(fakeRequest)
-
 	require.Equal(t, 200, httpResponse.StatusCode)
 	require.Equal(t, "user deleted successfully", string(httpResponse.JsonBody))
 }

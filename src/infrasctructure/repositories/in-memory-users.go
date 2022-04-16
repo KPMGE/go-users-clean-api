@@ -47,6 +47,15 @@ func (repo *InMemoryUserRepository) Delete(userId string) error {
 	return errors.New("No user with provided id")
 }
 
+func (repo *InMemoryUserRepository) CheckById(userId string) bool {
+	for _, user := range users {
+		if user.ID == userId {
+			return true
+		}
+	}
+	return false
+}
+
 func NewInMemoryUserRepository() *InMemoryUserRepository {
 	return &InMemoryUserRepository{}
 }

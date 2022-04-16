@@ -38,5 +38,13 @@ func SetupRoutes(app *fiber.App) *fiber.Router {
 		return c.Status(httpResponse.StatusCode).Send(httpResponse.JsonBody)
 	})
 
+	api.Delete("/users/:userId", func(c *fiber.Ctx) error {
+		userId := c.Params("userId")
+		request := protocols.NewHtppRequest(nil, []byte(userId))
+		controller := factories.MakeDeleteUserController()
+		httpResponse := controller.Handle(request)
+		return c.Status(httpResponse.StatusCode).Send(httpResponse.JsonBody)
+	})
+
 	return &api
 }

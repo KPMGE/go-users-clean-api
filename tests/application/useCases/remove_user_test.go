@@ -1,6 +1,7 @@
 package usecases_test
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
@@ -21,7 +22,10 @@ func NewDeleteUserUseCase(repo protocols.UserRepository) *DeleteUserUseCase {
 }
 
 func (useCase *DeleteUserUseCase) Delete(userId string) (string, error) {
-	useCase.userRepository.CheckById(userId)
+	userExists := useCase.userRepository.CheckById(userId)
+	if !userExists {
+		return "", errors.New("No user with the provided id!")
+	}
 	useCase.userRepository.Delete(userId)
 	return "user deleted successfully", nil
 }
@@ -29,6 +33,7 @@ func (useCase *DeleteUserUseCase) Delete(userId string) (string, error) {
 func MakeDeleteUserSut() (*DeleteUserUseCase, *mocks_test.UserRepositorySpy) {
 	repo := mocks_test.NewUserRepositorySpy()
 	repo.DeleteOutput = nil
+	repo.CheckByIdOuput = true
 	sut := NewDeleteUserUseCase(repo)
 	return sut, repo
 }
@@ -51,4 +56,15 @@ func TestDeleteUserUseCase_ShouldCallDelteUserRepositoryWithRightId(t *testing.T
 	sut, repo := MakeDeleteUserSut()
 	sut.Delete(FAKE_USER_ID)
 	require.Equal(t, FAKE_USER_ID, repo.DeleteInput)
+}
+
+func TestDeleteUserUseCase_ShouldReturnErrorIfWrongIdIIsProvided(t *testing.T) {
+	sut, repo := MakeDeleteUserSut()
+	repo.CheckByIdOuput = false
+
+	message, err := sut.Delete("any_wrong_id")
+
+	require.Error(t, err)
+	require.Equal(t, "No user with the provided id!", err.Error())
+	require.Equal(t, "", message)
 }

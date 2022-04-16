@@ -26,7 +26,10 @@ func (useCase *DeleteUserUseCase) Delete(userId string) (string, error) {
 	if !userExists {
 		return "", errors.New("No user with the provided id!")
 	}
-	useCase.userRepository.Delete(userId)
+	err := useCase.userRepository.Delete(userId)
+	if err != nil {
+		return "", err
+	}
 	return "user deleted successfully", nil
 }
 
@@ -67,4 +70,15 @@ func TestDeleteUserUseCase_ShouldReturnErrorIfWrongIdIIsProvided(t *testing.T) {
 	require.Error(t, err)
 	require.Equal(t, "No user with the provided id!", err.Error())
 	require.Equal(t, "", message)
+}
+
+func TestDeleteUserUseCase_ShouldReturnErrorIfDelteRepositoryReturnsError(t *testing.T) {
+	sut, repo := MakeDeleteUserSut()
+	repo.DeleteOutput = errors.New("Internal error")
+
+	message, err := sut.Delete(FAKE_USER_ID)
+
+	require.Error(t, err)
+	require.Equal(t, "", message)
+	require.Equal(t, "Internal error", err.Error())
 }

@@ -23,20 +23,39 @@ func NewDeleteUserController(useCase *usecases.DeleteUserUseCase) *DeleteUserCon
 }
 
 func (controller *DeleteUserController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
-	return helpers.Ok([]byte("user deleted successfully"))
+	message, err := controller.useCase.Delete(string(request.Params))
+	if err != nil {
+		return helpers.BadRequest(err)
+	}
+	return helpers.Ok([]byte(message))
 }
 
-func MakeDeleteUserControllerSut() *DeleteUserController {
+func MakeDeleteUserControllerSut() (*DeleteUserController, *mocks_test.UserRepositorySpy) {
 	repo := mocks_test.NewUserRepositorySpy()
+	repo.CheckByIdOuput = true
 	useCase := usecases.NewDeleteUserUseCase(repo)
 	sut := NewDeleteUserController(useCase)
-	return sut
+	return sut, repo
 }
 
-func TestDeleteUserController_ShouldCallUseCaseWithRightData(t *testing.T) {
-	sut := MakeDeleteUserControllerSut()
+func TestDeleteUserController_WhenCalledWithRightData(t *testing.T) {
+	sut, _ := MakeDeleteUserControllerSut()
 	fakeRequest := protocols.NewHtppRequest(nil, []byte("any_valid_id"))
+
 	httpResponse := sut.Handle(fakeRequest)
+
 	require.Equal(t, 200, httpResponse.StatusCode)
 	require.Equal(t, "user deleted successfully", string(httpResponse.JsonBody))
+}
+
+func TestDeleteUserController_WhenCalledWithWrongData(t *testing.T) {
+	sut, repo := MakeDeleteUserControllerSut()
+	repo.CheckByIdOuput = false
+
+	fakeRequest := protocols.NewHtppRequest(nil, []byte("any_invalid_id"))
+
+	httpResponse := sut.Handle(fakeRequest)
+
+	require.Equal(t, 400, httpResponse.StatusCode)
+	require.Equal(t, "No user with the provided id!", string(httpResponse.JsonBody))
 }

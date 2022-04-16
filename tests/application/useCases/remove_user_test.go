@@ -4,40 +4,18 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
+	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
 )
 
 const FAKE_USER_ID string = "any_user_id"
 
-type DeleteUserUseCase struct {
-	userRepository protocols.UserRepository
-}
-
-func NewDeleteUserUseCase(repo protocols.UserRepository) *DeleteUserUseCase {
-	return &DeleteUserUseCase{
-		userRepository: repo,
-	}
-}
-
-func (useCase *DeleteUserUseCase) Delete(userId string) (string, error) {
-	userExists := useCase.userRepository.CheckById(userId)
-	if !userExists {
-		return "", errors.New("No user with the provided id!")
-	}
-	err := useCase.userRepository.Delete(userId)
-	if err != nil {
-		return "", err
-	}
-	return "user deleted successfully", nil
-}
-
-func MakeDeleteUserSut() (*DeleteUserUseCase, *mocks_test.UserRepositorySpy) {
+func MakeDeleteUserSut() (*usecases.DeleteUserUseCase, *mocks_test.UserRepositorySpy) {
 	repo := mocks_test.NewUserRepositorySpy()
 	repo.DeleteOutput = nil
 	repo.CheckByIdOuput = true
-	sut := NewDeleteUserUseCase(repo)
+	sut := usecases.NewDeleteUserUseCase(repo)
 	return sut, repo
 }
 

@@ -31,7 +31,11 @@ func NewGetUserByIdUseCase(repo protocols.UserRepository) *GetUserByIdUseCase {
 }
 
 func (useCase *GetUserByIdUseCase) Get(userId string) (*GetUserByIdUseCaseOutputDTO, error) {
-	foundUser, _ := useCase.userRepository.GetById(userId)
+	foundUser, err := useCase.userRepository.GetById(userId)
+
+	if err != nil {
+		return nil, err
+	}
 
 	if foundUser == nil {
 		return nil, errors.New("User not found!")
@@ -84,5 +88,16 @@ func TestGetUserByIdUseCase_ShouldReturnErrorIfRepositoryRetunsNil(t *testing.T)
 
 	require.Error(t, err)
 	require.Equal(t, "User not found!", err.Error())
+	require.Nil(t, foundUser)
+}
+
+func TestGetUserByIdUseCase_ShouldReturnErrorIfRepositoryRetunsError(t *testing.T) {
+	sut, repo := MakeGetUserByIdSut()
+	repo.GetByidError = errors.New("repository error")
+
+	foundUser, err := sut.Get("invalid_id")
+
+	require.Error(t, err)
+	require.Equal(t, "repository error", err.Error())
 	require.Nil(t, foundUser)
 }

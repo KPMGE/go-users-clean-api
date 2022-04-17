@@ -5,8 +5,7 @@ import (
 	"log"
 	"testing"
 
-	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
-	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
+	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
@@ -14,39 +13,14 @@ import (
 
 const fakeName string = "any_user_name"
 
-type GetUserByIdUseCase struct {
-	userRepository protocols.UserRepository
-}
-
-func NewGetUserByIdUseCase(repo protocols.UserRepository) *GetUserByIdUseCase {
-	return &GetUserByIdUseCase{
-		userRepository: repo,
-	}
-}
-
-func (useCase *GetUserByIdUseCase) Get(userId string) (*dto.GetUserByIdUseCaseOutputDTO, error) {
-	foundUser, err := useCase.userRepository.GetById(userId)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if foundUser == nil {
-		return nil, errors.New("User not found!")
-	}
-
-	output := dto.NewGetUserByIdUseCaseOutputDTO(foundUser.ID, foundUser.Name, foundUser.Email, foundUser.UserName)
-	return output, nil
-}
-
-func MakeGetUserByIdSut() (*GetUserByIdUseCase, *mocks_test.UserRepositorySpy) {
+func MakeGetUserByIdSut() (*usecases.GetUserByIdUseCase, *mocks_test.UserRepositorySpy) {
 	repo := mocks_test.NewUserRepositorySpy()
 	fakeUser, err := entities.NewUser(fakeName, fakeUserName, fakeEmail)
 	if err != nil {
 		log.Fatal(err)
 	}
 	repo.GetByidOutput = fakeUser
-	sut := NewGetUserByIdUseCase(repo)
+	sut := usecases.NewGetUserByIdUseCase(repo)
 	return sut, repo
 }
 

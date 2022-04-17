@@ -1,6 +1,7 @@
 package usecases_test
 
 import (
+	"errors"
 	"log"
 	"testing"
 
@@ -29,14 +30,20 @@ func NewGetUserByIdUseCase(repo protocols.UserRepository) *GetUserByIdUseCase {
 	}
 }
 
-func (useCase *GetUserByIdUseCase) Get(userId string) *GetUserByIdUseCaseOutputDTO {
+func (useCase *GetUserByIdUseCase) Get(userId string) (*GetUserByIdUseCaseOutputDTO, error) {
 	foundUser, _ := useCase.userRepository.GetById(userId)
-	return &GetUserByIdUseCaseOutputDTO{
+
+	if foundUser == nil {
+		return nil, errors.New("User not found!")
+	}
+
+	output := &GetUserByIdUseCaseOutputDTO{
 		ID:       foundUser.ID,
 		Name:     foundUser.Name,
 		UserName: foundUser.UserName,
 		Email:    foundUser.Email,
 	}
+	return output, nil
 }
 
 func MakeGetUserByIdSut() (*GetUserByIdUseCase, *mocks_test.UserRepositorySpy) {
@@ -52,15 +59,30 @@ func MakeGetUserByIdSut() (*GetUserByIdUseCase, *mocks_test.UserRepositorySpy) {
 
 func TestGetUserByIdUseCase_ShouldCallRepositoryCorrectly(t *testing.T) {
 	sut, repo := MakeGetUserByIdSut()
+
 	sut.Get(FAKE_USER_ID)
+
 	require.Equal(t, FAKE_USER_ID, repo.GetByidInput)
 }
 
 func TestGetUserByIdUseCase_ShouldReturnFoundUser(t *testing.T) {
 	sut, _ := MakeGetUserByIdSut()
-	foundUser := sut.Get(FAKE_USER_ID)
+
+	foundUser, _ := sut.Get(FAKE_USER_ID)
+
 	require.Equal(t, fakeName, foundUser.Name)
 	require.Equal(t, fakeUserName, foundUser.UserName)
 	require.Equal(t, fakeEmail, foundUser.Email)
 	require.NotNil(t, foundUser.ID)
+}
+
+func TestGetUserByIdUseCase_ShouldReturnErrorIfRepositoryRetunsNil(t *testing.T) {
+	sut, repo := MakeGetUserByIdSut()
+	repo.GetByidOutput = nil
+
+	foundUser, err := sut.Get("invalid_id")
+
+	require.Error(t, err)
+	require.Equal(t, "User not found!", err.Error())
+	require.Nil(t, foundUser)
 }

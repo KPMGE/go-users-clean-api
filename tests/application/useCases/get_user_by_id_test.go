@@ -5,6 +5,7 @@ import (
 	"log"
 	"testing"
 
+	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
@@ -12,22 +13,6 @@ import (
 )
 
 const fakeName string = "any_user_name"
-
-type GetUserByIdUseCaseOutputDTO struct {
-	ID       string
-	Name     string
-	Email    string
-	UserName string
-}
-
-func NewGetUserByIdUseCaseOutputDTO(id string, name string, email string, userName string) *GetUserByIdUseCaseOutputDTO {
-	return &GetUserByIdUseCaseOutputDTO{
-		ID:       id,
-		Email:    email,
-		Name:     name,
-		UserName: userName,
-	}
-}
 
 type GetUserByIdUseCase struct {
 	userRepository protocols.UserRepository
@@ -39,7 +24,7 @@ func NewGetUserByIdUseCase(repo protocols.UserRepository) *GetUserByIdUseCase {
 	}
 }
 
-func (useCase *GetUserByIdUseCase) Get(userId string) (*GetUserByIdUseCaseOutputDTO, error) {
+func (useCase *GetUserByIdUseCase) Get(userId string) (*dto.GetUserByIdUseCaseOutputDTO, error) {
 	foundUser, err := useCase.userRepository.GetById(userId)
 
 	if err != nil {
@@ -50,7 +35,7 @@ func (useCase *GetUserByIdUseCase) Get(userId string) (*GetUserByIdUseCaseOutput
 		return nil, errors.New("User not found!")
 	}
 
-	output := NewGetUserByIdUseCaseOutputDTO(foundUser.ID, foundUser.Name, foundUser.Email, foundUser.UserName)
+	output := dto.NewGetUserByIdUseCaseOutputDTO(foundUser.ID, foundUser.Name, foundUser.Email, foundUser.UserName)
 	return output, nil
 }
 

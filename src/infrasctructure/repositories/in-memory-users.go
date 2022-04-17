@@ -56,6 +56,15 @@ func (repo *InMemoryUserRepository) CheckById(userId string) bool {
 	return false
 }
 
+func (repo *InMemoryUserRepository) GetById(userId string) (*entities.User, error) {
+	for _, user := range users {
+		if user.ID == userId {
+			return user, nil
+		}
+	}
+	return nil, errors.New("User not found")
+}
+
 func NewInMemoryUserRepository() *InMemoryUserRepository {
 	return &InMemoryUserRepository{}
 }

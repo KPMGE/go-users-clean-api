@@ -20,6 +20,15 @@ type GetUserByIdUseCaseOutputDTO struct {
 	UserName string
 }
 
+func NewGetUserByIdUseCaseOutputDTO(id string, name string, email string, userName string) *GetUserByIdUseCaseOutputDTO {
+	return &GetUserByIdUseCaseOutputDTO{
+		ID:       id,
+		Email:    email,
+		Name:     name,
+		UserName: userName,
+	}
+}
+
 type GetUserByIdUseCase struct {
 	userRepository protocols.UserRepository
 }
@@ -41,12 +50,7 @@ func (useCase *GetUserByIdUseCase) Get(userId string) (*GetUserByIdUseCaseOutput
 		return nil, errors.New("User not found!")
 	}
 
-	output := &GetUserByIdUseCaseOutputDTO{
-		ID:       foundUser.ID,
-		Name:     foundUser.Name,
-		UserName: foundUser.UserName,
-		Email:    foundUser.Email,
-	}
+	output := NewGetUserByIdUseCaseOutputDTO(foundUser.ID, foundUser.Name, foundUser.Email, foundUser.UserName)
 	return output, nil
 }
 

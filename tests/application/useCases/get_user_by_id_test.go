@@ -34,6 +34,6 @@ func TestGetUserByIdUseCase_ShouldCallRepositoryCorrectly(t *testing.T) {
 
 	sut := NewGetUserByIdUseCase(repo)
 
-	sut.Get("any_valid_user_id")
-	require.Equal(t, "any_valid_user_id", repo.GetByidInput)
+	sut.Get(FAKE_USER_ID)
+	require.Equal(t, FAKE_USER_ID, repo.GetByidInput)
 }

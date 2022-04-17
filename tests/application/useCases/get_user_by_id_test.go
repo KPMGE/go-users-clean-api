@@ -29,11 +29,14 @@ func (useCase *GetUserByIdUseCase) Get(userId string) {
 	useCase.userRepository.GetById(userId)
 }
 
-func TestGetUserByIdUseCase_ShouldCallRepositoryCorrectly(t *testing.T) {
+func MakeGetUserByIdSut() (*GetUserByIdUseCase, *mocks_test.UserRepositorySpy) {
 	repo := mocks_test.NewUserRepositorySpy()
-
 	sut := NewGetUserByIdUseCase(repo)
+	return sut, repo
+}
 
+func TestGetUserByIdUseCase_ShouldCallRepositoryCorrectly(t *testing.T) {
+	sut, repo := MakeGetUserByIdSut()
 	sut.Get(FAKE_USER_ID)
 	require.Equal(t, FAKE_USER_ID, repo.GetByidInput)
 }

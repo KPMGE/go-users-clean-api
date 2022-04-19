@@ -14,6 +14,9 @@ type UserRepositorySpy struct {
 	DeleteOutput          error
 	CheckByIdInput        string
 	CheckByIdOuput        bool
+	GetByidInput          string
+	GetByidOutput         *entities.User
+	GetByidError          error
 }
 
 func (repo *UserRepositorySpy) Save(user *entities.User) error {
@@ -43,6 +46,11 @@ func (repo *UserRepositorySpy) Delete(userId string) error {
 func (repo *UserRepositorySpy) CheckById(userId string) bool {
 	repo.CheckByIdInput = userId
 	return repo.CheckByIdOuput
+}
+
+func (repo *UserRepositorySpy) GetById(userId string) (*entities.User, error) {
+	repo.GetByidInput = userId
+	return repo.GetByidOutput, repo.GetByidError
 }
 
 func NewUserRepositorySpy() *UserRepositorySpy {

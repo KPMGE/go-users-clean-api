@@ -9,4 +9,5 @@ type UserRepository interface {
 	List() []*entities.User
 	Delete(userId string) error
 	CheckById(userId string) bool
+	GetById(userId string) (*entities.User, error)
 }

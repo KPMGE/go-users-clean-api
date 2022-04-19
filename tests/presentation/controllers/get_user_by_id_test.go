@@ -29,7 +29,10 @@ func (controller *GetUserByIdController) Handle(request *protocols.HttpRequest) 
 		return helpers.BadRequest(err)
 	}
 
-	controller.useCase.Get(string(request.Params))
+	_, err := controller.useCase.Get(string(request.Params))
+	if err != nil {
+		return helpers.ServerError(err)
+	}
 	return nil
 }
 
@@ -57,4 +60,15 @@ func TestGetUserByIdController_ShouldReturnErrorIfParamsIsBlank(t *testing.T) {
 
 	require.Equal(t, 400, httpResponse.StatusCode)
 	require.Equal(t, "Blank userId!", string(httpResponse.JsonBody))
+}
+
+func TestGetUserByIdController_ShouldReturnErrorIfUseCaseReturnsError(t *testing.T) {
+	sut, repo := MakeGetUserByIdController()
+	repo.GetByidError = errors.New("some server error")
+	fakeRequest := protocols.NewHtppRequest(nil, []byte(FAKE_USER_ID))
+
+	httpResponse := sut.Handle(fakeRequest)
+
+	require.Equal(t, 500, httpResponse.StatusCode)
+	require.Equal(t, "some server error", string(httpResponse.JsonBody))
 }

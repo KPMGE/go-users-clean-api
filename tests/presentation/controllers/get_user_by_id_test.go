@@ -1,10 +1,14 @@
 package controllers_test
 
 import (
+	"encoding/json"
 	"errors"
+	"log"
 	"testing"
 
+	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
@@ -29,11 +33,18 @@ func (controller *GetUserByIdController) Handle(request *protocols.HttpRequest) 
 		return helpers.BadRequest(err)
 	}
 
-	_, err := controller.useCase.Get(string(request.Params))
+	foundUser, err := controller.useCase.Get(string(request.Params))
 	if err != nil {
 		return helpers.ServerError(err)
 	}
-	return nil
+
+	outputDto := dto.NewGetUserByIdUseCaseOutputDTO(foundUser.ID, foundUser.Name, foundUser.Email, foundUser.UserName)
+	jsonOutputDto, err := json.Marshal(outputDto)
+	if err != nil {
+		return helpers.ServerError(err)
+	}
+
+	return helpers.Ok(jsonOutputDto)
 }
 
 func MakeGetUserByIdController() (*GetUserByIdController, *mocks_test.UserRepositorySpy) {
@@ -71,4 +82,26 @@ func TestGetUserByIdController_ShouldReturnErrorIfUseCaseReturnsError(t *testing
 
 	require.Equal(t, 500, httpResponse.StatusCode)
 	require.Equal(t, "some server error", string(httpResponse.JsonBody))
+}
+
+func TestGetUserByIdController_ShouldReturnDataOnSuccess(t *testing.T) {
+	sut, repo := MakeGetUserByIdController()
+	fakeUser, _ := entities.NewUser(fakeName, fakeUserName, fakeEmail)
+	repo.GetByidOutput = fakeUser
+	fakeRequest := protocols.NewHtppRequest(nil, []byte(FAKE_USER_ID))
+
+	httpResponse := sut.Handle(fakeRequest)
+
+	// convert json to struct
+	var outputObj *dto.GetUserByIdUseCaseOutputDTO
+	err := json.Unmarshal(httpResponse.JsonBody, &outputObj)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	require.Equal(t, 200, httpResponse.StatusCode)
+	require.Equal(t, fakeUser.ID, outputObj.ID)
+	require.Equal(t, fakeUser.Email, outputObj.Email)
+	require.Equal(t, fakeUser.Name, outputObj.Name)
+	require.Equal(t, fakeUser.UserName, outputObj.UserName)
 }

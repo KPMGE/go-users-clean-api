@@ -25,10 +25,15 @@ func (controller *GetUserByIdController) Handle(request *protocols.HttpRequest) 
 	return nil
 }
 
-func TestGetUserByIdController_ShouldCallUseCaseWithRightData(t *testing.T) {
+func MakeGetUserByIdController() (*GetUserByIdController, *mocks_test.UserRepositorySpy) {
 	repo := mocks_test.NewUserRepositorySpy()
 	useCase := usecases.NewGetUserByIdUseCase(repo)
 	sut := NewGetUserByIdController(useCase)
+	return sut, repo
+}
+
+func TestGetUserByIdController_ShouldCallUseCaseWithRightData(t *testing.T) {
+	sut, repo := MakeGetUserByIdController()
 	fakeRequest := protocols.NewHtppRequest(nil, []byte(FAKE_USER_ID))
 
 	sut.Handle(fakeRequest)

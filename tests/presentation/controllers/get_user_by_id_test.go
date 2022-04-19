@@ -9,7 +9,7 @@ import (
 	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
-	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
+	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
@@ -17,40 +17,10 @@ import (
 
 const FAKE_USER_ID string = "any_user_id"
 
-type GetUserByIdController struct {
-	useCase *usecases.GetUserByIdUseCase
-}
-
-func NewGetUserByIdController(useCase *usecases.GetUserByIdUseCase) *GetUserByIdController {
-	return &GetUserByIdController{
-		useCase: useCase,
-	}
-}
-
-func (controller *GetUserByIdController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
-	if len(request.Params) == 0 {
-		err := errors.New("Blank userId!")
-		return helpers.BadRequest(err)
-	}
-
-	foundUser, err := controller.useCase.Get(string(request.Params))
-	if err != nil {
-		return helpers.ServerError(err)
-	}
-
-	outputDto := dto.NewGetUserByIdUseCaseOutputDTO(foundUser.ID, foundUser.Name, foundUser.Email, foundUser.UserName)
-	jsonOutputDto, err := json.Marshal(outputDto)
-	if err != nil {
-		return helpers.ServerError(err)
-	}
-
-	return helpers.Ok(jsonOutputDto)
-}
-
-func MakeGetUserByIdController() (*GetUserByIdController, *mocks_test.UserRepositorySpy) {
+func MakeGetUserByIdController() (*controllers.GetUserByIdController, *mocks_test.UserRepositorySpy) {
 	repo := mocks_test.NewUserRepositorySpy()
 	useCase := usecases.NewGetUserByIdUseCase(repo)
-	sut := NewGetUserByIdController(useCase)
+	sut := controllers.NewGetUserByIdController(useCase)
 	return sut, repo
 }
 

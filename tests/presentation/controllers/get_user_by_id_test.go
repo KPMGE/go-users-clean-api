@@ -1,11 +1,14 @@
 package controllers_test
 
 import (
+	"errors"
+	"testing"
+
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 const FAKE_USER_ID string = "any_user_id"
@@ -21,6 +24,11 @@ func NewGetUserByIdController(useCase *usecases.GetUserByIdUseCase) *GetUserById
 }
 
 func (controller *GetUserByIdController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
+	if len(request.Params) == 0 {
+		err := errors.New("Blank userId!")
+		return helpers.BadRequest(err)
+	}
+
 	controller.useCase.Get(string(request.Params))
 	return nil
 }
@@ -39,4 +47,14 @@ func TestGetUserByIdController_ShouldCallUseCaseWithRightData(t *testing.T) {
 	sut.Handle(fakeRequest)
 
 	require.Equal(t, FAKE_USER_ID, repo.GetByidInput)
+}
+
+func TestGetUserByIdController_ShouldReturnErrorIfParamsIsBlank(t *testing.T) {
+	sut, _ := MakeGetUserByIdController()
+	fakeRequest := protocols.NewHtppRequest(nil, []byte(""))
+
+	httpResponse := sut.Handle(fakeRequest)
+
+	require.Equal(t, 400, httpResponse.StatusCode)
+	require.Equal(t, "Blank userId!", string(httpResponse.JsonBody))
 }

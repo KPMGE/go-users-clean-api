@@ -104,12 +104,13 @@ func TestAddBookUseCase_ShouldCallRepositoryWithRightData(t *testing.T) {
 	require.NotNil(t, bookRepo.input.User)
 }
 
+var FAKE_ADD_BOOK_INPUT_DTO = NewAddBookUseCaseInputDTO("any_title", "any_author", 342.2, "any_description", "any_invalid_user_id")
+
 func TestAddBookUseCase_ShouldCallUserRepositoryWithRightId(t *testing.T) {
 	sut, _, userRepo := MakeAddBookSut()
 	userRepo.GetByidOutput = nil
-	fakeInput := NewAddBookUseCaseInputDTO("any_title", "any_author", 342.2, "any_description", "any_invalid_user_id")
 
-	output, err := sut.Add(fakeInput)
+	output, err := sut.Add(FAKE_ADD_BOOK_INPUT_DTO)
 
 	require.Nil(t, output)
 	require.Error(t, err)
@@ -119,9 +120,8 @@ func TestAddBookUseCase_ShouldCallUserRepositoryWithRightId(t *testing.T) {
 func TestAddBookUseCase_ShouldReturnErrorIfWrongUserIdIsGiven(t *testing.T) {
 	sut, _, userRepo := MakeAddBookSut()
 	userRepo.GetByidOutput = nil
-	fakeInput := NewAddBookUseCaseInputDTO("any_title", "any_author", 342.2, "any_description", "any_invalid_user_id")
 
-	output, err := sut.Add(fakeInput)
+	output, err := sut.Add(FAKE_ADD_BOOK_INPUT_DTO)
 
 	require.Nil(t, output)
 	require.Error(t, err)

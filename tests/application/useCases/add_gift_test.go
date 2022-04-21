@@ -78,16 +78,20 @@ func (useCase *AddBookUseCase) Add(input *AddBookUseCaseInputDTO) (*AddBookUseCa
 }
 
 func MakeAddBookSut() (*AddBookUseCase, *AddBookRepositorySpy, *mocks_test.UserRepositorySpy) {
-	bookRepo := NewBookRepositorySpy()
+	fakeUser, _ := entities.NewUser("any_name", "any_username", "any_email@gmail.com")
+
 	userRepo := mocks_test.NewUserRepositorySpy()
+	userRepo.GetByidOutput = fakeUser
+	userRepo.GetByidError = nil
+
+	bookRepo := NewBookRepositorySpy()
 	sut := NewAddBookUseCase(bookRepo, userRepo)
+
 	return sut, bookRepo, userRepo
 }
 
 func TestAddBookUseCase_ShouldCallRepositoryWithRightData(t *testing.T) {
-	sut, bookRepo, userRepo := MakeAddBookSut()
-	fakeUser, _ := entities.NewUser("any_name", "any_username", "any_email@gmail.com")
-	userRepo.GetByidOutput = fakeUser
+	sut, bookRepo, _ := MakeAddBookSut()
 	fakeInput := NewAddBookUseCaseInputDTO("any_title", "any_author", 342.2, "any_description", "any_valid_user_id")
 
 	sut.Add(fakeInput)
@@ -98,6 +102,18 @@ func TestAddBookUseCase_ShouldCallRepositoryWithRightData(t *testing.T) {
 	require.Equal(t, fakeInput.Title, bookRepo.input.Title)
 	require.NotNil(t, bookRepo.input.ID)
 	require.NotNil(t, bookRepo.input.User)
+}
+
+func TestAddBookUseCase_ShouldCallUserRepositoryWithRightId(t *testing.T) {
+	sut, _, userRepo := MakeAddBookSut()
+	userRepo.GetByidOutput = nil
+	fakeInput := NewAddBookUseCaseInputDTO("any_title", "any_author", 342.2, "any_description", "any_invalid_user_id")
+
+	output, err := sut.Add(fakeInput)
+
+	require.Nil(t, output)
+	require.Error(t, err)
+	require.Equal(t, "User not found!", err.Error())
 }
 
 func TestAddBookUseCase_ShouldReturnErrorIfWrongUserIdIsGiven(t *testing.T) {

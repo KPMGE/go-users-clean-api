@@ -67,7 +67,12 @@ func NewAddBookUseCase(bookRepo AddBookRepository, userRepo protocols.UserReposi
 }
 
 func (useCase *AddBookUseCase) Add(input *AddBookUseCaseInputDTO) (*AddBookUseCaseOutputDTO, error) {
-	foundUser, _ := useCase.userRepo.GetById(input.UserId)
+	foundUser, err := useCase.userRepo.GetById(input.UserId)
+
+	if err != nil {
+		return nil, err
+	}
+
 	if foundUser == nil {
 		return nil, errors.New("User not found!")
 	}
@@ -123,4 +128,15 @@ func TestAddBookUseCase_ShouldReturnErrorIfWrongUserIdIsGiven(t *testing.T) {
 	require.Nil(t, output)
 	require.Error(t, err)
 	require.Equal(t, "User not found!", err.Error())
+}
+
+func TestAddBookUseCase_ShouldReturnErrorUserRepositoryReturnsError(t *testing.T) {
+	sut, _, userRepo := MakeAddBookSut()
+	userRepo.GetByidError = errors.New("repo error")
+
+	output, err := sut.Add(FAKE_ADD_BOOK_INPUT_DTO)
+
+	require.Nil(t, output)
+	require.Error(t, err)
+	require.Equal(t, "repo error", err.Error())
 }

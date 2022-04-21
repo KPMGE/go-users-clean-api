@@ -68,10 +68,15 @@ func (useCase *AddBookUseCase) Add(input *AddBookUseCaseInputDTO) (*AddBookUseCa
 	return nil, nil
 }
 
-func TestAddBookUseCase_ShouldCallRepositoryWithRightData(t *testing.T) {
-	fakeInput := NewAddBookUseCaseInputDTO("any_title", "any_author", 342.2, "any_description", "any_valid_user_id")
+func MakeAddBookSut() (*AddBookUseCase, *AddBookRepositorySpy) {
 	repo := NewBookRepositorySpy()
 	sut := NewAddBookUseCase(repo)
+	return sut, repo
+}
+
+func TestAddBookUseCase_ShouldCallRepositoryWithRightData(t *testing.T) {
+	sut, repo := MakeAddBookSut()
+	fakeInput := NewAddBookUseCaseInputDTO("any_title", "any_author", 342.2, "any_description", "any_valid_user_id")
 
 	sut.Add(fakeInput)
 

@@ -9,7 +9,7 @@ import (
 	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
-	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
+	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
@@ -25,49 +25,13 @@ var FAKE_ADD_BOOK_INPUT = `{
 
 var FAKE_REQUEST = protocols.NewHtppRequest([]byte(FAKE_ADD_BOOK_INPUT), nil)
 
-type AddBookController struct {
-	useCase *usecases.AddBookUseCase
-}
-
-func NewAddBookController(useCase *usecases.AddBookUseCase) *AddBookController {
-	return &AddBookController{
-		useCase: useCase,
-	}
-}
-
-func (controller *AddBookController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
-	if request == nil {
-		newError := errors.New("Invalid body!")
-		return helpers.ServerError(newError)
-	}
-
-	var inputDto dto.AddBookUseCaseInputDTO
-	err := json.Unmarshal(request.Body, &inputDto)
-	if err != nil {
-		newError := errors.New("Invalid body!")
-		return helpers.ServerError(newError)
-	}
-
-	output, err := controller.useCase.Add(&inputDto)
-	if err != nil {
-		return helpers.BadRequest(err)
-	}
-
-	outputJson, err := json.Marshal(output)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return helpers.Ok(outputJson)
-}
-
-func MakeAddBookControllerSut() (*AddBookController, *mocks_test.AddBookRepositorySpy) {
+func MakeAddBookControllerSut() (*controllers.AddBookController, *mocks_test.AddBookRepositorySpy) {
 	bookRepo := mocks_test.NewAddBookRepositorySpy()
 	userRepo := mocks_test.NewUserRepositorySpy()
 	fakeUser, _ := entities.NewUser("any_name", "any_username", "any_email@gmail.com")
 	userRepo.GetByidOutput = fakeUser
 	useCase := usecases.NewAddBookUseCase(bookRepo, userRepo)
-	sut := NewAddBookController(useCase)
+	sut := controllers.NewAddBookController(useCase)
 	return sut, bookRepo
 }
 

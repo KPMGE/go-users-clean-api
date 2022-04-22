@@ -12,10 +12,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type AddBookRepository interface {
-	Add(newBook *entities.Book) (*entities.Book, error)
-}
-
 type AddBookRepositorySpy struct {
 	input       *entities.Book
 	output      *entities.Book
@@ -33,11 +29,11 @@ func NewBookRepositorySpy() *AddBookRepositorySpy {
 }
 
 type AddBookUseCase struct {
-	bookRepo AddBookRepository
+	bookRepo protocols.AddBookRepository
 	userRepo protocols.UserRepository
 }
 
-func NewAddBookUseCase(bookRepo AddBookRepository, userRepo protocols.UserRepository) *AddBookUseCase {
+func NewAddBookUseCase(bookRepo protocols.AddBookRepository, userRepo protocols.UserRepository) *AddBookUseCase {
 	return &AddBookUseCase{
 		bookRepo: bookRepo,
 		userRepo: userRepo,

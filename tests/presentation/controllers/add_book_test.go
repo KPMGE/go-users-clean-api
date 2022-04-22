@@ -42,11 +42,17 @@ func (controller *AddBookController) Handle(request *protocols.HttpRequest) *pro
 		log.Fatal(err)
 	}
 
-	_, err = controller.useCase.Add(&inputDto)
+	output, err := controller.useCase.Add(&inputDto)
 	if err != nil {
 		return helpers.BadRequest(err)
 	}
-	return nil
+
+	outputJson, err := json.Marshal(output)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return helpers.Ok(outputJson)
 }
 
 func MakeAddBookControllerSut() (*AddBookController, *mocks_test.AddBookRepositorySpy) {
@@ -78,4 +84,26 @@ func TestAddBookController_ShouldReturnErrorIfUseCaseReturnsError(t *testing.T) 
 
 	require.Equal(t, 400, httpResponse.StatusCode)
 	require.Equal(t, "book repo error", string(httpResponse.JsonBody))
+}
+
+func TestAddBookController_ShouldReturnRightDataOnSuccess(t *testing.T) {
+	sut, _ := MakeAddBookControllerSut()
+
+	httpResponse := sut.Handle(FAKE_REQUEST)
+
+	var outputDto dto.AddBookUseCaseOutputDTO
+	err := json.Unmarshal(httpResponse.JsonBody, &outputDto)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	require.Equal(t, 200, httpResponse.StatusCode)
+	require.Equal(t, "any_author", outputDto.Author)
+	require.Equal(t, "any_description", outputDto.Description)
+	require.Equal(t, "any_title", outputDto.Title)
+	require.Equal(t, 123.3, outputDto.Price)
+	require.Equal(t, "any_name", outputDto.User.Name)
+	require.Equal(t, "any_username", outputDto.User.UserName)
+	require.NotNil(t, outputDto.ID)
+	require.NotNil(t, outputDto.User.ID)
 }

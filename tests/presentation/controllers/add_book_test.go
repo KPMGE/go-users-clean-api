@@ -36,10 +36,16 @@ func NewAddBookController(useCase *usecases.AddBookUseCase) *AddBookController {
 }
 
 func (controller *AddBookController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
+	if request == nil {
+		newError := errors.New("Invalid body!")
+		return helpers.ServerError(newError)
+	}
+
 	var inputDto dto.AddBookUseCaseInputDTO
 	err := json.Unmarshal(request.Body, &inputDto)
 	if err != nil {
-		log.Fatal(err)
+		newError := errors.New("Invalid body!")
+		return helpers.ServerError(newError)
 	}
 
 	output, err := controller.useCase.Add(&inputDto)
@@ -106,4 +112,13 @@ func TestAddBookController_ShouldReturnRightDataOnSuccess(t *testing.T) {
 	require.Equal(t, "any_username", outputDto.User.UserName)
 	require.NotNil(t, outputDto.ID)
 	require.NotNil(t, outputDto.User.ID)
+}
+
+func TestAddBookController_ShouldReturnServerErrorIfInvalidBodyIsProvided(t *testing.T) {
+	sut, _ := MakeAddBookControllerSut()
+
+	httpResponse := sut.Handle(nil)
+
+	require.Equal(t, 500, httpResponse.StatusCode)
+	require.Equal(t, "Invalid body!", string(httpResponse.JsonBody))
 }

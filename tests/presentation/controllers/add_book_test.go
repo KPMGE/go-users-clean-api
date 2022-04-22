@@ -47,13 +47,18 @@ func (controller *AddBookController) Handle(request *protocols.HttpRequest) *pro
 	return nil
 }
 
-func TestAddBookController_ShouldCallUseCaseWithRightData(t *testing.T) {
+func MakeAddBookControllerSut() (*AddBookController, *mocks_test.AddBookRepositorySpy) {
 	bookRepo := mocks_test.NewAddBookRepositorySpy()
 	userRepo := mocks_test.NewUserRepositorySpy()
 	fakeUser, _ := entities.NewUser("any_name", "any_username", "any_email@gmail.com")
 	userRepo.GetByidOutput = fakeUser
 	useCase := usecases.NewAddBookUseCase(bookRepo, userRepo)
 	sut := NewAddBookController(useCase)
+	return sut, bookRepo
+}
+
+func TestAddBookController_ShouldCallUseCaseWithRightData(t *testing.T) {
+	sut, bookRepo := MakeAddBookControllerSut()
 
 	sut.Handle(FAKE_REQUEST)
 

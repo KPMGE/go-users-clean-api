@@ -1,15 +1,15 @@
-// TODO: solve problem in first test
-
 package controllers_test
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"testing"
 
 	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
+	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
@@ -42,8 +42,10 @@ func (controller *AddBookController) Handle(request *protocols.HttpRequest) *pro
 		log.Fatal(err)
 	}
 
-	controller.useCase.Add(&inputDto)
-
+	_, err = controller.useCase.Add(&inputDto)
+	if err != nil {
+		return helpers.BadRequest(err)
+	}
 	return nil
 }
 
@@ -66,4 +68,14 @@ func TestAddBookController_ShouldCallUseCaseWithRightData(t *testing.T) {
 	require.Equal(t, "any_title", bookRepo.Input.Title)
 	require.Equal(t, 123.3, bookRepo.Input.Price)
 	require.Equal(t, "any_description", bookRepo.Input.Description)
+}
+
+func TestAddBookController_ShouldReturnErrorIfUseCaseReturnsError(t *testing.T) {
+	sut, bookRepo := MakeAddBookControllerSut()
+	bookRepo.OutputError = errors.New("book repo error")
+
+	httpResponse := sut.Handle(FAKE_REQUEST)
+
+	require.Equal(t, 400, httpResponse.StatusCode)
+	require.Equal(t, "book repo error", string(httpResponse.JsonBody))
 }

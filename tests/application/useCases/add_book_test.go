@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
-	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
+	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
@@ -28,52 +28,7 @@ func NewBookRepositorySpy() *AddBookRepositorySpy {
 	return &AddBookRepositorySpy{}
 }
 
-type AddBookUseCase struct {
-	bookRepo protocols.AddBookRepository
-	userRepo protocols.UserRepository
-}
-
-func NewAddBookUseCase(bookRepo protocols.AddBookRepository, userRepo protocols.UserRepository) *AddBookUseCase {
-	return &AddBookUseCase{
-		bookRepo: bookRepo,
-		userRepo: userRepo,
-	}
-}
-
-func (useCase *AddBookUseCase) Add(input *dto.AddBookUseCaseInputDTO) (*dto.AddBookUseCaseOutputDTO, error) {
-	foundUser, err := useCase.userRepo.GetById(input.UserId)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if foundUser == nil {
-		return nil, errors.New("User not found!")
-	}
-
-	newBook, err := entities.NewBook(input.Title, input.Author, input.Description, input.Price, foundUser)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = useCase.bookRepo.Add(newBook)
-	if err != nil {
-		return nil, err
-	}
-
-	outputDto := dto.AddBookUseCaseOutputDTO{
-		ID:          newBook.ID,
-		Title:       newBook.Title,
-		Author:      newBook.Author,
-		Price:       newBook.Price,
-		Description: newBook.Description,
-		User:        foundUser,
-	}
-
-	return &outputDto, nil
-}
-
-func MakeAddBookSut() (*AddBookUseCase, *AddBookRepositorySpy, *mocks_test.UserRepositorySpy) {
+func MakeAddBookSut() (*usecases.AddBookUseCase, *AddBookRepositorySpy, *mocks_test.UserRepositorySpy) {
 	fakeUser, err := entities.NewUser("any_name", "any_username", "any_email@gmail.com")
 	if err != nil {
 		log.Fatal(err)
@@ -85,7 +40,7 @@ func MakeAddBookSut() (*AddBookUseCase, *AddBookRepositorySpy, *mocks_test.UserR
 
 	bookRepo := NewBookRepositorySpy()
 	bookRepo.outputError = nil
-	sut := NewAddBookUseCase(bookRepo, userRepo)
+	sut := usecases.NewAddBookUseCase(bookRepo, userRepo)
 
 	return sut, bookRepo, userRepo
 }

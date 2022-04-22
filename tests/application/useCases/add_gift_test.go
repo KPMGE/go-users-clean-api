@@ -3,6 +3,7 @@ package usecases_test
 
 import (
 	"errors"
+	"log"
 	"testing"
 
 	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
@@ -43,12 +44,15 @@ type AddBookRepository interface {
 }
 
 type AddBookRepositorySpy struct {
-	input *entities.Book
+	input       *entities.Book
+	output      *entities.Book
+	outputError error
 }
 
 func (repo *AddBookRepositorySpy) Add(newBook *entities.Book) (*entities.Book, error) {
 	repo.input = newBook
-	return nil, nil
+	repo.output = repo.input
+	return repo.output, repo.outputError
 }
 
 func NewBookRepositorySpy() *AddBookRepositorySpy {
@@ -80,17 +84,31 @@ func (useCase *AddBookUseCase) Add(input *AddBookUseCaseInputDTO) (*AddBookUseCa
 
 	newBook, _ := entities.NewBook(input.Title, input.Author, input.Description, input.Price, foundUser)
 	useCase.bookRepo.Add(newBook)
-	return nil, nil
+
+	outputDto := AddBookUseCaseOutputDTO{
+		ID:          newBook.ID,
+		Title:       newBook.Title,
+		Author:      newBook.Author,
+		Price:       newBook.Price,
+		Description: newBook.Description,
+		User:        foundUser,
+	}
+
+	return &outputDto, nil
 }
 
 func MakeAddBookSut() (*AddBookUseCase, *AddBookRepositorySpy, *mocks_test.UserRepositorySpy) {
-	fakeUser, _ := entities.NewUser("any_name", "any_username", "any_email@gmail.com")
+	fakeUser, err := entities.NewUser("any_name", "any_username", "any_email@gmail.com")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	userRepo := mocks_test.NewUserRepositorySpy()
 	userRepo.GetByidOutput = fakeUser
 	userRepo.GetByidError = nil
 
 	bookRepo := NewBookRepositorySpy()
+	bookRepo.outputError = nil
 	sut := NewAddBookUseCase(bookRepo, userRepo)
 
 	return sut, bookRepo, userRepo
@@ -140,4 +158,18 @@ func TestAddBookUseCase_ShouldReturnErrorUserRepositoryReturnsError(t *testing.T
 	require.Nil(t, output)
 	require.Error(t, err)
 	require.Equal(t, "repo error", err.Error())
+}
+
+func TestAddBookUseCase_ShouldReturnOuputDTO(t *testing.T) {
+	sut, bookRepo, _ := MakeAddBookSut()
+
+	output, err := sut.Add(FAKE_ADD_BOOK_INPUT_DTO)
+
+	require.Nil(t, err)
+	require.Equal(t, output.Title, bookRepo.output.Title)
+	require.Equal(t, output.Author, bookRepo.output.Author)
+	require.Equal(t, output.Price, bookRepo.output.Price)
+	require.Equal(t, output.Description, bookRepo.output.Description)
+	require.NotNil(t, output.ID)
+	require.NotNil(t, output.User)
 }

@@ -18,13 +18,3 @@ type AddBookUseCaseOutputDTO struct {
 	Description string
 	User        *entities.User
 }
-
-func NewAddBookUseCaseInputDTO(title string, author string, price float64, description string, userId string) *AddBookUseCaseInputDTO {
-	return &AddBookUseCaseInputDTO{
-		Title:       title,
-		Author:      author,
-		Price:       price,
-		Description: description,
-		UserId:      userId,
-	}
-}

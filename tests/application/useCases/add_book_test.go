@@ -39,14 +39,11 @@ func MakeAddBookSut() (*usecases.AddBookUseCase, *mocks_test.AddBookRepositorySp
 
 func TestAddBookUseCase_ShouldCallRepositoryWithRightData(t *testing.T) {
 	sut, bookRepo, _ := MakeAddBookSut()
-	fakeInput := dto.NewAddBookUseCaseInputDTO("any_title", "any_author", 342.2, "any_description", "any_valid_user_id")
 
-	sut.Add(fakeInput)
-
-	require.Equal(t, fakeInput.Author, bookRepo.Input.Author)
-	require.Equal(t, fakeInput.Description, bookRepo.Input.Description)
-	require.Equal(t, fakeInput.Price, bookRepo.Input.Price)
-	require.Equal(t, fakeInput.Title, bookRepo.Input.Title)
+	sut.Add(FAKE_ADD_BOOK_INPUT_DTO)
+	require.Equal(t, FAKE_ADD_BOOK_INPUT_DTO.Description, bookRepo.Input.Description)
+	require.Equal(t, FAKE_ADD_BOOK_INPUT_DTO.Price, bookRepo.Input.Price)
+	require.Equal(t, FAKE_ADD_BOOK_INPUT_DTO.Title, bookRepo.Input.Title)
 	require.NotNil(t, bookRepo.Input.ID)
 	require.NotNil(t, bookRepo.Input.User)
 }

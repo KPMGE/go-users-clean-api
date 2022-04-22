@@ -82,9 +82,12 @@ func (useCase *AddBookUseCase) Add(input *AddBookUseCaseInputDTO) (*AddBookUseCa
 		return nil, errors.New("User not found!")
 	}
 
-	newBook, _ := entities.NewBook(input.Title, input.Author, input.Description, input.Price, foundUser)
-	_, err = useCase.bookRepo.Add(newBook)
+	newBook, err := entities.NewBook(input.Title, input.Author, input.Description, input.Price, foundUser)
+	if err != nil {
+		return nil, err
+	}
 
+	_, err = useCase.bookRepo.Add(newBook)
 	if err != nil {
 		return nil, err
 	}

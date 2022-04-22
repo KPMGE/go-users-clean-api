@@ -83,7 +83,11 @@ func (useCase *AddBookUseCase) Add(input *AddBookUseCaseInputDTO) (*AddBookUseCa
 	}
 
 	newBook, _ := entities.NewBook(input.Title, input.Author, input.Description, input.Price, foundUser)
-	useCase.bookRepo.Add(newBook)
+	_, err = useCase.bookRepo.Add(newBook)
+
+	if err != nil {
+		return nil, err
+	}
 
 	outputDto := AddBookUseCaseOutputDTO{
 		ID:          newBook.ID,
@@ -172,4 +176,15 @@ func TestAddBookUseCase_ShouldReturnOuputDTO(t *testing.T) {
 	require.Equal(t, output.Description, bookRepo.output.Description)
 	require.NotNil(t, output.ID)
 	require.NotNil(t, output.User)
+}
+
+func TestAddBookUseCase_ShouldReturnErrorIfAddBookReturnsError(t *testing.T) {
+	sut, bookRepo, _ := MakeAddBookSut()
+	bookRepo.outputError = errors.New("add book error")
+
+	output, err := sut.Add(FAKE_ADD_BOOK_INPUT_DTO)
+
+	require.Error(t, err)
+	require.Nil(t, output)
+	require.Equal(t, "add book error", err.Error())
 }

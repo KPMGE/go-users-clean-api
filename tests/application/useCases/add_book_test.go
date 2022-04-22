@@ -1,4 +1,3 @@
-// TODO: Test outputs for use case
 package usecases_test
 
 import (
@@ -6,38 +5,12 @@ import (
 	"log"
 	"testing"
 
+	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
 )
-
-type AddBookUseCaseInputDTO struct {
-	Title       string
-	Author      string
-	Price       float64
-	Description string
-	UserId      string
-}
-
-type AddBookUseCaseOutputDTO struct {
-	ID          string
-	Title       string
-	Author      string
-	Price       float64
-	Description string
-	User        *entities.User
-}
-
-func NewAddBookUseCaseInputDTO(title string, author string, price float64, description string, userId string) *AddBookUseCaseInputDTO {
-	return &AddBookUseCaseInputDTO{
-		Title:       title,
-		Author:      author,
-		Price:       price,
-		Description: description,
-		UserId:      userId,
-	}
-}
 
 type AddBookRepository interface {
 	Add(newBook *entities.Book) (*entities.Book, error)
@@ -71,7 +44,7 @@ func NewAddBookUseCase(bookRepo AddBookRepository, userRepo protocols.UserReposi
 	}
 }
 
-func (useCase *AddBookUseCase) Add(input *AddBookUseCaseInputDTO) (*AddBookUseCaseOutputDTO, error) {
+func (useCase *AddBookUseCase) Add(input *dto.AddBookUseCaseInputDTO) (*dto.AddBookUseCaseOutputDTO, error) {
 	foundUser, err := useCase.userRepo.GetById(input.UserId)
 
 	if err != nil {
@@ -92,7 +65,7 @@ func (useCase *AddBookUseCase) Add(input *AddBookUseCaseInputDTO) (*AddBookUseCa
 		return nil, err
 	}
 
-	outputDto := AddBookUseCaseOutputDTO{
+	outputDto := dto.AddBookUseCaseOutputDTO{
 		ID:          newBook.ID,
 		Title:       newBook.Title,
 		Author:      newBook.Author,
@@ -121,11 +94,11 @@ func MakeAddBookSut() (*AddBookUseCase, *AddBookRepositorySpy, *mocks_test.UserR
 	return sut, bookRepo, userRepo
 }
 
-var FAKE_ADD_BOOK_INPUT_DTO = NewAddBookUseCaseInputDTO("any_title", "any_author", 342.2, "any_description", "any_invalid_user_id")
+var FAKE_ADD_BOOK_INPUT_DTO = dto.NewAddBookUseCaseInputDTO("any_title", "any_author", 342.2, "any_description", "any_invalid_user_id")
 
 func TestAddBookUseCase_ShouldCallRepositoryWithRightData(t *testing.T) {
 	sut, bookRepo, _ := MakeAddBookSut()
-	fakeInput := NewAddBookUseCaseInputDTO("any_title", "any_author", 342.2, "any_description", "any_valid_user_id")
+	fakeInput := dto.NewAddBookUseCaseInputDTO("any_title", "any_author", 342.2, "any_description", "any_valid_user_id")
 
 	sut.Add(fakeInput)
 

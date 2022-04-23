@@ -5,17 +5,10 @@ import (
 	"log"
 	"testing"
 
+	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/stretchr/testify/require"
 )
-
-type RemoveBookUseCaseOutputDTO struct {
-	Title       string
-	Author      string
-	Description string
-	Price       float64
-	UserId      string
-}
 
 type RemoveBookRepository interface {
 	Remove(bookId string) error
@@ -66,7 +59,7 @@ func NewRemoveBookUseCase(removeBookRepo RemoveBookRepository, findBookRepo Find
 	}
 }
 
-func (useCase *RemoveBookUseCase) Remove(bookId string) (*RemoveBookUseCaseOutputDTO, error) {
+func (useCase *RemoveBookUseCase) Remove(bookId string) (*dto.RemoveBookUseCaseOutputDTO, error) {
 	foundBook, err := useCase.findBookRepo.Find(bookId)
 	if err != nil {
 		return nil, err
@@ -80,7 +73,7 @@ func (useCase *RemoveBookUseCase) Remove(bookId string) (*RemoveBookUseCaseOutpu
 		return nil, err
 	}
 
-	outputDto := RemoveBookUseCaseOutputDTO{
+	outputDto := dto.RemoveBookUseCaseOutputDTO{
 		Title:       foundBook.Title,
 		Author:      foundBook.Author,
 		Description: foundBook.Description,

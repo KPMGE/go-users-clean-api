@@ -28,6 +28,6 @@ func (useCase *GetUserByIdUseCase) Get(userId string) (*dto.GetUserByIdUseCaseOu
 		return nil, errors.New("User not found!")
 	}
 
-	output := dto.NewGetUserByIdUseCaseOutputDTO(foundUser.ID, foundUser.Name, foundUser.Email, foundUser.UserName)
+	output := dto.NewGetUserByIdUseCaseOutputDTO(foundUser.ID, foundUser.Name, foundUser.Email, foundUser.UserName, foundUser.Books)
 	return output, nil
 }

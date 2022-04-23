@@ -31,7 +31,7 @@ func (controller *GetUserByIdController) Handle(request *protocols.HttpRequest) 
 		return helpers.ServerError(err)
 	}
 
-	outputDto := dto.NewGetUserByIdUseCaseOutputDTO(foundUser.ID, foundUser.Name, foundUser.Email, foundUser.UserName)
+	outputDto := dto.NewGetUserByIdUseCaseOutputDTO(foundUser.ID, foundUser.Name, foundUser.Email, foundUser.UserName, foundUser.Books)
 	jsonOutputDto, err := json.Marshal(outputDto)
 	if err != nil {
 		return helpers.ServerError(err)

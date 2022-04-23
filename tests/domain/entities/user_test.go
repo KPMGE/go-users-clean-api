@@ -14,7 +14,7 @@ func TestUser_New(t *testing.T) {
 	newUser, err := entities.NewUser(fakeName, fakeUserName, fakeEmail)
 
 	require.Nil(t, err)
-	require.Nil(t, newUser.Books)
+	require.Equal(t, []*entities.Book{}, newUser.Books)
 	require.NotNil(t, newUser)
 	require.NotNil(t, newUser.ID)
 	require.NotNil(t, newUser.UpdatedAt)

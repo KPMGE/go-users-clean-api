@@ -89,7 +89,6 @@ func TestAddBookUseCase_ShouldReturnOuputDTO(t *testing.T) {
 	require.Equal(t, output.Price, bookRepo.Output.Price)
 	require.Equal(t, output.Description, bookRepo.Output.Description)
 	require.NotNil(t, output.ID)
-	require.NotNil(t, output.User)
 }
 
 func TestAddBookUseCase_ShouldReturnErrorIfAddBookReturnsError(t *testing.T) {

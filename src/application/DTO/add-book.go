@@ -1,7 +1,5 @@
 package dto
 
-import "github.com/KPMGE/go-users-clean-api/src/domain/entities"
-
 type AddBookUseCaseInputDTO struct {
 	Title       string  `json:"title"`
 	Author      string  `json:"author"`
@@ -16,5 +14,4 @@ type AddBookUseCaseOutputDTO struct {
 	Author      string
 	Price       float64
 	Description string
-	User        *entities.User
 }

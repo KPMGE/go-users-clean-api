@@ -41,12 +41,13 @@ func (useCase *AddBookUseCase) Add(input *dto.AddBookUseCaseInputDTO) (*dto.AddB
 		return nil, err
 	}
 
+	foundUser.Books = append(foundUser.Books, newBook)
+
 	err = useCase.userRepo.Delete(input.UserId)
 	if err != nil {
 		return nil, err
 	}
 
-	foundUser.Books = append(foundUser.Books, newBook)
 	err = useCase.userRepo.Save(foundUser)
 	if err != nil {
 		return nil, err
@@ -58,7 +59,6 @@ func (useCase *AddBookUseCase) Add(input *dto.AddBookUseCaseInputDTO) (*dto.AddB
 		Author:      newBook.Author,
 		Price:       newBook.Price,
 		Description: newBook.Description,
-		User:        foundUser,
 	}
 
 	return &outputDto, nil

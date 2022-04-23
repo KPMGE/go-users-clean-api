@@ -72,10 +72,6 @@ func TestAddBookController_ShouldReturnRightDataOnSuccess(t *testing.T) {
 	require.Equal(t, "any_description", outputDto.Description)
 	require.Equal(t, "any_title", outputDto.Title)
 	require.Equal(t, 123.3, outputDto.Price)
-	require.Equal(t, "any_name", outputDto.User.Name)
-	require.Equal(t, "any_username", outputDto.User.UserName)
-	require.NotNil(t, outputDto.ID)
-	require.NotNil(t, outputDto.User.ID)
 }
 
 func TestAddBookController_ShouldReturnServerErrorIfInvalidBodyIsProvided(t *testing.T) {

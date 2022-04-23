@@ -5,8 +5,7 @@ import (
 	"log"
 	"testing"
 
-	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
-	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
+	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/stretchr/testify/require"
 )
@@ -40,44 +39,7 @@ func NewFindBookRepositorySpy() *FindBookRepositorySpy {
 	return &FindBookRepositorySpy{}
 }
 
-type RemoveBookUseCase struct {
-	removeBookRepo protocols.RemoveBookRepository
-	findBookRepo   protocols.FindBookRepository
-}
-
-func NewRemoveBookUseCase(removeBookRepo protocols.RemoveBookRepository, findBookRepo protocols.FindBookRepository) *RemoveBookUseCase {
-	return &RemoveBookUseCase{
-		removeBookRepo: removeBookRepo,
-		findBookRepo:   findBookRepo,
-	}
-}
-
-func (useCase *RemoveBookUseCase) Remove(bookId string) (*dto.RemoveBookUseCaseOutputDTO, error) {
-	foundBook, err := useCase.findBookRepo.Find(bookId)
-	if err != nil {
-		return nil, err
-	}
-	if foundBook == nil {
-		return nil, errors.New("book not found!")
-	}
-
-	err = useCase.removeBookRepo.Remove(bookId)
-	if err != nil {
-		return nil, err
-	}
-
-	outputDto := dto.RemoveBookUseCaseOutputDTO{
-		Title:       foundBook.Title,
-		Author:      foundBook.Author,
-		Description: foundBook.Description,
-		Price:       foundBook.Price,
-		UserId:      foundBook.UserId,
-	}
-
-	return &outputDto, nil
-}
-
-func MakeRemoveBookSut() (*RemoveBookUseCase, *RemoveBookRepositorySpy, *FindBookRepositorySpy) {
+func MakeRemoveBookSut() (*usecases.RemoveBookUseCase, *RemoveBookRepositorySpy, *FindBookRepositorySpy) {
 	removeBookRepo := NewRemoveBookRepositorySpy()
 	removeBookRepo.RemoveError = nil
 
@@ -89,7 +51,7 @@ func MakeRemoveBookSut() (*RemoveBookUseCase, *RemoveBookRepositorySpy, *FindBoo
 	}
 	findBookRepo.FindOutput = fakeBook
 
-	sut := NewRemoveBookUseCase(removeBookRepo, findBookRepo)
+	sut := usecases.NewRemoveBookUseCase(removeBookRepo, findBookRepo)
 	return sut, removeBookRepo, findBookRepo
 }
 

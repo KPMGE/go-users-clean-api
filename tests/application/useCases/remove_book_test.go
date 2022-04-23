@@ -9,6 +9,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type RemoveBookUseCaseOutputDTO struct {
+	Title       string
+	Author      string
+	Description string
+	Price       float64
+	UserId      string
+}
+
 type RemoveBookRepository interface {
 	Remove(bookId string) error
 }
@@ -58,20 +66,29 @@ func NewRemoveBookUseCase(removeBookRepo RemoveBookRepository, findBookRepo Find
 	}
 }
 
-func (useCase *RemoveBookUseCase) Remove(bookId string) error {
+func (useCase *RemoveBookUseCase) Remove(bookId string) (*RemoveBookUseCaseOutputDTO, error) {
 	foundBook, err := useCase.findBookRepo.Find(bookId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if foundBook == nil {
-		return errors.New("book not found!")
+		return nil, errors.New("book not found!")
 	}
 
 	err = useCase.removeBookRepo.Remove(bookId)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+
+	outputDto := RemoveBookUseCaseOutputDTO{
+		Title:       foundBook.Title,
+		Author:      foundBook.Author,
+		Description: foundBook.Description,
+		Price:       foundBook.Price,
+		UserId:      foundBook.UserId,
+	}
+
+	return &outputDto, nil
 }
 
 func MakeRemoveBookSut() (*RemoveBookUseCase, *RemoveBookRepositorySpy, *FindBookRepositorySpy) {
@@ -102,8 +119,9 @@ func TestRemoveBookUseCase_ShouldReturnErrorIfRepositoryReturnsError(t *testing.
 	sut, removeBookRepo, _ := MakeRemoveBookSut()
 	removeBookRepo.RemoveError = errors.New("repo error")
 
-	err := sut.Remove("any_invalid_id")
+	deletedBook, err := sut.Remove("any_invalid_id")
 
+	require.Nil(t, deletedBook)
 	require.Error(t, err)
 	require.Equal(t, "repo error", err.Error())
 }
@@ -120,8 +138,9 @@ func TestRemoveBookUseCase_ShouldReturnErrorIfFindBookReturnsNil(t *testing.T) {
 	sut, _, findBookRepo := MakeRemoveBookSut()
 	findBookRepo.FindOutput = nil
 
-	err := sut.Remove("any_book_id")
+	deletedBook, err := sut.Remove("any_book_id")
 
+	require.Nil(t, deletedBook)
 	require.Error(t, err)
 	require.Equal(t, "book not found!", err.Error())
 }
@@ -130,8 +149,22 @@ func TestRemoveBookUseCase_ShouldReturnErrorIfFindBookReturnsError(t *testing.T)
 	sut, _, findBookRepo := MakeRemoveBookSut()
 	findBookRepo.FindError = errors.New("repo error")
 
-	err := sut.Remove("any_book_id")
+	deletedBook, err := sut.Remove("any_book_id")
 
+	require.Nil(t, deletedBook)
 	require.Error(t, err)
 	require.Equal(t, "repo error", err.Error())
+}
+
+func TestRemoveBookUseCase_ShouldReturnRightDataOnSuccess(t *testing.T) {
+	sut, _, findBookRepo := MakeRemoveBookSut()
+
+	deletedBook, err := sut.Remove("any_valid_book_id")
+
+	require.Nil(t, err)
+	require.Equal(t, findBookRepo.FindOutput.Author, deletedBook.Author)
+	require.Equal(t, findBookRepo.FindOutput.Price, deletedBook.Price)
+	require.Equal(t, findBookRepo.FindOutput.Description, deletedBook.Description)
+	require.Equal(t, findBookRepo.FindOutput.Title, deletedBook.Title)
+	require.Equal(t, findBookRepo.FindOutput.UserId, deletedBook.UserId)
 }

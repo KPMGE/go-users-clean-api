@@ -32,13 +32,12 @@ func makeFakeUser() *entities.User {
 
 func TestNewBook_WithRighData(t *testing.T) {
 	fakeUser := makeFakeUser()
-	newBook, err := entities.NewBook(fakeTitle, fakeAuthor, fakeDescription, fakePrice, fakeUser)
+	newBook, err := entities.NewBook(fakeTitle, fakeAuthor, fakeDescription, fakePrice, fakeUser.ID)
 
 	require.Nil(t, err)
 	require.NotEmpty(t, newBook.CreatedAt)
 	require.NotEmpty(t, newBook.UpdatedAt)
 	require.NotEmpty(t, newBook.ID)
-	require.Equal(t, newBook.User, fakeUser)
 	require.Equal(t, newBook.Title, fakeTitle)
 	require.Equal(t, newBook.Author, fakeAuthor)
 	require.Equal(t, newBook.Price, fakePrice)
@@ -47,7 +46,7 @@ func TestNewBook_WithRighData(t *testing.T) {
 
 func TestNewBook_WithPriceLessThanOrEqualTo0(t *testing.T) {
 	fakeUser := makeFakeUser()
-	newBook, err := entities.NewBook(fakeTitle, fakeAuthor, fakeDescription, 0, fakeUser)
+	newBook, err := entities.NewBook(fakeTitle, fakeAuthor, fakeDescription, 0, fakeUser.ID)
 
 	require.Error(t, err)
 	require.Nil(t, newBook)
@@ -57,15 +56,15 @@ func TestNewBook_WithPriceLessThanOrEqualTo0(t *testing.T) {
 func TestNewBook_WithNullFields(t *testing.T) {
 	fakeUser := makeFakeUser()
 
-	newBook, err := entities.NewBook("", fakeAuthor, fakeDescription, fakePrice, fakeUser)
+	newBook, err := entities.NewBook("", fakeAuthor, fakeDescription, fakePrice, fakeUser.ID)
 	require.Error(t, err)
 	require.Nil(t, newBook)
 
-	newBook, err = entities.NewBook(fakeTitle, "", fakeDescription, fakePrice, fakeUser)
+	newBook, err = entities.NewBook(fakeTitle, "", fakeDescription, fakePrice, fakeUser.ID)
 	require.Error(t, err)
 	require.Nil(t, newBook)
 
-	newBook, err = entities.NewBook(fakeTitle, fakeAuthor, "", fakePrice, fakeUser)
+	newBook, err = entities.NewBook(fakeTitle, fakeAuthor, "", fakePrice, fakeUser.ID)
 	require.Error(t, err)
 	require.Nil(t, newBook)
 }

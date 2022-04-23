@@ -54,5 +54,12 @@ func SetupRoutes(app *fiber.App) *fiber.Router {
 		return c.Status(httpResponse.StatusCode).Send(httpResponse.JsonBody)
 	})
 
+	api.Post("/books", func(c *fiber.Ctx) error {
+		controller := factories.MakeAddBookController()
+		request := protocols.NewHtppRequest(c.Body(), nil)
+		httpResponse := controller.Handle(request)
+		return c.Status(httpResponse.StatusCode).Send(httpResponse.JsonBody)
+	})
+
 	return &api
 }

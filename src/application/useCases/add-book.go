@@ -31,7 +31,7 @@ func (useCase *AddBookUseCase) Add(input *dto.AddBookUseCaseInputDTO) (*dto.AddB
 		return nil, errors.New("User not found!")
 	}
 
-	newBook, err := entities.NewBook(input.Title, input.Author, input.Description, input.Price, foundUser)
+	newBook, err := entities.NewBook(input.Title, input.Author, input.Description, input.Price, foundUser.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,6 @@ func (useCase *AddBookUseCase) Add(input *dto.AddBookUseCaseInputDTO) (*dto.AddB
 	}
 
 	foundUser.Books = append(foundUser.Books, newBook)
-
 	err = useCase.userRepo.Delete(input.UserId)
 	if err != nil {
 		return nil, err

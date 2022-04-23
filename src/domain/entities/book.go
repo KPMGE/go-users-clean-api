@@ -13,7 +13,7 @@ type Book struct {
 	Author      string  `json:"author" valid:"required"`
 	Price       float64 `json:"price" valid:"required"`
 	Description string  `json:"description" valid:"required"`
-	User        *User   `json:"user" valid:"required"`
+	UserId      string  `json:"userId" valid:"required"`
 }
 
 func (book *Book) isValid() error {
@@ -27,9 +27,9 @@ func (book *Book) isValid() error {
 	return nil
 }
 
-func NewBook(title string, author string, description string, price float64, user *User) (*Book, error) {
+func NewBook(title string, author string, description string, price float64, UserId string) (*Book, error) {
 	book := Book{
-		User:        user,
+		UserId:      UserId,
 		Title:       title,
 		Author:      author,
 		Description: description,

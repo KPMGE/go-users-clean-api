@@ -59,12 +59,15 @@ func NewRemoveBookUseCase(removeBookRepo RemoveBookRepository, findBookRepo Find
 }
 
 func (useCase *RemoveBookUseCase) Remove(bookId string) error {
-	foundBook, _ := useCase.findBookRepo.Find(bookId)
+	foundBook, err := useCase.findBookRepo.Find(bookId)
+	if err != nil {
+		return err
+	}
 	if foundBook == nil {
 		return errors.New("book not found!")
 	}
 
-	err := useCase.removeBookRepo.Remove(bookId)
+	err = useCase.removeBookRepo.Remove(bookId)
 	if err != nil {
 		return err
 	}
@@ -121,4 +124,14 @@ func TestRemoveBookUseCase_ShouldReturnErrorIfFindBookReturnsNil(t *testing.T) {
 
 	require.Error(t, err)
 	require.Equal(t, "book not found!", err.Error())
+}
+
+func TestRemoveBookUseCase_ShouldReturnErrorIfFindBookReturnsError(t *testing.T) {
+	sut, _, findBookRepo := MakeRemoveBookSut()
+	findBookRepo.FindError = errors.New("repo error")
+
+	err := sut.Remove("any_book_id")
+
+	require.Error(t, err)
+	require.Equal(t, "repo error", err.Error())
 }

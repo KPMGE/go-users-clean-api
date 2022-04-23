@@ -6,17 +6,10 @@ import (
 	"testing"
 
 	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
+	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/stretchr/testify/require"
 )
-
-type RemoveBookRepository interface {
-	Remove(bookId string) error
-}
-
-type FindBookRepository interface {
-	Find(bookId string) (*entities.Book, error)
-}
 
 type RemoveBookRepositorySpy struct {
 	RemoveInput string
@@ -48,11 +41,11 @@ func NewFindBookRepositorySpy() *FindBookRepositorySpy {
 }
 
 type RemoveBookUseCase struct {
-	removeBookRepo RemoveBookRepository
-	findBookRepo   FindBookRepository
+	removeBookRepo protocols.RemoveBookRepository
+	findBookRepo   protocols.FindBookRepository
 }
 
-func NewRemoveBookUseCase(removeBookRepo RemoveBookRepository, findBookRepo FindBookRepository) *RemoveBookUseCase {
+func NewRemoveBookUseCase(removeBookRepo protocols.RemoveBookRepository, findBookRepo protocols.FindBookRepository) *RemoveBookUseCase {
 	return &RemoveBookUseCase{
 		removeBookRepo: removeBookRepo,
 		findBookRepo:   findBookRepo,

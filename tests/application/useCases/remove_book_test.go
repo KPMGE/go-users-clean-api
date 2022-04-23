@@ -7,43 +7,18 @@ import (
 
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
+	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
 )
 
-type RemoveBookRepositorySpy struct {
-	RemoveInput string
-	RemoveError error
-}
-
-type FindBookRepositorySpy struct {
-	FindInput  string
-	FindOutput *entities.Book
-	FindError  error
-}
-
-func (repo *RemoveBookRepositorySpy) Remove(bookId string) error {
-	repo.RemoveInput = bookId
-	return repo.RemoveError
-}
-
-func NewRemoveBookRepositorySpy() *RemoveBookRepositorySpy {
-	return &RemoveBookRepositorySpy{}
-}
-
-func (repo *FindBookRepositorySpy) Find(bookId string) (*entities.Book, error) {
-	repo.FindInput = bookId
-	return repo.FindOutput, repo.FindError
-}
-
-func NewFindBookRepositorySpy() *FindBookRepositorySpy {
-	return &FindBookRepositorySpy{}
-}
-
-func MakeRemoveBookSut() (*usecases.RemoveBookUseCase, *RemoveBookRepositorySpy, *FindBookRepositorySpy) {
-	removeBookRepo := NewRemoveBookRepositorySpy()
+func MakeRemoveBookSut() (
+	*usecases.RemoveBookUseCase,
+	*mocks_test.RemoveBookRepositorySpy, *mocks_test.FindBookRepositorySpy,
+) {
+	removeBookRepo := mocks_test.NewRemoveBookRepositorySpy()
 	removeBookRepo.RemoveError = nil
 
-	findBookRepo := NewFindBookRepositorySpy()
+	findBookRepo := mocks_test.NewFindBookRepositorySpy()
 	findBookRepo.FindError = nil
 	fakeBook, err := entities.NewBook("any_title", "any_author", "any_description", 100.2, "any_user_id")
 	if err != nil {

@@ -29,6 +29,14 @@ func MakeRemoveBookSut() (
 	findBookRepo.FindOutput = fakeBook
 
 	userRepo := mocks_test.NewUserRepositorySpy()
+	fakeUser, err := entities.NewUser("any_name", "any_username", "any_valid_email@gmail.com")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fakeUser.ID = "any_user_id"
+	fakeBook.ID = "any_valid_book_id"
+	fakeUser.Books = append(fakeUser.Books, fakeBook)
+	userRepo.GetByidOutput = fakeUser
 
 	sut := usecases.NewRemoveBookUseCase(removeBookRepo, findBookRepo, userRepo)
 	return sut, removeBookRepo, findBookRepo, userRepo

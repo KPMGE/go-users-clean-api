@@ -37,7 +37,7 @@ func NewUser(name string, userName string, email string) (*User, error) {
 	}
 
 	user.ID = uuid.NewV4().String()
-	user.Books = nil
+	user.Books = []*Book{}
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 

@@ -7,41 +7,19 @@ import (
 	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
-	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
+	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
 )
 
-type RemoveBookController struct {
-	useCase *usecases.RemoveBookUseCase
-}
-
-func NewRemoveBookController(useCase *usecases.RemoveBookUseCase) *RemoveBookController {
-	return &RemoveBookController{
-		useCase: useCase,
-	}
-}
-
-func (controller *RemoveBookController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
-	removedBook, err := controller.useCase.Remove(string(request.Params))
-	if err != nil {
-		return helpers.BadRequest(err)
-	}
-	removedBookJson, err := json.Marshal(removedBook)
-	if err != nil {
-		return helpers.ServerError(err)
-	}
-	return helpers.Ok(removedBookJson)
-}
-
-func MakeRemoveBookControllerSut() (*RemoveBookController, *mocks_test.FindBookRepositorySpy, *mocks_test.RemoveBookRepositorySpy) {
+func MakeRemoveBookControllerSut() (*controllers.RemoveBookController, *mocks_test.FindBookRepositorySpy, *mocks_test.RemoveBookRepositorySpy) {
 	removeBookRepo := mocks_test.NewRemoveBookRepositorySpy()
 	findBookRepo := mocks_test.NewFindBookRepositorySpy()
 	fakeBook, _ := entities.NewBook("any_title", "any_author", "any_description", 100, "any_user_id")
 	findBookRepo.FindOutput = fakeBook
 	useCase := usecases.NewRemoveBookUseCase(removeBookRepo, findBookRepo)
-	sut := NewRemoveBookController(useCase)
+	sut := controllers.NewRemoveBookController(useCase)
 	return sut, findBookRepo, removeBookRepo
 }
 

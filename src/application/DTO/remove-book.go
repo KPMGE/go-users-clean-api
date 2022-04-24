@@ -1,9 +1,9 @@
 package dto
 
 type RemoveBookUseCaseOutputDTO struct {
-	Title       string
-	Author      string
-	Description string
-	Price       float64
-	UserId      string
+	Title       string  `json:"title"`
+	Author      string  `json:"author"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price"`
+	UserId      string  `json:"userId"`
 }

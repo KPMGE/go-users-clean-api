@@ -28,7 +28,10 @@ func (controller *RemoveBookController) Handle(request *protocols.HttpRequest) *
 	if err != nil {
 		return helpers.BadRequest(err)
 	}
-	removedBookJson, _ := json.Marshal(removedBook)
+	removedBookJson, err := json.Marshal(removedBook)
+	if err != nil {
+		return helpers.ServerError(err)
+	}
 	return helpers.Ok(removedBookJson)
 }
 

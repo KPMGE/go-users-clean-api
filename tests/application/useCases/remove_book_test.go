@@ -13,7 +13,9 @@ import (
 
 func MakeRemoveBookSut() (
 	*usecases.RemoveBookUseCase,
-	*mocks_test.RemoveBookRepositorySpy, *mocks_test.FindBookRepositorySpy,
+	*mocks_test.RemoveBookRepositorySpy,
+	*mocks_test.FindBookRepositorySpy,
+	*mocks_test.UserRepositorySpy,
 ) {
 	removeBookRepo := mocks_test.NewRemoveBookRepositorySpy()
 	removeBookRepo.RemoveError = nil
@@ -26,12 +28,14 @@ func MakeRemoveBookSut() (
 	}
 	findBookRepo.FindOutput = fakeBook
 
-	sut := usecases.NewRemoveBookUseCase(removeBookRepo, findBookRepo)
-	return sut, removeBookRepo, findBookRepo
+	userRepo := mocks_test.NewUserRepositorySpy()
+
+	sut := usecases.NewRemoveBookUseCase(removeBookRepo, findBookRepo, userRepo)
+	return sut, removeBookRepo, findBookRepo, userRepo
 }
 
 func TestRemoveBookUseCase_ShouldCallRepositoryWithRightBookId(t *testing.T) {
-	sut, removeBookRepo, _ := MakeRemoveBookSut()
+	sut, removeBookRepo, _, _ := MakeRemoveBookSut()
 
 	sut.Remove("any_valid_book_id")
 
@@ -39,7 +43,7 @@ func TestRemoveBookUseCase_ShouldCallRepositoryWithRightBookId(t *testing.T) {
 }
 
 func TestRemoveBookUseCase_ShouldReturnErrorIfRepositoryReturnsError(t *testing.T) {
-	sut, removeBookRepo, _ := MakeRemoveBookSut()
+	sut, removeBookRepo, _, _ := MakeRemoveBookSut()
 	removeBookRepo.RemoveError = errors.New("repo error")
 
 	deletedBook, err := sut.Remove("any_invalid_id")
@@ -50,7 +54,7 @@ func TestRemoveBookUseCase_ShouldReturnErrorIfRepositoryReturnsError(t *testing.
 }
 
 func TestRemoveBookUseCase_ShouldCallFindBookRepositoryWithRightBookId(t *testing.T) {
-	sut, _, findBookRepo := MakeRemoveBookSut()
+	sut, _, findBookRepo, _ := MakeRemoveBookSut()
 
 	sut.Remove("any_book_id")
 
@@ -58,7 +62,7 @@ func TestRemoveBookUseCase_ShouldCallFindBookRepositoryWithRightBookId(t *testin
 }
 
 func TestRemoveBookUseCase_ShouldReturnErrorIfFindBookReturnsNil(t *testing.T) {
-	sut, _, findBookRepo := MakeRemoveBookSut()
+	sut, _, findBookRepo, _ := MakeRemoveBookSut()
 	findBookRepo.FindOutput = nil
 
 	deletedBook, err := sut.Remove("any_book_id")
@@ -69,7 +73,7 @@ func TestRemoveBookUseCase_ShouldReturnErrorIfFindBookReturnsNil(t *testing.T) {
 }
 
 func TestRemoveBookUseCase_ShouldReturnErrorIfFindBookReturnsError(t *testing.T) {
-	sut, _, findBookRepo := MakeRemoveBookSut()
+	sut, _, findBookRepo, _ := MakeRemoveBookSut()
 	findBookRepo.FindError = errors.New("repo error")
 
 	deletedBook, err := sut.Remove("any_book_id")
@@ -80,7 +84,7 @@ func TestRemoveBookUseCase_ShouldReturnErrorIfFindBookReturnsError(t *testing.T)
 }
 
 func TestRemoveBookUseCase_ShouldReturnRightDataOnSuccess(t *testing.T) {
-	sut, _, findBookRepo := MakeRemoveBookSut()
+	sut, _, findBookRepo, _ := MakeRemoveBookSut()
 
 	deletedBook, err := sut.Remove("any_valid_book_id")
 
@@ -90,4 +94,12 @@ func TestRemoveBookUseCase_ShouldReturnRightDataOnSuccess(t *testing.T) {
 	require.Equal(t, findBookRepo.FindOutput.Description, deletedBook.Description)
 	require.Equal(t, findBookRepo.FindOutput.Title, deletedBook.Title)
 	require.Equal(t, findBookRepo.FindOutput.UserId, deletedBook.UserId)
+}
+
+func TestRemoveBookUseCase_ShouldCallFindUserWithCorrectUserId(t *testing.T) {
+	sut, _, _, userRepo := MakeRemoveBookSut()
+
+	sut.Remove("any_valid_book_id")
+
+	require.Equal(t, "any_user_id", userRepo.GetByidInput)
 }

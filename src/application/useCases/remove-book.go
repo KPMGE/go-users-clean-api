@@ -10,13 +10,16 @@ import (
 type RemoveBookUseCase struct {
 	removeBookRepo protocols.RemoveBookRepository
 	findBookRepo   protocols.FindBookRepository
+	userRepo       protocols.UserRepository
 }
 
 func NewRemoveBookUseCase(
 	removeBookRepo protocols.RemoveBookRepository,
 	findBookRepo protocols.FindBookRepository,
+	userRepo protocols.UserRepository,
 ) *RemoveBookUseCase {
 	return &RemoveBookUseCase{
+		userRepo:       userRepo,
 		removeBookRepo: removeBookRepo,
 		findBookRepo:   findBookRepo,
 	}
@@ -30,6 +33,8 @@ func (useCase *RemoveBookUseCase) Remove(bookId string) (*dto.RemoveBookUseCaseO
 	if foundBook == nil {
 		return nil, errors.New("book not found!")
 	}
+
+	useCase.userRepo.GetById(foundBook.UserId)
 
 	err = useCase.removeBookRepo.Remove(bookId)
 	if err != nil {

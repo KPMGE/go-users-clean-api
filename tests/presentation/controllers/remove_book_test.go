@@ -15,11 +15,16 @@ import (
 
 func MakeRemoveBookControllerSut() (*controllers.RemoveBookController, *mocks_test.FindBookRepositorySpy, *mocks_test.RemoveBookRepositorySpy) {
 	removeBookRepo := mocks_test.NewRemoveBookRepositorySpy()
+
 	findBookRepo := mocks_test.NewFindBookRepositorySpy()
 	fakeBook, _ := entities.NewBook("any_title", "any_author", "any_description", 100, "any_user_id")
 	findBookRepo.FindOutput = fakeBook
-	useCase := usecases.NewRemoveBookUseCase(removeBookRepo, findBookRepo)
+
+	userRepo := mocks_test.NewUserRepositorySpy()
+
+	useCase := usecases.NewRemoveBookUseCase(removeBookRepo, findBookRepo, userRepo)
 	sut := controllers.NewRemoveBookController(useCase)
+
 	return sut, findBookRepo, removeBookRepo
 }
 

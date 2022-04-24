@@ -61,5 +61,13 @@ func SetupRoutes(app *fiber.App) *fiber.Router {
 		return c.Status(httpResponse.StatusCode).Send(httpResponse.JsonBody)
 	})
 
+	api.Delete("/books/:bookId", func(c *fiber.Ctx) error {
+		controller := factories.MakeRemoveBookController()
+		bookId := c.Params("bookId")
+		request := protocols.NewHtppRequest(nil, []byte(bookId))
+		httpResponse := controller.Handle(request)
+		return c.Status(httpResponse.StatusCode).Send(httpResponse.JsonBody)
+	})
+
 	return &api
 }

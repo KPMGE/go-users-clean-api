@@ -24,7 +24,10 @@ func NewRemoveBookController(useCase *usecases.RemoveBookUseCase) *RemoveBookCon
 }
 
 func (controller *RemoveBookController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
-	removedBook, _ := controller.useCase.Remove(string(request.Params))
+	removedBook, err := controller.useCase.Remove(string(request.Params))
+	if err != nil {
+		return helpers.BadRequest(err)
+	}
 	removedBookJson, _ := json.Marshal(removedBook)
 	return helpers.Ok(removedBookJson)
 }
@@ -64,4 +67,15 @@ func TestRemoveBookController_ShoulReturnRightDataOnSuccess(t *testing.T) {
 	require.Equal(t, "any_description", removedBook.Description)
 	require.Equal(t, 100.0, removedBook.Price)
 	require.Equal(t, "any_user_id", removedBook.UserId)
+}
+
+func TestRemoveBookController_ShoulReturnErrorIfUseCaseRetunsError(t *testing.T) {
+	sut, findBookRepo, _ := MakeRemoveBookControllerSut()
+	findBookRepo.FindOutput = nil
+
+	fakeRequest := protocols.NewHtppRequest(nil, []byte("any_book_id"))
+	httpResponse := sut.Handle(fakeRequest)
+
+	require.Equal(t, 400, httpResponse.StatusCode)
+	require.Equal(t, "book not found!", string(httpResponse.JsonBody))
 }

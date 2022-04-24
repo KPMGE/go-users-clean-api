@@ -25,13 +25,18 @@ func (controller *RemoveBookController) Handle(request *protocols.HttpRequest) *
 	return nil
 }
 
-func TestRemoveBookController_ShoulCallUseCaseWithRightBookId(t *testing.T) {
+func MakeRemoveBookControllerSut() (*RemoveBookController, *mocks_test.FindBookRepositorySpy, *mocks_test.RemoveBookRepositorySpy) {
 	removeBookRepo := mocks_test.NewRemoveBookRepositorySpy()
 	findBookRepo := mocks_test.NewFindBookRepositorySpy()
 	fakeBook, _ := entities.NewBook("any_title", "any_author", "any_description", 100, "any_user_id")
 	findBookRepo.FindOutput = fakeBook
 	useCase := usecases.NewRemoveBookUseCase(removeBookRepo, findBookRepo)
 	sut := NewRemoveBookController(useCase)
+	return sut, findBookRepo, removeBookRepo
+}
+
+func TestRemoveBookController_ShoulCallUseCaseWithRightBookId(t *testing.T) {
+	sut, findBookRepo, removeBookRepo := MakeRemoveBookControllerSut()
 
 	fakeRequest := protocols.NewHtppRequest(nil, []byte("any_book_id"))
 	sut.Handle(fakeRequest)

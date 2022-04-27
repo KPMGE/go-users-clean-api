@@ -38,10 +38,14 @@ func NewGetBookByIdUseCase(getBookRepo GetBookRepository) *GetBookByIdUseCase {
 	}
 }
 
-func TestGetBookByIdUseCase_ShouldCallRepositoryWithRightData(t *testing.T) {
+func MakeGetBookByIdSut() (*GetBookByIdUseCase, *GetBookByIdRepositoryMock) {
 	getBookRepo := NewGetBookByIdRepositoryMock()
 	sut := NewGetBookByIdUseCase(getBookRepo)
+	return sut, getBookRepo
+}
 
+func TestGetBookByIdUseCase_ShouldCallRepositoryWithRightData(t *testing.T) {
+	sut, getBookRepo := MakeGetBookByIdSut()
 	sut.GetById("any_book_id")
 
 	require.Equal(t, "any_book_id", getBookRepo.input)

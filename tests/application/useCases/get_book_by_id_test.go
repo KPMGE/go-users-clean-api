@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/stretchr/testify/require"
 )
@@ -23,12 +24,8 @@ func NewGetBookByIdRepositorySpy() *GetBookByIdRepositorySpy {
 	return &GetBookByIdRepositorySpy{}
 }
 
-type GetBookRepository interface {
-	Get(bookId string) (*entities.Book, error)
-}
-
 type GetBookByIdUseCase struct {
-	getBookRepo GetBookRepository
+	getBookRepo protocols.GetBookRepository
 }
 
 func (useCase *GetBookByIdUseCase) GetById(bookId string) (*entities.Book, error) {
@@ -39,7 +36,7 @@ func (useCase *GetBookByIdUseCase) GetById(bookId string) (*entities.Book, error
 	return book, nil
 }
 
-func NewGetBookByIdUseCase(getBookRepo GetBookRepository) *GetBookByIdUseCase {
+func NewGetBookByIdUseCase(getBookRepo protocols.GetBookRepository) *GetBookByIdUseCase {
 	return &GetBookByIdUseCase{
 		getBookRepo: getBookRepo,
 	}

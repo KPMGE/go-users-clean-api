@@ -7,42 +7,18 @@ import (
 
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
-	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
+	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
 )
 
-type GetBookByIdController struct {
-	useCase *usecases.GetBookByIdUseCase
-}
-
-func NewGetBookByIdController(useCase *usecases.GetBookByIdUseCase) *GetBookByIdController {
-	return &GetBookByIdController{
-		useCase: useCase,
-	}
-}
-
-func (controller *GetBookByIdController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
-	book, err := controller.useCase.GetById(string(request.Params))
-	if err != nil {
-		return helpers.ServerError(err)
-	}
-
-	jsonBook, err := json.Marshal(book)
-	if err != nil {
-		return helpers.ServerError(err)
-	}
-
-	return helpers.Ok(jsonBook)
-}
-
-func MakeGetBookByIdControllerSut() (*GetBookByIdController, *mocks_test.GetBookByIdRepositorySpy) {
+func MakeGetBookByIdControllerSut() (*controllers.GetBookByIdController, *mocks_test.GetBookByIdRepositorySpy) {
 	repo := mocks_test.NewGetBookByIdRepositorySpy()
 	fakeBook, _ := entities.NewBook("any_title", "any_author", "any_description", 100.23, "any_user_id")
 	repo.Output = fakeBook
 	useCase := usecases.NewGetBookByIdUseCase(repo)
-	sut := NewGetBookByIdController(useCase)
+	sut := controllers.NewGetBookByIdController(useCase)
 	return sut, repo
 }
 

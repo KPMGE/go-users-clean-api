@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
+	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/stretchr/testify/require"
 )
@@ -24,29 +24,11 @@ func NewGetBookByIdRepositorySpy() *GetBookByIdRepositorySpy {
 	return &GetBookByIdRepositorySpy{}
 }
 
-type GetBookByIdUseCase struct {
-	getBookRepo protocols.GetBookRepository
-}
-
-func (useCase *GetBookByIdUseCase) GetById(bookId string) (*entities.Book, error) {
-	book, err := useCase.getBookRepo.Get(bookId)
-	if err != nil {
-		return nil, err
-	}
-	return book, nil
-}
-
-func NewGetBookByIdUseCase(getBookRepo protocols.GetBookRepository) *GetBookByIdUseCase {
-	return &GetBookByIdUseCase{
-		getBookRepo: getBookRepo,
-	}
-}
-
-func MakeGetBookByIdSut() (*GetBookByIdUseCase, *GetBookByIdRepositorySpy) {
+func MakeGetBookByIdSut() (*usecases.GetBookByIdUseCase, *GetBookByIdRepositorySpy) {
 	getBookRepo := NewGetBookByIdRepositorySpy()
 	fakeBook, _ := entities.NewBook("any_title", "any_author", "any_description", 100.23, "any_user_id")
 	getBookRepo.output = fakeBook
-	sut := NewGetBookByIdUseCase(getBookRepo)
+	sut := usecases.NewGetBookByIdUseCase(getBookRepo)
 	return sut, getBookRepo
 }
 

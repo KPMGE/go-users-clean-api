@@ -24,13 +24,16 @@ func (controller *GetBookByIdController) Handle(request *protocols.HttpRequest) 
 	return nil
 }
 
-func TestGetGiftByIdController_ShouldCallUseCaseWithRightData(t *testing.T) {
+func MakeGetBookByIdControllerSut() (*GetBookByIdController, *mocks_test.GetBookByIdRepositorySpy) {
 	repo := mocks_test.NewGetBookByIdRepositorySpy()
 	useCase := usecases.NewGetBookByIdUseCase(repo)
 	sut := NewGetBookByIdController(useCase)
+	return sut, repo
+}
 
+func TestGetGiftByIdController_ShouldCallUseCaseWithRightData(t *testing.T) {
+	sut, repo := MakeGetBookByIdControllerSut()
 	fakeRequest := protocols.NewHtppRequest(nil, []byte("any_book_id"))
 	sut.Handle(fakeRequest)
-
 	require.Equal(t, "any_book_id", repo.Input)
 }

@@ -7,17 +7,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type GetBookByIdRepositoryMock struct {
-	input string
+type GetBookByIdRepositorySpy struct {
+	input  string
+	output *entities.Book
 }
 
-func (repo *GetBookByIdRepositoryMock) Get(bookId string) *entities.Book {
+func (repo *GetBookByIdRepositorySpy) Get(bookId string) *entities.Book {
 	repo.input = bookId
-	return nil
+	return repo.output
 }
 
-func NewGetBookByIdRepositoryMock() *GetBookByIdRepositoryMock {
-	return &GetBookByIdRepositoryMock{}
+func NewGetBookByIdRepositorySpy() *GetBookByIdRepositorySpy {
+	return &GetBookByIdRepositorySpy{}
 }
 
 type GetBookRepository interface {
@@ -28,8 +29,8 @@ type GetBookByIdUseCase struct {
 	getBookRepo GetBookRepository
 }
 
-func (useCase *GetBookByIdUseCase) GetById(bookId string) {
-	useCase.getBookRepo.Get(bookId)
+func (useCase *GetBookByIdUseCase) GetById(bookId string) *entities.Book {
+	return useCase.getBookRepo.Get(bookId)
 }
 
 func NewGetBookByIdUseCase(getBookRepo GetBookRepository) *GetBookByIdUseCase {
@@ -38,8 +39,8 @@ func NewGetBookByIdUseCase(getBookRepo GetBookRepository) *GetBookByIdUseCase {
 	}
 }
 
-func MakeGetBookByIdSut() (*GetBookByIdUseCase, *GetBookByIdRepositoryMock) {
-	getBookRepo := NewGetBookByIdRepositoryMock()
+func MakeGetBookByIdSut() (*GetBookByIdUseCase, *GetBookByIdRepositorySpy) {
+	getBookRepo := NewGetBookByIdRepositorySpy()
 	sut := NewGetBookByIdUseCase(getBookRepo)
 	return sut, getBookRepo
 }
@@ -47,6 +48,12 @@ func MakeGetBookByIdSut() (*GetBookByIdUseCase, *GetBookByIdRepositoryMock) {
 func TestGetBookByIdUseCase_ShouldCallRepositoryWithRightData(t *testing.T) {
 	sut, getBookRepo := MakeGetBookByIdSut()
 	sut.GetById("any_book_id")
-
 	require.Equal(t, "any_book_id", getBookRepo.input)
+}
+
+func TestGetBookByIdUseCase_ShouldRetunNilIfNoBookIsFound(t *testing.T) {
+	sut, getBookRepo := MakeGetBookByIdSut()
+	getBookRepo.output = nil
+	foundBook := sut.GetById("any_book_id")
+	require.Nil(t, foundBook)
 }

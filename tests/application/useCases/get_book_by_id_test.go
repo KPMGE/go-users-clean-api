@@ -6,28 +6,14 @@ import (
 
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
+	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
 )
 
-type GetBookByIdRepositorySpy struct {
-	input       string
-	output      *entities.Book
-	outputError error
-}
-
-func (repo *GetBookByIdRepositorySpy) Get(bookId string) (*entities.Book, error) {
-	repo.input = bookId
-	return repo.output, repo.outputError
-}
-
-func NewGetBookByIdRepositorySpy() *GetBookByIdRepositorySpy {
-	return &GetBookByIdRepositorySpy{}
-}
-
-func MakeGetBookByIdSut() (*usecases.GetBookByIdUseCase, *GetBookByIdRepositorySpy) {
-	getBookRepo := NewGetBookByIdRepositorySpy()
+func MakeGetBookByIdSut() (*usecases.GetBookByIdUseCase, *mocks_test.GetBookByIdRepositorySpy) {
+	getBookRepo := mocks_test.NewGetBookByIdRepositorySpy()
 	fakeBook, _ := entities.NewBook("any_title", "any_author", "any_description", 100.23, "any_user_id")
-	getBookRepo.output = fakeBook
+	getBookRepo.Output = fakeBook
 	sut := usecases.NewGetBookByIdUseCase(getBookRepo)
 	return sut, getBookRepo
 }
@@ -35,12 +21,12 @@ func MakeGetBookByIdSut() (*usecases.GetBookByIdUseCase, *GetBookByIdRepositoryS
 func TestGetBookByIdUseCase_ShouldCallRepositoryWithRightData(t *testing.T) {
 	sut, getBookRepo := MakeGetBookByIdSut()
 	sut.GetById("any_book_id")
-	require.Equal(t, "any_book_id", getBookRepo.input)
+	require.Equal(t, "any_book_id", getBookRepo.Input)
 }
 
 func TestGetBookByIdUseCase_ShouldRetunNilIfNoBookIsFound(t *testing.T) {
 	sut, getBookRepo := MakeGetBookByIdSut()
-	getBookRepo.output = nil
+	getBookRepo.Output = nil
 	foundBook, _ := sut.GetById("any_book_id")
 	require.Nil(t, foundBook)
 }
@@ -60,7 +46,7 @@ func TestGetBookByIdUseCase_ShouldRetunRightBookOnSuccess(t *testing.T) {
 
 func TestGetBookByIdUseCase_ShouldRetunErrorIfRepositoryReturnsError(t *testing.T) {
 	sut, getBookRepo := MakeGetBookByIdSut()
-	getBookRepo.outputError = errors.New("repo error")
+	getBookRepo.OutputError = errors.New("repo error")
 	foundBook, err := sut.GetById("any_book_id")
 	require.Nil(t, foundBook)
 	require.Error(t, err)

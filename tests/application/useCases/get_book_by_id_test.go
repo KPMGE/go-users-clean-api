@@ -1,6 +1,7 @@
 package usecases_test
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
@@ -8,13 +9,14 @@ import (
 )
 
 type GetBookByIdRepositorySpy struct {
-	input  string
-	output *entities.Book
+	input       string
+	output      *entities.Book
+	outputError error
 }
 
-func (repo *GetBookByIdRepositorySpy) Get(bookId string) *entities.Book {
+func (repo *GetBookByIdRepositorySpy) Get(bookId string) (*entities.Book, error) {
 	repo.input = bookId
-	return repo.output
+	return repo.output, repo.outputError
 }
 
 func NewGetBookByIdRepositorySpy() *GetBookByIdRepositorySpy {
@@ -22,15 +24,19 @@ func NewGetBookByIdRepositorySpy() *GetBookByIdRepositorySpy {
 }
 
 type GetBookRepository interface {
-	Get(bookId string) *entities.Book
+	Get(bookId string) (*entities.Book, error)
 }
 
 type GetBookByIdUseCase struct {
 	getBookRepo GetBookRepository
 }
 
-func (useCase *GetBookByIdUseCase) GetById(bookId string) *entities.Book {
-	return useCase.getBookRepo.Get(bookId)
+func (useCase *GetBookByIdUseCase) GetById(bookId string) (*entities.Book, error) {
+	book, err := useCase.getBookRepo.Get(bookId)
+	if err != nil {
+		return nil, err
+	}
+	return book, nil
 }
 
 func NewGetBookByIdUseCase(getBookRepo GetBookRepository) *GetBookByIdUseCase {
@@ -56,13 +62,13 @@ func TestGetBookByIdUseCase_ShouldCallRepositoryWithRightData(t *testing.T) {
 func TestGetBookByIdUseCase_ShouldRetunNilIfNoBookIsFound(t *testing.T) {
 	sut, getBookRepo := MakeGetBookByIdSut()
 	getBookRepo.output = nil
-	foundBook := sut.GetById("any_book_id")
+	foundBook, _ := sut.GetById("any_book_id")
 	require.Nil(t, foundBook)
 }
 
 func TestGetBookByIdUseCase_ShouldRetunRightBookOnSuccess(t *testing.T) {
 	sut, _ := MakeGetBookByIdSut()
-	foundBook := sut.GetById("any_book_id")
+	foundBook, _ := sut.GetById("any_book_id")
 	require.Equal(t, "any_title", foundBook.Title)
 	require.Equal(t, "any_author", foundBook.Author)
 	require.Equal(t, "any_user_id", foundBook.UserId)
@@ -71,4 +77,13 @@ func TestGetBookByIdUseCase_ShouldRetunRightBookOnSuccess(t *testing.T) {
 	require.NotNil(t, foundBook.CreatedAt)
 	require.NotNil(t, foundBook.UpdatedAt)
 	require.NotNil(t, foundBook.ID)
+}
+
+func TestGetBookByIdUseCase_ShouldRetunErrorIfRepositoryReturnsError(t *testing.T) {
+	sut, getBookRepo := MakeGetBookByIdSut()
+	getBookRepo.outputError = errors.New("repo error")
+	foundBook, err := sut.GetById("any_book_id")
+	require.Nil(t, foundBook)
+	require.Error(t, err)
+	require.Equal(t, "repo error", err.Error())
 }

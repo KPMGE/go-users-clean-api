@@ -4,13 +4,10 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/stretchr/testify/require"
 )
-
-type ListBooksRepository interface {
-	List() ([]*entities.Book, error)
-}
 
 type ListBooksRepositoryStub struct {
 	Output      []*entities.Book
@@ -26,10 +23,10 @@ func NewListBooksRepositoryStub() *ListBooksRepositoryStub {
 }
 
 type ListBooksUseCase struct {
-	listBooksRepo ListBooksRepository
+	listBooksRepo protocols.ListBooksRepository
 }
 
-func NewListBookUseCase(repo ListBooksRepository) *ListBooksUseCase {
+func NewListBookUseCase(repo protocols.ListBooksRepository) *ListBooksUseCase {
 	return &ListBooksUseCase{
 		listBooksRepo: repo,
 	}

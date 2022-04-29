@@ -14,6 +14,10 @@ func removeIndex[T any](s []T, index int) []T {
 	return append(s[:index], s[index+1:]...)
 }
 
+func (repo *InMemoryBookRepository) List() ([]*entities.Book, error) {
+	return books, nil
+}
+
 func (repo *InMemoryBookRepository) Add(newBook *entities.Book) (*entities.Book, error) {
 	books = append(books, newBook)
 	return newBook, nil

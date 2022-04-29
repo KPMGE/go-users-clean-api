@@ -6,24 +6,12 @@ import (
 
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
+	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
 )
 
-type ListBooksRepositoryStub struct {
-	Output      []*entities.Book
-	OutputError error
-}
-
-func (repo *ListBooksRepositoryStub) List() ([]*entities.Book, error) {
-	return repo.Output, repo.OutputError
-}
-
-func NewListBooksRepositoryStub() *ListBooksRepositoryStub {
-	return &ListBooksRepositoryStub{}
-}
-
-func MakeListBooksSut() (*usecases.ListBooksUseCase, *ListBooksRepositoryStub) {
-	repo := NewListBooksRepositoryStub()
+func MakeListBooksSut() (*usecases.ListBooksUseCase, *mocks_test.ListBooksRepositoryStub) {
+	repo := mocks_test.NewListBooksRepositoryStub()
 	fakeBook, _ := entities.NewBook("any_title", "any_author", "any_description", 100.5, "any_user_id")
 	repo.Output = append(repo.Output, fakeBook)
 	repo.OutputError = nil

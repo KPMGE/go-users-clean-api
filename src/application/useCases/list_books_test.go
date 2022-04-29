@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
+	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/stretchr/testify/require"
 )
@@ -22,30 +22,12 @@ func NewListBooksRepositoryStub() *ListBooksRepositoryStub {
 	return &ListBooksRepositoryStub{}
 }
 
-type ListBooksUseCase struct {
-	listBooksRepo protocols.ListBooksRepository
-}
-
-func NewListBookUseCase(repo protocols.ListBooksRepository) *ListBooksUseCase {
-	return &ListBooksUseCase{
-		listBooksRepo: repo,
-	}
-}
-
-func (useCase *ListBooksUseCase) List() ([]*entities.Book, error) {
-	books, err := useCase.listBooksRepo.List()
-	if err != nil {
-		return nil, err
-	}
-	return books, nil
-}
-
-func MakeListBooksSut() (*ListBooksUseCase, *ListBooksRepositoryStub) {
+func MakeListBooksSut() (*usecases.ListBooksUseCase, *ListBooksRepositoryStub) {
 	repo := NewListBooksRepositoryStub()
 	fakeBook, _ := entities.NewBook("any_title", "any_author", "any_description", 100.5, "any_user_id")
 	repo.Output = append(repo.Output, fakeBook)
 	repo.OutputError = nil
-	sut := NewListBookUseCase(repo)
+	sut := usecases.NewListBookUseCase(repo)
 	return sut, repo
 }
 

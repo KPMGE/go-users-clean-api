@@ -2,8 +2,8 @@ package postgresrepository
 
 import (
 	"database/sql"
-
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
+	"log"
 )
 
 type PostgresUserRepository struct {
@@ -26,7 +26,30 @@ func (repo *PostgresUserRepository) CheckByUserName(userName string) bool {
 }
 
 func (repo *PostgresUserRepository) List() []*entities.User {
-	return nil
+	var users []*entities.User
+
+	query := `SELECT * FROM users`
+	rows, err := repo.db.Query(query)
+
+	defer rows.Close()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for rows.Next() {
+		var user entities.User
+
+		err := rows.Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt, &user.Name, &user.UserName, &user.Email)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		users = append(users, &user)
+	}
+
+	return users
 }
 
 func (repo *PostgresUserRepository) Delete(userId string) error {

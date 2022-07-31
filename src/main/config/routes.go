@@ -1,16 +1,18 @@
 package configuration
 
 import (
+	"database/sql"
+
 	"github.com/KPMGE/go-users-clean-api/src/main/adapters"
 	"github.com/KPMGE/go-users-clean-api/src/main/factories"
 	"github.com/gofiber/fiber/v2"
 )
 
-func SetupRoutes(app *fiber.App) *fiber.Router {
+func SetupRoutes(app *fiber.App, db *sql.DB) *fiber.Router {
 	api := app.Group("/api")
 
-	api.Post("/accounts", adapters.FiberRouteAdapter(factories.MakeAddAccountController()))
-	api.Delete("/accounts/:accountId", adapters.FiberRouteAdapter(factories.MakeRemoveAccountController()))
+	api.Post("/accounts", adapters.FiberRouteAdapter(factories.MakeAddAccountController(db)))
+	api.Delete("/accounts/:accountId", adapters.FiberRouteAdapter(factories.MakeRemoveAccountController(db)))
 
 	api.Post("/users", adapters.FiberRouteAdapter(factories.MakeAddUserController()))
 	api.Get("/users/:userId", adapters.FiberRouteAdapter(factories.MakeGetUserByIdController()))

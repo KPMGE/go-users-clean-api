@@ -1,5 +1,19 @@
 # Api Documentation
 
+### Environment variables
+You are supposed to set up a __.env__ file at the root of this project. That file's gonna be used 
+to configure your database among other stuff. Here it is an example of such a file. Don't forget to change
+those default configurations.
+
+```bash
+POSTGRES_HOST="localhost"
+POSTGRES_PASSWORD="root"
+POSTGRES_PORT=5432
+POSTGRES_USER="postgres"
+POSTGRES_PASSWORD="root"
+POSTGRES_DB_NAME="users"
+```
+
 ### How to generate api docs.
 You can easily generate your api docs. First of all, you're supposed to run the following command:
 

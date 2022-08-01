@@ -15,7 +15,7 @@ func SetupRoutes(app *fiber.App, db *sql.DB) *fiber.Router {
 	api.Delete("/accounts/:accountId", adapters.FiberRouteAdapter(factories.MakeRemoveAccountController(db)))
 
 	api.Post("/users", adapters.FiberRouteAdapter(factories.MakeAddUserController(db)))
-	api.Get("/users/:userId", adapters.FiberRouteAdapter(factories.MakeGetUserByIdController()))
+	api.Get("/users/:userId", adapters.FiberRouteAdapter(factories.MakeGetUserByIdController(db)))
 	api.Get("/users", adapters.FiberRouteAdapter(factories.MakeListUsersController(db)))
 	api.Delete("/users/:userId", adapters.FiberRouteAdapter(factories.MakeDeleteUserController()))
 

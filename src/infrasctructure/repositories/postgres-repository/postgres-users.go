@@ -103,7 +103,19 @@ func (repo *PostgresUserRepository) CheckById(userId string) bool {
 }
 
 func (repo *PostgresUserRepository) GetById(userId string) (*entities.User, error) {
-	return nil, nil
+	query := `SELECT id, created_at, updated_at, name, user_name, email FROM users WHERE id = ($1)`
+	rows := repo.db.QueryRow(query, userId)
+
+	var foundUser entities.User
+
+	err := rows.Scan(&foundUser.ID, &foundUser.CreatedAt, &foundUser.UpdatedAt,
+		&foundUser.Name, &foundUser.UserName, &foundUser.Email)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &foundUser, nil
 }
 
 func NewPostgresUserRepository(db *sql.DB) *PostgresUserRepository {

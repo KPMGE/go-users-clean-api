@@ -50,6 +50,8 @@ CREATE TABLE accounts(
 );
 ```
 
+You can run those queries directly on the container or using an external tool such as beekeeper for example. 
+
 --- 
 
 

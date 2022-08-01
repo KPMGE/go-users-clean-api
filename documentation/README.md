@@ -23,6 +23,36 @@ just make sure you've got docker and docker-compose installed on your machine. T
 sudo docker-compose up -d
 ```
 
+### Tables on the database
+To create the tables inside your database, you can use the following queries: 
+
+##### Users
+```sql
+CREATE TABLE users(
+  id         UUID, 
+  created_at TIMESTAMP(6),
+  updated_at TIMESTAMP(6),
+  name       VARCHAR(255),
+  user_name  VARCHAR(255),
+  email      VARCHAR(255)
+);
+```
+
+##### Accounts
+```sql
+CREATE TABLE accounts(
+  id         UUID, 
+  created_at TIMESTAMP(6),
+  updated_at TIMESTAMP(6),
+  user_name  VARCHAR(255),
+  email      VARCHAR(255),
+  password   VARCHAR(255)
+);
+```
+
+--- 
+
+
 After a few seconds, your container should be up and running. The default database is __users__ and 
 the default password, root. You can change them to whatever you want later!
 

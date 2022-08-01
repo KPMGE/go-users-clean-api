@@ -78,6 +78,13 @@ func (repo *PostgresUserRepository) List() []*entities.User {
 }
 
 func (repo *PostgresUserRepository) Delete(userId string) error {
+	query := `DELETE FROM users WHERE id = $1`
+	_, err := repo.db.Exec(query, userId)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

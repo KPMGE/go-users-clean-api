@@ -21,9 +21,10 @@ func Init() *gorm.DB {
 		log.Fatalln(err)
 	}
 
+	fmt.Println("Migrating entities...")
 	db.AutoMigrate(&entities.Account{})
-
-	fmt.Println("complete!!")
+	db.AutoMigrate(&entities.User{})
+	db.AutoMigrate(&entities.Book{})
 
 	return db
 }

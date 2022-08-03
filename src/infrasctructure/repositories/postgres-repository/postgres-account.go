@@ -1,6 +1,8 @@
 package postgresrepository
 
 import (
+	"errors"
+	"fmt"
 	"log"
 
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
@@ -18,7 +20,17 @@ type PostgresAccountRepository struct {
 }
 
 func (repo *PostgresAccountRepository) CheckAccountByEmail(email string) bool {
-	return false
+	var account entities.Account
+
+	result := repo.db.First(&account, fmt.Sprintf("email='%s'", email))
+
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return false
+	}
+
+	CheckError(result.Error)
+
+	return true
 }
 
 func (repo *PostgresAccountRepository) CheckAccountByUserName(userName string) bool {
@@ -27,9 +39,7 @@ func (repo *PostgresAccountRepository) CheckAccountByUserName(userName string) b
 
 func (repo *PostgresAccountRepository) Save(account *entities.Account) error {
 	result := repo.db.Create(account)
-	if result.Error != nil {
-		return result.Error
-	}
+	CheckError(result.Error)
 	return nil
 }
 

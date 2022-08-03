@@ -1,14 +1,13 @@
 package configuration
 
 import (
-	"database/sql"
-
 	"github.com/KPMGE/go-users-clean-api/src/main/adapters"
 	"github.com/KPMGE/go-users-clean-api/src/main/factories"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
-func SetupRoutes(app *fiber.App, db *sql.DB) *fiber.Router {
+func SetupRoutes(app *fiber.App, db *gorm.DB) *fiber.Router {
 	api := app.Group("/api")
 
 	api.Post("/accounts", adapters.FiberRouteAdapter(factories.MakeAddAccountController(db)))

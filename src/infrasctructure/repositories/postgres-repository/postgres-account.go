@@ -54,6 +54,11 @@ func (repo *PostgresAccountRepository) Save(account *entities.Account) error {
 }
 
 func (repo *PostgresAccountRepository) DeleteAccountById(accountId string) bool {
+	result := repo.db.Delete(&entities.Account{}, fmt.Sprintf("id = '%s'", accountId))
+	CheckError(result.Error)
+	if result.RowsAffected < 1 {
+		return false
+	}
 	return true
 }
 

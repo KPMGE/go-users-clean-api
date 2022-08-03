@@ -34,7 +34,17 @@ func (repo *PostgresAccountRepository) CheckAccountByEmail(email string) bool {
 }
 
 func (repo *PostgresAccountRepository) CheckAccountByUserName(userName string) bool {
-	return false
+	var account entities.Account
+
+	result := repo.db.First(&account, fmt.Sprintf("user_name = '%s'", userName))
+
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return false
+	}
+
+	CheckError(result.Error)
+
+	return true
 }
 
 func (repo *PostgresAccountRepository) Save(account *entities.Account) error {

@@ -37,7 +37,17 @@ func (repo *PostgresUserRepository) CheckByEmail(email string) bool {
 }
 
 func (repo *PostgresUserRepository) CheckByUserName(userName string) bool {
-	return false
+	var user entities.User
+
+	result := repo.db.First(&user, fmt.Sprintf("user_name = '%s'", userName))
+
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return false
+	}
+
+	CheckError(result.Error)
+
+	return true
 }
 
 func (repo *PostgresUserRepository) List() []*entities.User {
@@ -52,11 +62,30 @@ func (repo *PostgresUserRepository) Delete(userId string) error {
 }
 
 func (repo *PostgresUserRepository) CheckById(userId string) bool {
-	return false
+	var user entities.User
+
+	result := repo.db.First(&user, fmt.Sprintf("id = '%s'", userId))
+
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return false
+	}
+
+	CheckError(result.Error)
+
+	return true
 }
 
 func (repo *PostgresUserRepository) GetById(userId string) (*entities.User, error) {
-	return nil, nil
+	var user entities.User
+
+	result := repo.db.First(&user, fmt.Sprintf("id = '%s'", userId))
+
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, errors.New("user not found")
+	}
+	CheckError(result.Error)
+
+	return &user, nil
 }
 
 func NewPostgresUserRepository(db *gorm.DB) *PostgresUserRepository {

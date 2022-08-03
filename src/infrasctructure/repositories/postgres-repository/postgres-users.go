@@ -11,9 +11,11 @@ type PostgresUserRepository struct {
 
 func (repo *PostgresUserRepository) Save(user *entities.User) error {
 	result := repo.db.Create(user)
+
 	if result.Error != nil {
 		return result.Error
 	}
+
 	return nil
 }
 
@@ -26,7 +28,10 @@ func (repo *PostgresUserRepository) CheckByUserName(userName string) bool {
 }
 
 func (repo *PostgresUserRepository) List() []*entities.User {
-	return nil
+	var users []*entities.User
+	result := repo.db.Find(&users)
+	CheckError(result.Error)
+	return users
 }
 
 func (repo *PostgresUserRepository) Delete(userId string) error {

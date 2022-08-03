@@ -1,6 +1,9 @@
 package postgresrepository
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"gorm.io/gorm"
 )
@@ -20,7 +23,17 @@ func (repo *PostgresUserRepository) Save(user *entities.User) error {
 }
 
 func (repo *PostgresUserRepository) CheckByEmail(email string) bool {
-	return false
+	var user entities.User
+
+	result := repo.db.First(&user, fmt.Sprintf("email='%s'", email))
+
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return false
+	}
+
+	CheckError(result.Error)
+
+	return true
 }
 
 func (repo *PostgresUserRepository) CheckByUserName(userName string) bool {

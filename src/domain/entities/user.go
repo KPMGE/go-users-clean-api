@@ -9,10 +9,10 @@ import (
 
 type User struct {
 	Base
-	Name     string  `json:"name" valid:"required"`
-	UserName string  `json:"user_name" valid:"required"`
-	Email    string  `json:"email" valid:"email"`
-	Books    []*Book `json:"books" valid:"-"`
+	Name     string `json:"name" valid:"required"`
+	UserName string `json:"user_name" valid:"required"`
+	Email    string `json:"email" valid:"email"`
+	Books    []Book `json:"books" valid:"-"`
 }
 
 func (user *User) isValid() error {
@@ -37,7 +37,7 @@ func NewUser(name string, userName string, email string) (*User, error) {
 	}
 
 	user.ID = uuid.NewV4().String()
-	user.Books = []*Book{}
+	user.Books = []Book{}
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 

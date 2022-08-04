@@ -59,7 +59,7 @@ func TestGetGiftByIdController_ShouldReturnRightDataOnSuccess(t *testing.T) {
 	require.Equal(t, repo.Output.Author, book.Author)
 	require.Equal(t, repo.Output.Price, book.Price)
 	require.Equal(t, repo.Output.Description, book.Description)
-	require.Equal(t, repo.Output.UserId, book.UserId)
+	require.Equal(t, repo.Output.UserID, book.UserID)
 	require.Equal(t, repo.Output.ID, book.ID)
 	require.Equal(t, repo.Output.Title, book.Title)
 }

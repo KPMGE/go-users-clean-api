@@ -12,6 +12,12 @@ import (
 	"gorm.io/gorm"
 )
 
+func CheckError(err error) {
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
 func Init() *gorm.DB {
 	dbURL := "postgresql://postgres:root@localhost:5432/users"
 
@@ -22,9 +28,12 @@ func Init() *gorm.DB {
 	}
 
 	fmt.Println("Migrating entities...")
-	db.AutoMigrate(&entities.Account{})
-	db.AutoMigrate(&entities.User{})
-	db.AutoMigrate(&entities.Book{})
+	err = db.AutoMigrate(&entities.Book{})
+	CheckError(err)
+	err = db.AutoMigrate(&entities.Account{})
+	CheckError(err)
+	err = db.AutoMigrate(&entities.User{})
+	CheckError(err)
 
 	return db
 }

@@ -35,7 +35,7 @@ func TestListBooksController_shouldReturnRightDataOnSuccess(t *testing.T) {
 	require.Equal(t, 200, httpResponse.StatusCode)
 	require.Equal(t, "any_title", books[0].Title)
 	require.Equal(t, "any_description", books[0].Description)
-	require.Equal(t, "any_user_id", books[0].UserId)
+	require.Equal(t, "any_user_id", books[0].UserID)
 	require.Equal(t, "any_author", books[0].Author)
 	require.Equal(t, 200.2, books[0].Price)
 }

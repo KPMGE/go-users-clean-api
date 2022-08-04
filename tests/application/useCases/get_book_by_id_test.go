@@ -36,7 +36,7 @@ func TestGetBookByIdUseCase_ShouldRetunRightBookOnSuccess(t *testing.T) {
 	foundBook, _ := sut.GetById("any_book_id")
 	require.Equal(t, "any_title", foundBook.Title)
 	require.Equal(t, "any_author", foundBook.Author)
-	require.Equal(t, "any_user_id", foundBook.UserId)
+	require.Equal(t, "any_user_id", foundBook.UserID)
 	require.Equal(t, "any_description", foundBook.Description)
 	require.Equal(t, 100.23, foundBook.Price)
 	require.NotNil(t, foundBook.CreatedAt)

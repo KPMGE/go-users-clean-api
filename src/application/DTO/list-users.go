@@ -3,14 +3,14 @@ package dto
 import "github.com/KPMGE/go-users-clean-api/src/domain/entities"
 
 type ListUsersDTO struct {
-	ID       string           `json:"id"`
-	Name     string           `json:"name"`
-	UserName string           `json:"userNam"`
-	Email    string           `json:"email"`
-	Books    []*entities.Book `json:"books"`
+	ID       string          `json:"id"`
+	Name     string          `json:"name"`
+	UserName string          `json:"userNam"`
+	Email    string          `json:"email"`
+	Books    []entities.Book `json:"books"`
 }
 
-func NewListUserDTO(id string, name string, userName string, email string, books []*entities.Book) *ListUsersDTO {
+func NewListUserDTO(id string, name string, userName string, email string, books []entities.Book) *ListUsersDTO {
 	return &ListUsersDTO{
 		ID:       id,
 		Name:     name,

@@ -7,10 +7,10 @@ type GetUserByIdUseCaseOutputDTO struct {
 	Name     string
 	Email    string
 	UserName string
-	Books    []*entities.Book
+	Books    []entities.Book
 }
 
-func NewGetUserByIdUseCaseOutputDTO(id string, name string, email string, userName string, books []*entities.Book) *GetUserByIdUseCaseOutputDTO {
+func NewGetUserByIdUseCaseOutputDTO(id string, name string, email string, userName string, books []entities.Book) *GetUserByIdUseCaseOutputDTO {
 	return &GetUserByIdUseCaseOutputDTO{
 		ID:       id,
 		Email:    email,

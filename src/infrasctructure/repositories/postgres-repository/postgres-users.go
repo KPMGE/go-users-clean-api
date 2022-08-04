@@ -13,6 +13,7 @@ type PostgresUserRepository struct {
 }
 
 func (repo *PostgresUserRepository) Save(user *entities.User) error {
+	user.Books = []entities.Book{}
 	result := repo.db.Create(user)
 
 	if result.Error != nil {

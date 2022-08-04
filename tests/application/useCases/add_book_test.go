@@ -45,7 +45,7 @@ func TestAddBookUseCase_ShouldCallRepositoryWithRightData(t *testing.T) {
 	require.Equal(t, FAKE_ADD_BOOK_INPUT_DTO.Price, bookRepo.Input.Price)
 	require.Equal(t, FAKE_ADD_BOOK_INPUT_DTO.Title, bookRepo.Input.Title)
 	require.NotNil(t, bookRepo.Input.ID)
-	require.NotNil(t, bookRepo.Input.UserId)
+	require.NotNil(t, bookRepo.Input.UserID)
 }
 
 func TestAddBookUseCase_ShouldCallUserRepositoryWithRightUserId(t *testing.T) {

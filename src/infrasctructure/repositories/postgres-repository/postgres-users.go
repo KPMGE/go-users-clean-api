@@ -53,8 +53,17 @@ func (repo *PostgresUserRepository) CheckByUserName(userName string) bool {
 
 func (repo *PostgresUserRepository) List() []*entities.User {
 	var users []*entities.User
-	result := repo.db.Find(&users)
-	CheckError(result.Error)
+	var books []entities.Book
+
+	resultUsers := repo.db.Find(&users)
+	CheckError(resultUsers.Error)
+
+	for _, user := range users {
+		resultBooks := repo.db.Find(&books, fmt.Sprintf("user_id = '%s'", user.ID))
+		CheckError(resultBooks.Error)
+		user.Books = books
+	}
+
 	return users
 }
 

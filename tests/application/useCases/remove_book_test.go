@@ -103,11 +103,3 @@ func TestRemoveBookUseCase_ShouldReturnRightDataOnSuccess(t *testing.T) {
 	require.Equal(t, findBookRepo.FindOutput.Title, deletedBook.Title)
 	require.Equal(t, findBookRepo.FindOutput.UserID, deletedBook.UserId)
 }
-
-func TestRemoveBookUseCase_ShouldCallFindUserWithCorrectUserId(t *testing.T) {
-	sut, _, _, userRepo := MakeRemoveBookSut()
-
-	sut.Remove("any_valid_book_id")
-
-	require.Equal(t, "any_user_id", userRepo.GetByidInput)
-}

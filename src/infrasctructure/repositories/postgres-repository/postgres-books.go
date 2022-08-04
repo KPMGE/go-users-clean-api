@@ -2,6 +2,7 @@ package postgresrepository
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"gorm.io/gorm"
@@ -34,15 +35,32 @@ func (repo *PostgresBookRepository) Add(newBook *entities.Book) (*entities.Book,
 }
 
 func (repo *PostgresBookRepository) Find(bookId string) (*entities.Book, error) {
-	return nil, nil
-}
+	var foundBook entities.Book
 
-func (repo *PostgresBookRepository) Remove(bookId string) error {
-	return nil
+	result := repo.db.First(&foundBook, fmt.Sprintf("id = '%s'", bookId))
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &foundBook, nil
 }
 
 func (repo *PostgresBookRepository) Get(bookId string) (*entities.Book, error) {
-	return nil, nil
+	var foundBook entities.Book
+
+	result := repo.db.First(&foundBook, fmt.Sprintf("id = '%s'", bookId))
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &foundBook, nil
+}
+
+func (repo *PostgresBookRepository) Remove(bookId string) error {
+	result := repo.db.Delete(&entities.Book{}, fmt.Sprintf("id = '%s'", bookId))
+	return result.Error
 }
 
 func NewPostgresBookRepository(db *gorm.DB) *PostgresBookRepository {

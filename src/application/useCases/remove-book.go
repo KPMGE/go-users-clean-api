@@ -53,27 +53,6 @@ func (useCase *RemoveBookUseCase) Remove(bookId string) (*dto.RemoveBookUseCaseO
 		return nil, err
 	}
 
-	foundUser, err := useCase.userRepo.GetById(foundBook.UserID)
-	if err != nil {
-		return nil, err
-	}
-
-	index := getBookIndex(foundUser.Books, bookId)
-	if index == -1 {
-		return nil, errors.New("Cannot find book in user!")
-	}
-	foundUser.Books = removeIndex(foundUser.Books, index)
-
-	err = useCase.userRepo.Delete(foundBook.UserID)
-	if err != nil {
-		return nil, err
-	}
-
-	err = useCase.userRepo.Save(foundUser)
-	if err != nil {
-		return nil, err
-	}
-
 	outputDto := dto.RemoveBookUseCaseOutputDTO{
 		Title:       foundBook.Title,
 		Author:      foundBook.Author,

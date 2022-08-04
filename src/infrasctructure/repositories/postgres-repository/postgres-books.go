@@ -14,7 +14,11 @@ func (repo *PostgresBookRepository) List() ([]*entities.Book, error) {
 }
 
 func (repo *PostgresBookRepository) Add(newBook *entities.Book) (*entities.Book, error) {
-	return nil, nil
+	result := repo.db.Create(newBook)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return newBook, nil
 }
 
 func (repo *PostgresBookRepository) Find(bookId string) (*entities.Book, error) {

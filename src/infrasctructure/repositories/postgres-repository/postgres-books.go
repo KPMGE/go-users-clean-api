@@ -1,6 +1,8 @@
 package postgresrepository
 
 import (
+	"errors"
+
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"gorm.io/gorm"
 )
@@ -10,7 +12,17 @@ type PostgresBookRepository struct {
 }
 
 func (repo *PostgresBookRepository) List() ([]*entities.Book, error) {
-	return nil, nil
+	var books []*entities.Book
+
+	result := repo.db.Find(&books)
+
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return []*entities.Book{}, nil
+	}
+
+	CheckError(result.Error)
+
+	return books, nil
 }
 
 func (repo *PostgresBookRepository) Add(newBook *entities.Book) (*entities.Book, error) {

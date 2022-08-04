@@ -35,7 +35,7 @@ func MakeRemoveBookSut() (
 	}
 	fakeUser.ID = "any_user_id"
 	fakeBook.ID = "any_valid_book_id"
-	fakeUser.Books = append(fakeUser.Books, fakeBook)
+	fakeUser.Books = append(fakeUser.Books, *fakeBook)
 	userRepo.GetByidOutput = fakeUser
 
 	sut := usecases.NewRemoveBookUseCase(removeBookRepo, findBookRepo, userRepo)
@@ -101,13 +101,5 @@ func TestRemoveBookUseCase_ShouldReturnRightDataOnSuccess(t *testing.T) {
 	require.Equal(t, findBookRepo.FindOutput.Price, deletedBook.Price)
 	require.Equal(t, findBookRepo.FindOutput.Description, deletedBook.Description)
 	require.Equal(t, findBookRepo.FindOutput.Title, deletedBook.Title)
-	require.Equal(t, findBookRepo.FindOutput.UserId, deletedBook.UserId)
-}
-
-func TestRemoveBookUseCase_ShouldCallFindUserWithCorrectUserId(t *testing.T) {
-	sut, _, _, userRepo := MakeRemoveBookSut()
-
-	sut.Remove("any_valid_book_id")
-
-	require.Equal(t, "any_user_id", userRepo.GetByidInput)
+	require.Equal(t, findBookRepo.FindOutput.UserID, deletedBook.UserId)
 }

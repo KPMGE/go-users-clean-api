@@ -25,6 +25,7 @@ func (controller *ListBooksController) Handle(request *protocols.HttpRequest) *p
 	}
 
 	jsonBooks, err := json.Marshal(books)
+
 	if err != nil {
 		return helpers.ServerError(err)
 	}

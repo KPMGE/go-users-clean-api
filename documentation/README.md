@@ -15,6 +15,8 @@ POSTGRES_PASSWORD="root"
 POSTGRES_DB_NAME="users"
 ```
 
+--- 
+
 ### Postgres database
 I've made a __docker-compose__ file for creating a simple postgres databse container for you. To use it, 
 just make sure you've got docker and docker-compose installed on your machine. Then run the simple command: 
@@ -23,40 +25,22 @@ just make sure you've got docker and docker-compose installed on your machine. T
 sudo docker-compose up -d
 ```
 
-### Tables on the database
-To create the tables inside your database, you can use the following queries: 
-
-##### Users
-```sql
-CREATE TABLE users(
-  id         UUID, 
-  created_at TIMESTAMP(6),
-  updated_at TIMESTAMP(6),
-  name       VARCHAR(255),
-  user_name  VARCHAR(255),
-  email      VARCHAR(255)
-);
-```
-
-##### Accounts
-```sql
-CREATE TABLE accounts(
-  id         UUID, 
-  created_at TIMESTAMP(6),
-  updated_at TIMESTAMP(6),
-  user_name  VARCHAR(255),
-  email      VARCHAR(255),
-  password   VARCHAR(255)
-);
-```
-
-You can run those queries directly on the container or using an external tool such as beekeeper for example. 
-
 --- 
 
+### Tables on the database
+In this project, i have used the *gorm* framework to deal with the migrations. So, you don't need to 
+worry about it, it will create the tables automatically when you run the program.
 
 After a few seconds, your container should be up and running. The default database is __users__ and 
 the default password, root. You can change them to whatever you want later!
+
+### How do i run it?
+In order to run this project, make sure you have got golang properly installed on your machine, then run 
+the command at the root of the project
+
+```bash
+go run ./src/main/main.go
+```
 
 ### How to generate api docs.
 You can easily generate your api docs. First of all, you're supposed to run the following command:

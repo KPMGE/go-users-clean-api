@@ -1,77 +1,67 @@
 package postgresrepository
 
 import (
-	"database/sql"
+	"errors"
+	"fmt"
+
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
+	"gorm.io/gorm"
 )
 
 type PostgresUserRepository struct {
-	db *sql.DB
+	db *gorm.DB
 }
 
 func (repo *PostgresUserRepository) Save(user *entities.User) error {
-	query := `INSERT INTO "users"("id", "created_at", "updated_at", "name", "user_name", "email") VALUES($1, $2, $3, $4, $5, $6)`
-	_, err := repo.db.Exec(query, user.ID, user.CreatedAt, user.UpdatedAt, user.Name, user.UserName, user.Email)
+	user.Books = []entities.Book{}
+	result := repo.db.Create(user)
 
-	return err
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
 }
 
 func (repo *PostgresUserRepository) CheckByEmail(email string) bool {
-	query := `SELECT email FROM users WHERE email = ($1)`
-	rows, err := repo.db.Query(query, email)
-	CheckError(err)
+	var user entities.User
 
-	defer rows.Close()
+	result := repo.db.First(&user, fmt.Sprintf("email='%s'", email))
 
-	for rows.Next() {
-		var foundEmail string
-
-		err = rows.Scan(&foundEmail)
-		CheckError(err)
-
-		if foundEmail != "" {
-			return true
-		}
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return false
 	}
 
-	return false
+	CheckError(result.Error)
+
+	return true
 }
 
 func (repo *PostgresUserRepository) CheckByUserName(userName string) bool {
-	query := `SELECT user_name FROM users WHERE user_name = ($1)`
-	rows, err := repo.db.Query(query, userName)
-	CheckError(err)
+	var user entities.User
 
-	defer rows.Close()
+	result := repo.db.First(&user, fmt.Sprintf("user_name = '%s'", userName))
 
-	for rows.Next() {
-		var foundUserName string
-
-		err = rows.Scan(&foundUserName)
-		CheckError(err)
-
-		if foundUserName != "" {
-			return true
-		}
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return false
 	}
 
-	return false
+	CheckError(result.Error)
+
+	return true
 }
 
 func (repo *PostgresUserRepository) List() []*entities.User {
 	var users []*entities.User
+	var books []entities.Book
 
-	query := `SELECT * FROM users`
-	rows, err := repo.db.Query(query)
+	resultUsers := repo.db.Find(&users)
+	CheckError(resultUsers.Error)
 
-	defer rows.Close()
-	CheckError(err)
-
-	for rows.Next() {
-		var user entities.User
-		err := rows.Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt, &user.Name, &user.UserName, &user.Email)
-		CheckError(err)
-		users = append(users, &user)
+	for _, user := range users {
+		resultBooks := repo.db.Find(&books, fmt.Sprintf("user_id = '%s'", user.ID))
+		CheckError(resultBooks.Error)
+		user.Books = books
 	}
 
 	return users
@@ -82,31 +72,33 @@ func (repo *PostgresUserRepository) Delete(userId string) error {
 }
 
 func (repo *PostgresUserRepository) CheckById(userId string) bool {
-	query := `SELECT id FROM users WHERE id = ($1)`
-	rows, err := repo.db.Query(query, userId)
-	CheckError(err)
+	var user entities.User
 
-	defer rows.Close()
+	result := repo.db.First(&user, fmt.Sprintf("id = '%s'", userId))
 
-	for rows.Next() {
-		var foundUserId string
-
-		err = rows.Scan(&foundUserId)
-		CheckError(err)
-
-		if foundUserId != "" {
-			return true
-		}
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return false
 	}
 
-	return false
+	CheckError(result.Error)
+
+	return true
 }
 
 func (repo *PostgresUserRepository) GetById(userId string) (*entities.User, error) {
-	return nil, nil
+	var user entities.User
+
+	result := repo.db.First(&user, fmt.Sprintf("id = '%s'", userId))
+
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, errors.New("user not found")
+	}
+	CheckError(result.Error)
+
+	return &user, nil
 }
 
-func NewPostgresUserRepository(db *sql.DB) *PostgresUserRepository {
+func NewPostgresUserRepository(db *gorm.DB) *PostgresUserRepository {
 	return &PostgresUserRepository{
 		db: db,
 	}

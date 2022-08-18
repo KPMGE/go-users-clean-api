@@ -3,7 +3,7 @@ package controllers_test
 import (
 	"testing"
 
-	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	"github.com/KPMGE/go-users-clean-api/src/application/services"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
@@ -13,8 +13,8 @@ import (
 func MakeSut() (*controllers.RemoveAccountController, *mocks_test.FakeAccountRepository) {
 	repo := mocks_test.NewFakeAccountRepository()
 	repo.DeleteAccountByIdOutput = true
-	useCase := usecases.NewRemoveAccountUseCase(repo)
-	sut := controllers.NewRemoveAccountController(useCase)
+	service := services.NewRemoveAccountService(repo)
+	sut := controllers.NewRemoveAccountController(service)
 	return sut, repo
 }
 

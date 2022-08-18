@@ -1,15 +1,15 @@
-package usecases
+package services
 
 import (
 	"errors"
 	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
 )
 
-type RemoveAccountUseCase struct {
+type RemoveAccountService struct {
 	accountRepository protocols.AccountRepository
 }
 
-func (useCase *RemoveAccountUseCase) Remove(accountId string) (string, error) {
+func (useCase *RemoveAccountService) RemoveAccount(accountId string) (string, error) {
 	foundAccount := useCase.accountRepository.DeleteAccountById(accountId)
 	if !foundAccount {
 		return "", errors.New("there is no account with this id")
@@ -17,8 +17,8 @@ func (useCase *RemoveAccountUseCase) Remove(accountId string) (string, error) {
 	return "account deleted", nil
 }
 
-func NewRemoveAccountUseCase(repo protocols.AccountRepository) *RemoveAccountUseCase {
-	return &RemoveAccountUseCase{
+func NewRemoveAccountService(repo protocols.AccountRepository) *RemoveAccountService {
+	return &RemoveAccountService{
 		accountRepository: repo,
 	}
 }

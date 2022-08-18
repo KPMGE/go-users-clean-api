@@ -1,18 +1,18 @@
-package usecases
+package services
 
 import (
 	"errors"
 	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
-	"github.com/KPMGE/go-users-clean-api/src/application/DTO"
+	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 )
 
-type AddAccountUseCase struct {
+type AddAccountService struct {
 	accountRepository protocols.AccountRepository
 	hasher            protocols.Hasher
 }
 
-func (useCase *AddAccountUseCase) AddAccount(input *dto.AddAccountInputDTO) (*dto.AddAccountOutputDTO, error) {
+func (useCase *AddAccountService) AddAccount(input *domaindto.AddAccountInputDTO) (*domaindto.AddAccountOutputDTO, error) {
 	emailTaken := useCase.accountRepository.CheckAccountByEmail(input.Email)
 	if emailTaken {
 		return nil, errors.New("email already taken")
@@ -39,17 +39,13 @@ func (useCase *AddAccountUseCase) AddAccount(input *dto.AddAccountInputDTO) (*dt
 		return nil, err
 	}
 
-	output := dto.AddAccountOutputDTO{
-		ID:       account.ID,
-		UserName: account.UserName,
-		Email:    account.Email,
-	}
+	output := domaindto.NewAddAccountOutputDTO(account.ID, account.UserName, account.Email)
 
-	return &output, nil
+	return output, nil
 }
 
-func NewAddAccountUseCase(accountRepository protocols.AccountRepository, hasher protocols.Hasher) *AddAccountUseCase {
-	return &AddAccountUseCase{
+func NewAddAccountService(accountRepository protocols.AccountRepository, hasher protocols.Hasher) *AddAccountService {
+	return &AddAccountService{
 		accountRepository: accountRepository,
 		hasher:            hasher,
 	}

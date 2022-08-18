@@ -1,35 +1,29 @@
 package usecases_test
 
 import (
-	"testing"
-
-	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
-	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	"github.com/KPMGE/go-users-clean-api/src/application/services"
+	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 const fakeUserName string = "any_user_name"
 const fakeEmail string = "any_valid_email@gmail.com"
 const fakePassword string = "any_password"
 
-func makeFakeInput() *dto.AddAccountInputDTO {
-	return &dto.AddAccountInputDTO{
-		UserName:        fakeUserName,
-		Email:           fakeEmail,
-		Password:        fakePassword,
-		ConfirmPassword: fakePassword,
-	}
+func makeFakeInput() *domaindto.AddAccountInputDTO {
+	return domaindto.NewAddAccountInputDTO(fakeUserName, fakeEmail, fakePassword, fakePassword)
 }
 
-func makeSut() (*usecases.AddAccountUseCase, *mocks_test.HasherSpy, *mocks_test.FakeAccountRepository) {
+func makeSut() (*services.AddAccountService, *mocks_test.HasherSpy, *mocks_test.FakeAccountRepository) {
 	repo := mocks_test.NewFakeAccountRepository()
 	hasher := mocks_test.NewHasherSpy()
-	sut := usecases.NewAddAccountUseCase(repo, hasher)
+	sut := services.NewAddAccountService(repo, hasher)
 	return sut, hasher, repo
 }
 
-func TestAddAccountUseCase_WithRightData(t *testing.T) {
+func TestAddAccountService_WithRightData(t *testing.T) {
 	sut, hasher, repo := makeSut()
 	fakeInput := makeFakeInput()
 	createdAccount, err := sut.AddAccount(fakeInput)
@@ -41,7 +35,7 @@ func TestAddAccountUseCase_WithRightData(t *testing.T) {
 	require.Equal(t, repo.Input.Password, "hashed_text")
 }
 
-func TestAddAccountUseCase_WithDifferentPasswordAndConfirmPassword(t *testing.T) {
+func TestAddAccountService_WithDifferentPasswordAndConfirmPassword(t *testing.T) {
 	sut, _, _ := makeSut()
 	fakeInput := makeFakeInput()
 	fakeInput.ConfirmPassword = "any_different_password"
@@ -53,7 +47,7 @@ func TestAddAccountUseCase_WithDifferentPasswordAndConfirmPassword(t *testing.T)
 	require.Equal(t, err.Error(), "password and confirmPassword must match")
 }
 
-func TestAddAccountUseCase_WithEmailAlreadyTaken(t *testing.T) {
+func TestAddAccountService_WithEmailAlreadyTaken(t *testing.T) {
 	sut, _, repo := makeSut()
 	repo.CheckAccountOutput = true
 	fakeInput := makeFakeInput()
@@ -65,7 +59,7 @@ func TestAddAccountUseCase_WithEmailAlreadyTaken(t *testing.T) {
 	require.Equal(t, err.Error(), "email already taken")
 }
 
-func TestAddAccountUseCase_WithUsernameAlreadyTaken(t *testing.T) {
+func TestAddAccountService_WithUsernameAlreadyTaken(t *testing.T) {
 	sut, _, repo := makeSut()
 	fakeInput := makeFakeInput()
 	repo.CheckUserNameOutput = true
@@ -77,7 +71,7 @@ func TestAddAccountUseCase_WithUsernameAlreadyTaken(t *testing.T) {
 	require.Equal(t, err.Error(), "username already taken")
 }
 
-func TestAddAccountUseCase_WithBlankFields(t *testing.T) {
+func TestAddAccountService_WithBlankFields(t *testing.T) {
 	sut, _, repo := makeSut()
 	repo.CheckUserNameOutput = false
 	repo.CheckUserNameOutput = false

@@ -6,6 +6,7 @@ import (
 
 	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
 	"github.com/KPMGE/go-users-clean-api/src/infrasctructure/repositories"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
@@ -34,8 +35,8 @@ func makeAddUserControllerSut() *controllers.AddUserController {
 	return sut
 }
 
-func convertJsonToAccoutOutputDTO(data []byte) *dto.AddAccountOutputDTO {
-	var bodyObj dto.AddAccountOutputDTO
+func convertJsonToAccoutOutputDTO(data []byte) *domaindto.AddAccountOutputDTO {
+	var bodyObj domaindto.AddAccountOutputDTO
 	err := json.Unmarshal(data, &bodyObj)
 	if err != nil {
 		panic(err)

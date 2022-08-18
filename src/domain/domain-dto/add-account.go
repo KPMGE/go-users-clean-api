@@ -1,4 +1,4 @@
-package dto
+package domaindto
 
 type AddAccountOutputDTO struct {
 	ID       string `json:"id"`

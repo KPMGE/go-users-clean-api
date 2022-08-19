@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
-	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	"github.com/KPMGE/go-users-clean-api/src/application/services"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
@@ -19,8 +19,8 @@ const FAKE_USER_ID string = "any_user_id"
 
 func MakeGetUserByIdController() (*controllers.GetUserByIdController, *mocks_test.UserRepositorySpy) {
 	repo := mocks_test.NewUserRepositorySpy()
-	useCase := usecases.NewGetUserByIdUseCase(repo)
-	sut := controllers.NewGetUserByIdController(useCase)
+	service := services.NewGetUserByIdService(repo)
+	sut := controllers.NewGetUserByIdController(service)
 	return sut, repo
 }
 

@@ -2,14 +2,13 @@ package controllers_test
 
 import (
 	"encoding/json"
-	"testing"
-
-	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
-	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	"github.com/KPMGE/go-users-clean-api/src/application/services"
+	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
 	"github.com/KPMGE/go-users-clean-api/src/infrasctructure/repositories"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 type FakeHasher struct{}
@@ -25,7 +24,7 @@ func NewFakeHasher() *FakeHasher {
 const fakePassword string = "any_password"
 
 func makeFakeRequest(userName string, email string, password string, confirm string) *protocols.HttpRequest {
-	inputObj := dto.NewAddAccountInputDTO(userName, email, password, confirm)
+	inputObj := domaindto.NewAddAccountInputDTO(userName, email, password, confirm)
 	jsonObj, err := json.Marshal(inputObj)
 	if err != nil {
 		panic(err)
@@ -36,7 +35,7 @@ func makeFakeRequest(userName string, email string, password string, confirm str
 func makeSut() *controllers.AddAccountController {
 	repo := repositories.NewInmemoryAccountRepository()
 	hasher := NewFakeHasher()
-	useCase := usecases.NewAddAccountUseCase(repo, hasher)
+	useCase := services.NewAddAccountService(repo, hasher)
 	sut := controllers.NewAddAccountController(useCase)
 	return sut
 }

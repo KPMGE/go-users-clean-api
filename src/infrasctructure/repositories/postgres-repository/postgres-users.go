@@ -68,7 +68,8 @@ func (repo *PostgresUserRepository) List() []*entities.User {
 }
 
 func (repo *PostgresUserRepository) Delete(userId string) error {
-	return nil
+	result := repo.db.Delete(&entities.User{}, fmt.Sprintf("id = '%s'", userId))
+	return result.Error
 }
 
 func (repo *PostgresUserRepository) CheckById(userId string) bool {

@@ -2,29 +2,28 @@ package controllers
 
 import (
 	"encoding/json"
-
-	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
-	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
+	usecases "github.com/KPMGE/go-users-clean-api/src/domain/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 )
 
 type AddAccountController struct {
-	useCase *usecases.AddAccountUseCase
+	useCase usecases.AddAccountUseCase
 }
 
-func NewAddAccountController(useCase *usecases.AddAccountUseCase) *AddAccountController {
+func NewAddAccountController(useCase usecases.AddAccountUseCase) *AddAccountController {
 	return &AddAccountController{
 		useCase: useCase,
 	}
 }
 
 type AddAccountRequest struct {
-	Body *dto.AddAccountInputDTO
+	Body *domaindto.AddAccountInputDTO
 }
 
 func (controller *AddAccountController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
-	var accountInput dto.AddAccountInputDTO
+	var accountInput domaindto.AddAccountInputDTO
 	err := json.Unmarshal(request.Body, &accountInput)
 	if err != nil {
 		return helpers.ServerError(err)

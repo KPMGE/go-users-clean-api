@@ -4,19 +4,19 @@ import (
 	"encoding/json"
 	"errors"
 
-	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
-	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
+	usecases "github.com/KPMGE/go-users-clean-api/src/domain/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 )
 
 type GetUserByIdController struct {
-	useCase *usecases.GetUserByIdUseCase
+	service usecases.GetUserByIdUseCase
 }
 
-func NewGetUserByIdController(useCase *usecases.GetUserByIdUseCase) *GetUserByIdController {
+func NewGetUserByIdController(s usecases.GetUserByIdUseCase) *GetUserByIdController {
 	return &GetUserByIdController{
-		useCase: useCase,
+		service: s,
 	}
 }
 
@@ -26,13 +26,20 @@ func (controller *GetUserByIdController) Handle(request *protocols.HttpRequest) 
 		return helpers.BadRequest(err)
 	}
 
-	foundUser, err := controller.useCase.Get(string(request.Params))
+	foundUser, err := controller.service.GetUserById(string(request.Params))
 	if err != nil {
 		return helpers.ServerError(err)
 	}
 
-	outputDto := dto.NewGetUserByIdUseCaseOutputDTO(foundUser.ID, foundUser.Name, foundUser.Email, foundUser.UserName, foundUser.Books)
+	outputDto := domaindto.NewGetUserByIdUseCaseOutputDTO(
+		foundUser.ID,
+		foundUser.Name,
+		foundUser.Email,
+		foundUser.UserName,
+		foundUser.Books)
+
 	jsonOutputDto, err := json.Marshal(outputDto)
+
 	if err != nil {
 		return helpers.ServerError(err)
 	}

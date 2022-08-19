@@ -1,23 +1,23 @@
 package controllers
 
 import (
-  "github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
-	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	usecases "github.com/KPMGE/go-users-clean-api/src/domain/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
+	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 )
 
 type DeleteUserController struct {
-	useCase *usecases.DeleteUserUseCase
+	service usecases.DeleteUserUseCase
 }
 
-func NewDeleteUserController(useCase *usecases.DeleteUserUseCase) *DeleteUserController {
+func NewDeleteUserController(service usecases.DeleteUserUseCase) *DeleteUserController {
 	return &DeleteUserController{
-		useCase: useCase,
+		service: service,
 	}
 }
 
 func (controller *DeleteUserController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
-	message, err := controller.useCase.Delete(string(request.Params))
+	message, err := controller.service.DeleteUser(string(request.Params))
 	if err != nil {
 		return helpers.BadRequest(err)
 	}

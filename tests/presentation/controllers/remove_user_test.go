@@ -3,7 +3,7 @@ package controllers_test
 import (
 	"testing"
 
-	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	"github.com/KPMGE/go-users-clean-api/src/application/services"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
@@ -15,8 +15,8 @@ const FAKE_OUT_MESSAGE string = "any_message_from_usecase"
 func MakeDeleteUserControllerSut() (*controllers.DeleteUserController, *mocks_test.UserRepositorySpy) {
 	repo := mocks_test.NewUserRepositorySpy()
 	repo.CheckByIdOuput = true
-	useCase := usecases.NewDeleteUserUseCase(repo)
-	sut := controllers.NewDeleteUserController(useCase)
+	service := services.NewDeleteUserService(repo)
+	sut := controllers.NewDeleteUserController(service)
 	return sut, repo
 }
 

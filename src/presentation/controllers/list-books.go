@@ -3,23 +3,17 @@ package controllers
 import (
 	"encoding/json"
 
-	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	usecases "github.com/KPMGE/go-users-clean-api/src/domain/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 )
 
 type ListBooksController struct {
-	useCase *usecases.ListBooksUseCase
-}
-
-func NewListBooksController(useCase *usecases.ListBooksUseCase) *ListBooksController {
-	return &ListBooksController{
-		useCase: useCase,
-	}
+	service usecases.ListBooksUseCase
 }
 
 func (controller *ListBooksController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
-	books, err := controller.useCase.List()
+	books, err := controller.service.ListBooks()
 	if err != nil {
 		return helpers.ServerError(err)
 	}
@@ -31,4 +25,10 @@ func (controller *ListBooksController) Handle(request *protocols.HttpRequest) *p
 	}
 
 	return helpers.Ok(jsonBooks)
+}
+
+func NewListBooksController(service usecases.ListBooksUseCase) *ListBooksController {
+	return &ListBooksController{
+		service: service,
+	}
 }

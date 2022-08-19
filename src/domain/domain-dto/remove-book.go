@@ -1,4 +1,4 @@
-package dto
+package domaindto
 
 type RemoveBookUseCaseOutputDTO struct {
 	Title       string  `json:"title"`

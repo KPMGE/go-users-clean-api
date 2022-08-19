@@ -6,8 +6,8 @@ import (
 	"log"
 	"testing"
 
-	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
-	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	"github.com/KPMGE/go-users-clean-api/src/application/services"
+	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
@@ -30,8 +30,8 @@ func MakeAddBookControllerSut() (*controllers.AddBookController, *mocks_test.Add
 	userRepo := mocks_test.NewUserRepositorySpy()
 	fakeUser, _ := entities.NewUser("any_name", "any_username", "any_email@gmail.com")
 	userRepo.GetByidOutput = fakeUser
-	useCase := usecases.NewAddBookUseCase(bookRepo, userRepo)
-	sut := controllers.NewAddBookController(useCase)
+	service := services.NewAddBookService(bookRepo, userRepo)
+	sut := controllers.NewAddBookController(service)
 	return sut, bookRepo
 }
 
@@ -61,7 +61,7 @@ func TestAddBookController_ShouldReturnRightDataOnSuccess(t *testing.T) {
 
 	httpResponse := sut.Handle(FAKE_REQUEST)
 
-	var outputDto dto.AddBookUseCaseOutputDTO
+	var outputDto domaindto.AddBookUseCaseOutputDTO
 	err := json.Unmarshal(httpResponse.JsonBody, &outputDto)
 	if err != nil {
 		log.Fatal(err)

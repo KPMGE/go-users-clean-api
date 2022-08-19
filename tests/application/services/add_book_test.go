@@ -5,14 +5,15 @@ import (
 	"log"
 	"testing"
 
-	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
-	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	"github.com/KPMGE/go-users-clean-api/src/application/services"
+	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
+	usecases "github.com/KPMGE/go-users-clean-api/src/domain/useCases"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
 )
 
-var FAKE_ADD_BOOK_INPUT_DTO = &dto.AddBookUseCaseInputDTO{
+var FAKE_ADD_BOOK_INPUT_DTO = &domaindto.AddBookUseCaseInputDTO{
 	Title:       "any_title",
 	Author:      "any_author",
 	Price:       342.2,
@@ -20,7 +21,7 @@ var FAKE_ADD_BOOK_INPUT_DTO = &dto.AddBookUseCaseInputDTO{
 	UserId:      "any_valid_user_id",
 }
 
-func MakeAddBookSut() (*usecases.AddBookUseCase, *mocks_test.AddBookRepositorySpy, *mocks_test.UserRepositorySpy) {
+func MakeAddBookSut() (usecases.AddBookUseCase, *mocks_test.AddBookRepositorySpy, *mocks_test.UserRepositorySpy) {
 	fakeUser, err := entities.NewUser("any_name", "any_username", "any_email@gmail.com")
 	if err != nil {
 		log.Fatal(err)
@@ -32,7 +33,7 @@ func MakeAddBookSut() (*usecases.AddBookUseCase, *mocks_test.AddBookRepositorySp
 
 	bookRepo := mocks_test.NewAddBookRepositorySpy()
 	bookRepo.OutputError = nil
-	sut := usecases.NewAddBookUseCase(bookRepo, userRepo)
+	sut := services.NewAddBookService(bookRepo, userRepo)
 
 	return sut, bookRepo, userRepo
 }
@@ -40,7 +41,7 @@ func MakeAddBookSut() (*usecases.AddBookUseCase, *mocks_test.AddBookRepositorySp
 func TestAddBookUseCase_ShouldCallRepositoryWithRightData(t *testing.T) {
 	sut, bookRepo, _ := MakeAddBookSut()
 
-	sut.Add(FAKE_ADD_BOOK_INPUT_DTO)
+	sut.AddBook(FAKE_ADD_BOOK_INPUT_DTO)
 	require.Equal(t, FAKE_ADD_BOOK_INPUT_DTO.Description, bookRepo.Input.Description)
 	require.Equal(t, FAKE_ADD_BOOK_INPUT_DTO.Price, bookRepo.Input.Price)
 	require.Equal(t, FAKE_ADD_BOOK_INPUT_DTO.Title, bookRepo.Input.Title)
@@ -51,7 +52,7 @@ func TestAddBookUseCase_ShouldCallRepositoryWithRightData(t *testing.T) {
 func TestAddBookUseCase_ShouldCallUserRepositoryWithRightUserId(t *testing.T) {
 	sut, _, userRepo := MakeAddBookSut()
 
-	sut.Add(FAKE_ADD_BOOK_INPUT_DTO)
+	sut.AddBook(FAKE_ADD_BOOK_INPUT_DTO)
 
 	require.Equal(t, FAKE_ADD_BOOK_INPUT_DTO.UserId, userRepo.GetByidInput)
 }
@@ -60,7 +61,7 @@ func TestAddBookUseCase_ShouldReturnErrorIfWrongUserIdIsGiven(t *testing.T) {
 	sut, _, userRepo := MakeAddBookSut()
 	userRepo.GetByidOutput = nil
 
-	output, err := sut.Add(FAKE_ADD_BOOK_INPUT_DTO)
+	output, err := sut.AddBook(FAKE_ADD_BOOK_INPUT_DTO)
 
 	require.Nil(t, output)
 	require.Error(t, err)
@@ -71,7 +72,7 @@ func TestAddBookUseCase_ShouldReturnErrorUserRepositoryReturnsError(t *testing.T
 	sut, _, userRepo := MakeAddBookSut()
 	userRepo.GetByidError = errors.New("repo error")
 
-	output, err := sut.Add(FAKE_ADD_BOOK_INPUT_DTO)
+	output, err := sut.AddBook(FAKE_ADD_BOOK_INPUT_DTO)
 
 	require.Nil(t, output)
 	require.Error(t, err)
@@ -81,7 +82,7 @@ func TestAddBookUseCase_ShouldReturnErrorUserRepositoryReturnsError(t *testing.T
 func TestAddBookUseCase_ShouldReturnOuputDTO(t *testing.T) {
 	sut, bookRepo, _ := MakeAddBookSut()
 
-	output, err := sut.Add(FAKE_ADD_BOOK_INPUT_DTO)
+	output, err := sut.AddBook(FAKE_ADD_BOOK_INPUT_DTO)
 
 	require.Nil(t, err)
 	require.Equal(t, output.Title, bookRepo.Output.Title)
@@ -95,7 +96,7 @@ func TestAddBookUseCase_ShouldReturnErrorIfAddBookReturnsError(t *testing.T) {
 	sut, bookRepo, _ := MakeAddBookSut()
 	bookRepo.OutputError = errors.New("add book error")
 
-	output, err := sut.Add(FAKE_ADD_BOOK_INPUT_DTO)
+	output, err := sut.AddBook(FAKE_ADD_BOOK_INPUT_DTO)
 
 	require.Error(t, err)
 	require.Nil(t, output)

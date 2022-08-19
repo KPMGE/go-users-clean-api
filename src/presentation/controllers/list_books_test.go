@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	"github.com/KPMGE/go-users-clean-api/src/application/services"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
@@ -18,8 +18,8 @@ func MakeListBoooksControllerSut() (*controllers.ListBooksController, *mocks_tes
 	fakeBook, _ := entities.NewBook("any_title", "any_author", "any_description", 200.2, "any_user_id")
 	repo.Output = append(repo.Output, fakeBook)
 	repo.OutputError = nil
-	useCase := usecases.NewListBookUseCase(repo)
-	sut := controllers.NewListBooksController(useCase)
+	service := services.NewListBookService(repo)
+	sut := controllers.NewListBooksController(service)
 	return sut, repo
 }
 

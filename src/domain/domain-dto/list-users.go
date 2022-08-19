@@ -1,4 +1,4 @@
-package dto
+package domaindto
 
 import "github.com/KPMGE/go-users-clean-api/src/domain/entities"
 

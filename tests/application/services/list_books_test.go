@@ -4,25 +4,26 @@ import (
 	"errors"
 	"testing"
 
-	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	"github.com/KPMGE/go-users-clean-api/src/application/services"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
+	usecases "github.com/KPMGE/go-users-clean-api/src/domain/useCases"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
 )
 
-func MakeListBooksSut() (*usecases.ListBooksUseCase, *mocks_test.ListBooksRepositoryStub) {
+func MakeListBooksSut() (usecases.ListBooksUseCase, *mocks_test.ListBooksRepositoryStub) {
 	repo := mocks_test.NewListBooksRepositoryStub()
 	fakeBook, _ := entities.NewBook("any_title", "any_author", "any_description", 100.5, "any_user_id")
 	repo.Output = append(repo.Output, fakeBook)
 	repo.OutputError = nil
-	sut := usecases.NewListBookUseCase(repo)
+	sut := services.NewListBookService(repo)
 	return sut, repo
 }
 
 func TestListBooksUseCase_ShoulReturnRightDataFromRepository(t *testing.T) {
 	sut, _ := MakeListBooksSut()
 
-	books, _ := sut.List()
+	books, _ := sut.ListBooks()
 
 	require.Equal(t, 1, len(books))
 	require.Equal(t, "any_title", books[0].Title)
@@ -36,7 +37,7 @@ func TestListBooksUseCase_ShoulReturnErrorIfRepositoryReturnsError(t *testing.T)
 	sut, repo := MakeListBooksSut()
 	repo.OutputError = errors.New("repo error")
 
-	books, err := sut.List()
+	books, err := sut.ListBooks()
 
 	require.Error(t, err)
 	require.Equal(t, "repo error", err.Error())

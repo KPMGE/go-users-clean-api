@@ -1,22 +1,22 @@
-package usecases
+package services
 
 import (
 	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 )
 
-type ListBooksUseCase struct {
+type ListBooksService struct {
 	listBooksRepo protocols.ListBooksRepository
 }
 
-func NewListBookUseCase(repo protocols.ListBooksRepository) *ListBooksUseCase {
-	return &ListBooksUseCase{
+func NewListBookService(repo protocols.ListBooksRepository) *ListBooksService {
+	return &ListBooksService{
 		listBooksRepo: repo,
 	}
 }
 
-func (useCase *ListBooksUseCase) List() ([]*entities.Book, error) {
-	books, err := useCase.listBooksRepo.List()
+func (s *ListBooksService) ListBooks() ([]*entities.Book, error) {
+	books, err := s.listBooksRepo.List()
 	if err != nil {
 		return nil, err
 	}

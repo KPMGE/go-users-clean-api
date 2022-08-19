@@ -6,8 +6,8 @@ import (
 	"log"
 	"testing"
 
-	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	"github.com/KPMGE/go-users-clean-api/src/application/services"
+	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
@@ -63,7 +63,7 @@ func TestGetUserByIdController_ShouldReturnDataOnSuccess(t *testing.T) {
 	httpResponse := sut.Handle(fakeRequest)
 
 	// convert json to struct
-	var outputObj *dto.GetUserByIdUseCaseOutputDTO
+	var outputObj *domaindto.GetUserByIdUseCaseOutputDTO
 	err := json.Unmarshal(httpResponse.JsonBody, &outputObj)
 	if err != nil {
 		log.Fatal(err)

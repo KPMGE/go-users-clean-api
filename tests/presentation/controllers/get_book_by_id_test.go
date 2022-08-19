@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	"github.com/KPMGE/go-users-clean-api/src/application/services"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
@@ -17,8 +17,8 @@ func MakeGetBookByIdControllerSut() (*controllers.GetBookByIdController, *mocks_
 	repo := mocks_test.NewGetBookByIdRepositorySpy()
 	fakeBook, _ := entities.NewBook("any_title", "any_author", "any_description", 100.23, "any_user_id")
 	repo.Output = fakeBook
-	useCase := usecases.NewGetBookByIdUseCase(repo)
-	sut := controllers.NewGetBookByIdController(useCase)
+	service := services.NewGetBookByIdService(repo)
+	sut := controllers.NewGetBookByIdController(service)
 	return sut, repo
 }
 

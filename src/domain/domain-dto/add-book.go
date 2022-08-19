@@ -1,4 +1,4 @@
-package dto
+package domaindto
 
 type AddBookUseCaseInputDTO struct {
 	Title       string  `json:"title"`

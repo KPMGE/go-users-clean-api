@@ -1,26 +1,26 @@
-package usecases
+package services
 
 import (
 	"errors"
 
-	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
+	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 )
 
-type AddBookUseCase struct {
+type AddBookService struct {
 	bookRepo protocols.AddBookRepository
 	userRepo protocols.UserRepository
 }
 
-func NewAddBookUseCase(bookRepo protocols.AddBookRepository, userRepo protocols.UserRepository) *AddBookUseCase {
-	return &AddBookUseCase{
+func NewAddBookService(bookRepo protocols.AddBookRepository, userRepo protocols.UserRepository) *AddBookService {
+	return &AddBookService{
 		bookRepo: bookRepo,
 		userRepo: userRepo,
 	}
 }
 
-func (useCase *AddBookUseCase) Add(input *dto.AddBookUseCaseInputDTO) (*dto.AddBookUseCaseOutputDTO, error) {
+func (useCase *AddBookService) AddBook(input *domaindto.AddBookUseCaseInputDTO) (*domaindto.AddBookUseCaseOutputDTO, error) {
 	foundUser, err := useCase.userRepo.GetById(input.UserId)
 
 	if err != nil {
@@ -43,7 +43,7 @@ func (useCase *AddBookUseCase) Add(input *dto.AddBookUseCaseInputDTO) (*dto.AddB
 
 	foundUser.Books = append(foundUser.Books, *newBook)
 
-	outputDto := dto.AddBookUseCaseOutputDTO{
+	outputDto := domaindto.AddBookUseCaseOutputDTO{
 		ID:          newBook.ID,
 		Title:       newBook.Title,
 		Author:      newBook.Author,

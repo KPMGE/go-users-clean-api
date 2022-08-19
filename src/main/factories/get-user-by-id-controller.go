@@ -1,7 +1,7 @@
 package factories
 
 import (
-	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	"github.com/KPMGE/go-users-clean-api/src/application/services"
 	postgresrepository "github.com/KPMGE/go-users-clean-api/src/infrasctructure/repositories/postgres-repository"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"gorm.io/gorm"
@@ -9,7 +9,7 @@ import (
 
 func MakeGetUserByIdController(db *gorm.DB) *controllers.GetUserByIdController {
 	repo := postgresrepository.NewPostgresUserRepository(db)
-	useCase := usecases.NewGetUserByIdUseCase(repo)
-	controller := controllers.NewGetUserByIdController(useCase)
+	service := services.NewGetUserByIdService(repo)
+	controller := controllers.NewGetUserByIdController(service)
 	return controller
 }

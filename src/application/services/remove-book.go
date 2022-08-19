@@ -1,25 +1,25 @@
-package usecases
+package services
 
 import (
 	"errors"
 
-	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
 	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
+	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 )
 
-type RemoveBookUseCase struct {
+type RemoveBookService struct {
 	removeBookRepo protocols.RemoveBookRepository
 	findBookRepo   protocols.FindBookRepository
 	userRepo       protocols.UserRepository
 }
 
-func NewRemoveBookUseCase(
+func NewRemoveBookService(
 	removeBookRepo protocols.RemoveBookRepository,
 	findBookRepo protocols.FindBookRepository,
 	userRepo protocols.UserRepository,
-) *RemoveBookUseCase {
-	return &RemoveBookUseCase{
+) *RemoveBookService {
+	return &RemoveBookService{
 		userRepo:       userRepo,
 		removeBookRepo: removeBookRepo,
 		findBookRepo:   findBookRepo,
@@ -39,8 +39,8 @@ func getBookIndex(books []entities.Book, bookId string) int {
 	return -1
 }
 
-func (useCase *RemoveBookUseCase) Remove(bookId string) (*dto.RemoveBookUseCaseOutputDTO, error) {
-	foundBook, err := useCase.findBookRepo.Find(bookId)
+func (s *RemoveBookService) RemoveBook(bookId string) (*domaindto.RemoveBookUseCaseOutputDTO, error) {
+	foundBook, err := s.findBookRepo.Find(bookId)
 	if err != nil {
 		return nil, err
 	}
@@ -48,12 +48,12 @@ func (useCase *RemoveBookUseCase) Remove(bookId string) (*dto.RemoveBookUseCaseO
 		return nil, errors.New("book not found!")
 	}
 
-	err = useCase.removeBookRepo.Remove(bookId)
+	err = s.removeBookRepo.Remove(bookId)
 	if err != nil {
 		return nil, err
 	}
 
-	outputDto := dto.RemoveBookUseCaseOutputDTO{
+	outputDto := domaindto.RemoveBookUseCaseOutputDTO{
 		Title:       foundBook.Title,
 		Author:      foundBook.Author,
 		Description: foundBook.Description,

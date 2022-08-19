@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
-	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	"github.com/KPMGE/go-users-clean-api/src/application/services"
+	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
@@ -27,8 +27,8 @@ func MakeRemoveBookControllerSut() (*controllers.RemoveBookController, *mocks_te
 	fakeUser.Books = append(fakeUser.Books, *fakeBook)
 	userRepo.GetByidOutput = fakeUser
 
-	useCase := usecases.NewRemoveBookUseCase(removeBookRepo, findBookRepo, userRepo)
-	sut := controllers.NewRemoveBookController(useCase)
+	service := services.NewRemoveBookService(removeBookRepo, findBookRepo, userRepo)
+	sut := controllers.NewRemoveBookController(service)
 
 	return sut, findBookRepo, removeBookRepo
 }
@@ -49,7 +49,7 @@ func TestRemoveBookController_ShoulReturnRightDataOnSuccess(t *testing.T) {
 	fakeRequest := protocols.NewHtppRequest(nil, []byte("any_book_id"))
 	httpResponse := sut.Handle(fakeRequest)
 
-	var removedBook dto.RemoveBookUseCaseOutputDTO
+	var removedBook domaindto.RemoveBookUseCaseOutputDTO
 	json.Unmarshal(httpResponse.JsonBody, &removedBook)
 
 	require.Equal(t, 200, httpResponse.StatusCode)

@@ -3,23 +3,23 @@ package controllers
 import (
 	"encoding/json"
 
-	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	usecases "github.com/KPMGE/go-users-clean-api/src/domain/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 )
 
 type RemoveBookController struct {
-	useCase *usecases.RemoveBookUseCase
+	service usecases.RemoveBookUseCase
 }
 
-func NewRemoveBookController(useCase *usecases.RemoveBookUseCase) *RemoveBookController {
+func NewRemoveBookController(service usecases.RemoveBookUseCase) *RemoveBookController {
 	return &RemoveBookController{
-		useCase: useCase,
+		service: service,
 	}
 }
 
 func (controller *RemoveBookController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
-	removedBook, err := controller.useCase.Remove(string(request.Params))
+	removedBook, err := controller.service.RemoveBook(string(request.Params))
 	if err != nil {
 		return helpers.BadRequest(err)
 	}

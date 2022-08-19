@@ -3,29 +3,29 @@ package controllers
 import (
 	"encoding/json"
 
-	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
-	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
+	usecases "github.com/KPMGE/go-users-clean-api/src/domain/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 )
 
 type AddUserController struct {
-	useCase *usecases.AddUserUseCase
+	service usecases.AddUserUseCase
 }
 
 func (controller *AddUserController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
-	var inputUser dto.AddUserInputDTO
+	var inputUser domaindto.AddUserInputDTO
 	err := json.Unmarshal(request.Body, &inputUser)
 	if err != nil {
 		return helpers.ServerError(err)
 	}
 
-	newUser, err := controller.useCase.Add(&inputUser)
+	newUser, err := controller.service.Add(&inputUser)
 	if err != nil {
 		return helpers.BadRequest(err)
 	}
 
-	output := dto.NewAddUserOutputDTO(newUser.ID, newUser.Name, newUser.UserName, newUser.Email)
+	output := domaindto.NewAddUserOutputDTO(newUser.ID, newUser.Name, newUser.UserName, newUser.Email)
 	outputJson, err := json.Marshal(output)
 	if err != nil {
 		return helpers.ServerError(err)
@@ -34,8 +34,8 @@ func (controller *AddUserController) Handle(request *protocols.HttpRequest) *pro
 	return helpers.Ok(outputJson)
 }
 
-func NewAddUserController(useCase *usecases.AddUserUseCase) *AddUserController {
+func NewAddUserController(service usecases.AddUserUseCase) *AddUserController {
 	return &AddUserController{
-		useCase: useCase,
+		service: service,
 	}
 }

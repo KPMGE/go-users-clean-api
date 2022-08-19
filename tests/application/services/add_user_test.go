@@ -2,22 +2,23 @@ package usecases_test
 
 import (
 	"errors"
-	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
-	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	"testing"
+
+	"github.com/KPMGE/go-users-clean-api/src/application/services"
+	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
-func makeAddUserSut() (*usecases.AddUserUseCase, *mocks_test.UserRepositorySpy) {
+func makeAddUserSut() (*services.AddUserService, *mocks_test.UserRepositorySpy) {
 	repo := mocks_test.NewUserRepositorySpy()
 	repo.AddOutput = nil
-	sut := usecases.NewAddUserUseCase(repo)
+	sut := services.NewAddUserService(repo)
 	return sut, repo
 }
 
-func makeFakeValidAddUserInput() *dto.AddUserInputDTO {
-	return dto.NewAddUserInputDTO("any_name", "any_username", "any_valid_email@gmail.com")
+func makeFakeValidAddUserInput() *domaindto.AddUserInputDTO {
+	return domaindto.NewAddUserInputDTO("any_name", "any_username", "any_valid_email@gmail.com")
 }
 
 func TestAddUser_WithRightInput(t *testing.T) {

@@ -1,4 +1,4 @@
-package dto
+package domaindto
 
 type AddUserInputDTO struct {
 	Name     string `json:"name"`

@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	dto "github.com/KPMGE/go-users-clean-api/src/application/DTO"
-	usecases "github.com/KPMGE/go-users-clean-api/src/application/useCases"
+	"github.com/KPMGE/go-users-clean-api/src/application/services"
 	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
 	"github.com/KPMGE/go-users-clean-api/src/infrasctructure/repositories"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
@@ -18,7 +17,7 @@ const fakeUserName string = "any_username"
 const fakeEmail string = "any_valid_email@gmail.com"
 
 func makeFakeAddUserRequest(name string, userName string, email string) *protocols.HttpRequest {
-	input := dto.NewAddUserInputDTO(name, userName, email)
+	input := domaindto.NewAddUserInputDTO(name, userName, email)
 	jsonEntry, err := json.Marshal(input)
 
 	if err != nil {
@@ -30,8 +29,8 @@ func makeFakeAddUserRequest(name string, userName string, email string) *protoco
 
 func makeAddUserControllerSut() *controllers.AddUserController {
 	repo := repositories.NewInMemoryUserRepository()
-	useCase := usecases.NewAddUserUseCase(repo)
-	sut := controllers.NewAddUserController(useCase)
+	service := services.NewAddUserService(repo)
+	sut := controllers.NewAddUserController(service)
 	return sut
 }
 

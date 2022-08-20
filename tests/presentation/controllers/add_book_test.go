@@ -9,6 +9,7 @@ import (
 	"github.com/KPMGE/go-users-clean-api/src/application/services"
 	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
+	"github.com/KPMGE/go-users-clean-api/src/main/factories/validators"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
@@ -31,7 +32,8 @@ func MakeAddBookControllerSut() (*controllers.AddBookController, *mocks_test.Add
 	fakeUser, _ := entities.NewUser("any_name", "any_username", "any_email@gmail.com")
 	userRepo.GetByidOutput = fakeUser
 	service := services.NewAddBookService(bookRepo, userRepo)
-	sut := controllers.NewAddBookController(service)
+	validator := validators.MakeAddBookValidation()
+	sut := controllers.NewAddBookController(service, validator)
 	return sut, bookRepo
 }
 

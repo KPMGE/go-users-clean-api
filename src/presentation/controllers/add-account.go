@@ -9,12 +9,14 @@ import (
 )
 
 type AddAccountController struct {
-	useCase usecases.AddAccountUseCase
+	useCase   usecases.AddAccountUseCase
+	validator protocols.Validator
 }
 
-func NewAddAccountController(useCase usecases.AddAccountUseCase) *AddAccountController {
+func NewAddAccountController(useCase usecases.AddAccountUseCase, validator protocols.Validator) *AddAccountController {
 	return &AddAccountController{
-		useCase: useCase,
+		useCase:   useCase,
+		validator: validator,
 	}
 }
 
@@ -22,14 +24,19 @@ type AddAccountRequest struct {
 	Body *domaindto.AddAccountInputDTO
 }
 
-func (controller *AddAccountController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
+func (c *AddAccountController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
 	var accountInput domaindto.AddAccountInputDTO
 	err := json.Unmarshal(request.Body, &accountInput)
 	if err != nil {
 		return helpers.ServerError(err)
 	}
 
-	output, err := controller.useCase.AddAccount(&accountInput)
+	err = c.validator.Validate(&accountInput)
+	if err != nil {
+		return helpers.BadRequest(err)
+	}
+
+	output, err := c.useCase.AddAccount(&accountInput)
 	if err != nil {
 		return helpers.BadRequest(err)
 	}

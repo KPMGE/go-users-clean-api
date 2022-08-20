@@ -7,6 +7,7 @@ import (
 	"github.com/KPMGE/go-users-clean-api/src/application/services"
 	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
 	"github.com/KPMGE/go-users-clean-api/src/infrasctructure/repositories"
+	"github.com/KPMGE/go-users-clean-api/src/main/factories/validators"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 	"github.com/stretchr/testify/require"
@@ -30,7 +31,7 @@ func makeFakeAddUserRequest(name string, userName string, email string) *protoco
 func makeAddUserControllerSut() *controllers.AddUserController {
 	repo := repositories.NewInMemoryUserRepository()
 	service := services.NewAddUserService(repo)
-	sut := controllers.NewAddUserController(service)
+	sut := controllers.NewAddUserController(service, validators.MakeAddUserValidation())
 	return sut
 }
 

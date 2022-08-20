@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+
 	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
 	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"

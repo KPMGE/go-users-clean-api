@@ -26,7 +26,7 @@ func getAttr(obj interface{}, fieldName string) reflect.Value {
 func (r *RequiredParameterValidation) Validate(input any) error {
 	val := getAttr(input, r.parameterName)
 	if val.IsZero() {
-		return errors.New(fmt.Sprintf("Missing parameter %s!", r.parameterName))
+		return errors.New(fmt.Sprintf("Missing field %s!", r.parameterName))
 	}
 	return nil
 }

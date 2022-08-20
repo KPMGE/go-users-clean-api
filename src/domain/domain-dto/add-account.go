@@ -13,10 +13,6 @@ type AddAccountInputDTO struct {
 	ConfirmPassword string `json:"confirmPassword"`
 }
 
-func (i *AddAccountInputDTO) Validate(input *AddAccountInputDTO) bool {
-	return !(input.Email == "" || input.UserName == "" || input.Password == "" || input.ConfirmPassword == "")
-}
-
 func NewAddAccountInputDTO(userName string, email string, password string, confirmPassword string) *AddAccountInputDTO {
 	return &AddAccountInputDTO{
 		UserName:        userName,

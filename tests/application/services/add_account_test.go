@@ -35,41 +35,6 @@ func TestAddAccountService_WithRightData(t *testing.T) {
 	require.Equal(t, repo.Input.Password, "hashed_text")
 }
 
-func TestAddAccountService_ShouldReturnErrorIfAnyInputIsMissing(t *testing.T) {
-	sut, _, _ := makeSut()
-	fakeInput := makeFakeInput()
-	fakeInput.Password = ""
-
-	createdAccount, err := sut.AddAccount(fakeInput)
-	require.Error(t, err)
-	require.Nil(t, createdAccount)
-	require.Equal(t, err.Error(), "Missing fields!")
-
-	fakeInput = makeFakeInput()
-	fakeInput.ConfirmPassword = ""
-	createdAccount, err = sut.AddAccount(fakeInput)
-
-	require.Error(t, err)
-	require.Nil(t, createdAccount)
-	require.Equal(t, err.Error(), "Missing fields!")
-
-	fakeInput = makeFakeInput()
-	fakeInput.UserName = ""
-	createdAccount, err = sut.AddAccount(fakeInput)
-
-	require.Error(t, err)
-	require.Nil(t, createdAccount)
-	require.Equal(t, err.Error(), "Missing fields!")
-
-	fakeInput = makeFakeInput()
-	fakeInput.Email = ""
-	createdAccount, err = sut.AddAccount(fakeInput)
-
-	require.Error(t, err)
-	require.Nil(t, createdAccount)
-	require.Equal(t, err.Error(), "Missing fields!")
-}
-
 func TestAddAccountService_WithDifferentPasswordAndConfirmPassword(t *testing.T) {
 	sut, _, _ := makeSut()
 	fakeInput := makeFakeInput()

@@ -14,11 +14,6 @@ type AddAccountService struct {
 }
 
 func (useCase *AddAccountService) AddAccount(input *domaindto.AddAccountInputDTO) (*domaindto.AddAccountOutputDTO, error) {
-	inputValid := input.Validate(input)
-	if !inputValid {
-		return nil, errors.New("Missing fields!")
-	}
-
 	emailTaken := useCase.accountRepository.CheckAccountByEmail(input.Email)
 	if emailTaken {
 		return nil, errors.New("email already taken")

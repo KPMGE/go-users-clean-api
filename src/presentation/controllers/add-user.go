@@ -10,17 +10,23 @@ import (
 )
 
 type AddUserController struct {
-	service usecases.AddUserUseCase
+	service   usecases.AddUserUseCase
+	validator protocols.Validator
 }
 
-func (controller *AddUserController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
+func (c *AddUserController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
 	var inputUser domaindto.AddUserInputDTO
 	err := json.Unmarshal(request.Body, &inputUser)
 	if err != nil {
 		return helpers.ServerError(err)
 	}
 
-	newUser, err := controller.service.Add(&inputUser)
+	err = c.validator.Validate(&inputUser)
+	if err != nil {
+		return helpers.BadRequest(err)
+	}
+
+	newUser, err := c.service.Add(&inputUser)
 	if err != nil {
 		return helpers.BadRequest(err)
 	}
@@ -34,8 +40,9 @@ func (controller *AddUserController) Handle(request *protocols.HttpRequest) *pro
 	return helpers.Ok(outputJson)
 }
 
-func NewAddUserController(service usecases.AddUserUseCase) *AddUserController {
+func NewAddUserController(service usecases.AddUserUseCase, validator protocols.Validator) *AddUserController {
 	return &AddUserController{
-		service: service,
+		service:   service,
+		validator: validator,
 	}
 }

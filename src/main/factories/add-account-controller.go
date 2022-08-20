@@ -13,7 +13,7 @@ func MakeAddAccountController(db *gorm.DB) *controllers.AddAccountController {
 	repo := postgresrepository.NewPostgresAccountRepository(db)
 	hasher := providers.NewBcryptHasher()
 	service := services.NewAddAccountService(repo, hasher)
-	validator := validators.MakeAddAccountValidaton()
+	validator := validators.MakeAddAccountValidation()
 	controller := controllers.NewAddAccountController(service, validator)
 	return controller
 }

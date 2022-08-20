@@ -5,7 +5,7 @@ import (
 	"github.com/KPMGE/go-users-clean-api/src/validation/validators"
 )
 
-func MakeAddAccountValidaton() protocols.Validator {
+func MakeAddAccountValidation() protocols.Validator {
 	userNameFiled := validators.NewRequiredParameterValidation("UserName")
 	emailField := validators.NewRequiredParameterValidation("Email")
 	passwordField := validators.NewRequiredParameterValidation("Password")

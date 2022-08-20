@@ -38,7 +38,7 @@ func makeSut() *controllers.AddAccountController {
 	repo := repositories.NewInmemoryAccountRepository()
 	hasher := NewFakeHasher()
 	useCase := services.NewAddAccountService(repo, hasher)
-	sut := controllers.NewAddAccountController(useCase, validators.MakeAddAccountValidaton())
+	sut := controllers.NewAddAccountController(useCase, validators.MakeAddAccountValidation())
 	return sut
 }
 

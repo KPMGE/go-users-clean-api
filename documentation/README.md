@@ -42,8 +42,11 @@ the command at the root of the project
 go run ./src/main/main.go
 ```
 
-### How to generate api docs.
-You can easily generate your api docs. First of all, you're supposed to run the following command:
+--- 
+
+### How to generate api route docs.
+You can easily generate your api route docs. First of all, you're supposed to run the command below, make sure you've got
+npx on your machine.
 
 ```bash
 npx insomnia-documenter --config ./golang-api.json

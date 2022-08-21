@@ -12,10 +12,11 @@ import (
 )
 
 type AddBookController struct {
-	service usecases.AddBookUseCase
+	service   usecases.AddBookUseCase
+	validator protocols.Validator
 }
 
-func (controller *AddBookController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
+func (c *AddBookController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
 	if request == nil {
 		newError := errors.New("Invalid body!")
 		return helpers.ServerError(newError)
@@ -28,7 +29,12 @@ func (controller *AddBookController) Handle(request *protocols.HttpRequest) *pro
 		return helpers.ServerError(newError)
 	}
 
-	output, err := controller.service.AddBook(&inputDto)
+	err = c.validator.Validate(&inputDto)
+	if err != nil {
+		return helpers.BadRequest(err)
+	}
+
+	output, err := c.service.AddBook(&inputDto)
 	if err != nil {
 		return helpers.BadRequest(err)
 	}
@@ -41,8 +47,9 @@ func (controller *AddBookController) Handle(request *protocols.HttpRequest) *pro
 	return helpers.Ok(outputJson)
 }
 
-func NewAddBookController(service usecases.AddBookUseCase) *AddBookController {
+func NewAddBookController(service usecases.AddBookUseCase, validator protocols.Validator) *AddBookController {
 	return &AddBookController{
-		service: service,
+		service:   service,
+		validator: validator,
 	}
 }

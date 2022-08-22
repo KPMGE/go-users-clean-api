@@ -10,6 +10,7 @@ import (
 func SetupRoutes(app *fiber.App, db *gorm.DB) *fiber.Router {
 	api := app.Group("/api")
 
+	api.Get("/accounts", adapters.FiberRouteAdapter(factories.MakeListAccountsController(db)))
 	api.Post("/accounts", adapters.FiberRouteAdapter(factories.MakeAddAccountController(db)))
 	api.Delete("/accounts/:accountId", adapters.FiberRouteAdapter(factories.MakeRemoveAccountController(db)))
 

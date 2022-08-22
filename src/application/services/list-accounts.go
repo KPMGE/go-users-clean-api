@@ -16,5 +16,19 @@ func NewListAccountsService(repo protocols.ListAccountsRepository) *ListAccounts
 }
 
 func (l *ListAccountsService) ListAccounts() []domaindto.ListAccountsOutputDTO {
-	return l.accountsRepo.ListAccounts()
+	foundAccounts := l.accountsRepo.ListAccounts()
+
+	accountsDto := []domaindto.ListAccountsOutputDTO{}
+
+	for _, account := range foundAccounts {
+		accountsDto = append(accountsDto, domaindto.ListAccountsOutputDTO{
+			UserName:  account.UserName,
+			Email:     account.Email,
+			ID:        account.ID,
+			CreatedAt: account.CreatedAt,
+			UpdatedAt: account.UpdatedAt,
+		})
+	}
+
+	return accountsDto
 }

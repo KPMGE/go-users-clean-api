@@ -1,7 +1,9 @@
 package protocols
 
-import domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
+import (
+	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
+)
 
 type ListAccountsRepository interface {
-	ListAccounts() []domaindto.ListAccountsOutputDTO
+	ListAccounts() []entities.Account
 }

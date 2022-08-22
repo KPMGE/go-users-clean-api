@@ -25,5 +25,5 @@ func TestListAccountsController_ShouldReturnFromService(t *testing.T) {
 	httpResponse := sut.Handle(nil)
 
 	require.Equal(t, 200, httpResponse.StatusCode)
-	require.NotNil(t, 200, httpResponse.JsonBody)
+	require.NotNil(t, httpResponse.JsonBody)
 }

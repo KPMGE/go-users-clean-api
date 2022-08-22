@@ -62,6 +62,15 @@ func (repo *PostgresAccountRepository) DeleteAccountById(accountId string) bool 
 	return true
 }
 
+func (repo *PostgresAccountRepository) ListAccounts() []entities.Account {
+	var accounts []entities.Account
+
+	result := repo.db.Find(&accounts)
+	CheckError(result.Error)
+
+	return accounts
+}
+
 func NewPostgresAccountRepository(db *gorm.DB) *PostgresAccountRepository {
 	return &PostgresAccountRepository{
 		db: db,

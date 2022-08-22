@@ -2,29 +2,17 @@ package usecases_test
 
 import (
 	"testing"
-	"time"
 
+	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
 	"github.com/stretchr/testify/require"
 )
 
-type ListAccountsOutputDTO struct {
-	ID        string    `json:"id" valid:"uuid"`
-	CreatedAt time.Time `json:"createdAt" valid:"-"`
-	UpdatedAt time.Time `json:"updatedAt" valid:"-"`
-	UserName  string    `json:"userName"`
-	Email     string    `json:"email"`
-}
-
-type ListAccountsUseCase interface {
-	ListAccounts() []ListAccountsOutputDTO
-}
-
 type ListAccountsRepository interface {
-	ListAccounts() []ListAccountsOutputDTO
+	ListAccounts() []domaindto.ListAccountsOutputDTO
 }
 
 type ListAccountsRepositoryStub struct {
-	Output []ListAccountsOutputDTO
+	Output []domaindto.ListAccountsOutputDTO
 }
 
 type ListAccountsService struct {
@@ -37,21 +25,21 @@ func NewListAccountsService(repo ListAccountsRepository) *ListAccountsService {
 	}
 }
 
-func (l *ListAccountsService) ListAccounts() []ListAccountsOutputDTO {
+func (l *ListAccountsService) ListAccounts() []domaindto.ListAccountsOutputDTO {
 	return l.accountsRepo.ListAccounts()
 }
 
-func (l *ListAccountsRepositoryStub) ListAccounts() []ListAccountsOutputDTO {
+func (l *ListAccountsRepositoryStub) ListAccounts() []domaindto.ListAccountsOutputDTO {
 	return l.Output
 }
 
 func TestListAccounts_ShouldReturnFromRepository(t *testing.T) {
 	repo := &ListAccountsRepositoryStub{
-		Output: []ListAccountsOutputDTO{},
+		Output: []domaindto.ListAccountsOutputDTO{},
 	}
 	sut := NewListAccountsService(repo)
 
 	result := sut.ListAccounts()
 
-	require.Equal(t, []ListAccountsOutputDTO{}, result)
+	require.Equal(t, []domaindto.ListAccountsOutputDTO{}, result)
 }

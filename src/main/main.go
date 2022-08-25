@@ -19,7 +19,7 @@ func CheckError(err error) {
 }
 
 func Init() *gorm.DB {
-	dbURL := "postgresql://postgres:root@localhost:5432/users"
+	dbURL := "postgresql://postgres:root@db:5432/users"
 
 	db, err := gorm.Open(postgres.Open(dbURL), &gorm.Config{})
 

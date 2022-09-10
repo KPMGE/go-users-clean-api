@@ -1,65 +1,58 @@
 package controllers_test
 
 import (
-	"encoding/json"
 	"errors"
+	"net/http"
 	"testing"
 
-	"github.com/KPMGE/go-users-clean-api/src/application/services"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
-	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
 )
 
-func MakeGetBookByIdControllerSut() (*controllers.GetBookByIdController, *mocks_test.GetBookByIdRepositorySpy) {
-	repo := mocks_test.NewGetBookByIdRepositorySpy()
-	fakeBook, _ := entities.NewBook("any_title", "any_author", "any_description", 100.23, "any_user_id")
-	repo.Output = fakeBook
-	service := services.NewGetBookByIdService(repo)
-	sut := controllers.NewGetBookByIdController(service)
-	return sut, repo
+type GetBookByIdServiceMock struct {
+	Output *entities.Book
+	Error  error
 }
 
-func TestGetGiftByIdController_ShouldCallUseCaseWithRightData(t *testing.T) {
-	sut, repo := MakeGetBookByIdControllerSut()
-	fakeRequest := protocols.NewHtppRequest(nil, []byte("any_book_id"))
-
-	sut.Handle(fakeRequest)
-
-	require.Equal(t, "any_book_id", repo.Input)
+func (g *GetBookByIdServiceMock) GetBookById(bookId string) (*entities.Book, error) {
+	return g.Output, g.Error
 }
 
-func TestGetGiftByIdController_ShouldReturnErrorIfUseCaseReturnsError(t *testing.T) {
-	sut, repo := MakeGetBookByIdControllerSut()
-	repo.OutputError = errors.New("repo error")
-	fakeRequest := protocols.NewHtppRequest(nil, []byte("any_book_id"))
-
-	httpResponse := sut.Handle(fakeRequest)
-
-	require.Equal(t, 500, httpResponse.StatusCode)
-	require.Equal(t, "repo error", string(httpResponse.JsonBody))
+func MakeGetBookByIdControllerSut() (*controllers.GetBookByIdController, *GetBookByIdServiceMock) {
+	fakeBook, _ := entities.NewBook("any_title", "any_author", "any_description", 203.43, "any_user_id")
+	serviceMock := &GetBookByIdServiceMock{Output: fakeBook, Error: nil}
+	sut := controllers.NewGetBookByIdController(serviceMock)
+	return sut, serviceMock
 }
 
-func TestGetGiftByIdController_ShouldReturnRightDataOnSuccess(t *testing.T) {
-	sut, repo := MakeGetBookByIdControllerSut()
-	fakeRequest := protocols.NewHtppRequest(nil, []byte("any_book_id"))
+func TestGetBookByIdController_ShouldReturnRightDataOnSuccess(t *testing.T) {
+	sut, serviceMock := MakeGetBookByIdControllerSut()
 
-	httpResponse := sut.Handle(fakeRequest)
+	httpResponse := sut.Handle(protocols.NewHttpRequest([]byte("any_id"), nil))
 
-	require.Equal(t, 200, httpResponse.StatusCode)
-	var book *entities.Book
-	err := json.Unmarshal(httpResponse.JsonBody, &book)
-	if err != nil {
-		panic(err)
-	}
+	require.Equal(t, http.StatusOK, httpResponse.StatusCode)
+	require.Equal(t, serviceMock.Output, httpResponse.Body)
+}
 
-	require.Equal(t, 200, httpResponse.StatusCode)
-	require.Equal(t, repo.Output.Author, book.Author)
-	require.Equal(t, repo.Output.Price, book.Price)
-	require.Equal(t, repo.Output.Description, book.Description)
-	require.Equal(t, repo.Output.UserID, book.UserID)
-	require.Equal(t, repo.Output.ID, book.ID)
-	require.Equal(t, repo.Output.Title, book.Title)
+func TestGetBookByIdController_ShouldReturnNotFoundIfServiceReturnsNull(t *testing.T) {
+	sut, serviceMock := MakeGetBookByIdControllerSut()
+	serviceMock.Output = nil
+	expectedError := errors.New("book not found")
+
+	httpResponse := sut.Handle(protocols.NewHttpRequest([]byte("any_id"), nil))
+
+	require.Equal(t, http.StatusNotFound, httpResponse.StatusCode)
+	require.Equal(t, expectedError.Error(), httpResponse.Body)
+}
+
+func TestGetBookByIdController_ShouldReturnServerErrorIfServiceReturnsError(t *testing.T) {
+	sut, serviceMock := MakeGetBookByIdControllerSut()
+	serviceMock.Error = errors.New("service error")
+
+	httpResponse := sut.Handle(protocols.NewHttpRequest([]byte("any_id"), nil))
+
+	require.Equal(t, http.StatusInternalServerError, httpResponse.StatusCode)
+	require.Equal(t, serviceMock.Error.Error(), httpResponse.Body)
 }

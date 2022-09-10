@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
-	"log"
 
 	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
 	usecases "github.com/KPMGE/go-users-clean-api/src/domain/useCases"
@@ -39,12 +38,7 @@ func (c *AddBookController) Handle(request *protocols.HttpRequest) *protocols.Ht
 		return helpers.BadRequest(err)
 	}
 
-	outputJson, err := json.Marshal(output)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return helpers.Ok(outputJson)
+	return helpers.Ok(output)
 }
 
 func NewAddBookController(service usecases.AddBookUseCase, validator protocols.Validator) *AddBookController {

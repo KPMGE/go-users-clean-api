@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"encoding/json"
+	"errors"
 
 	usecases "github.com/KPMGE/go-users-clean-api/src/domain/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
@@ -24,10 +24,9 @@ func (controller *GetBookByIdController) Handle(request *protocols.HttpRequest) 
 		return helpers.ServerError(err)
 	}
 
-	jsonBook, err := json.Marshal(book)
-	if err != nil {
-		return helpers.ServerError(err)
+	if book == nil {
+		return helpers.NotFound(errors.New("book not found"))
 	}
 
-	return helpers.Ok(jsonBook)
+	return helpers.Ok(book)
 }

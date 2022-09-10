@@ -1,15 +1,14 @@
 package controllers_test
 
 import (
-	"encoding/json"
+	"errors"
+	"net/http"
 	"testing"
 
-	"github.com/KPMGE/go-users-clean-api/src/application/services"
 	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
-	"github.com/KPMGE/go-users-clean-api/src/infrasctructure/repositories"
-	"github.com/KPMGE/go-users-clean-api/src/main/factories/validators"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
+	controllermocks_test "github.com/KPMGE/go-users-clean-api/tests/presentation/controller-mocks"
 	"github.com/stretchr/testify/require"
 )
 
@@ -17,81 +16,55 @@ const fakeName string = "any_name"
 const fakeUserName string = "any_username"
 const fakeEmail string = "any_valid_email@gmail.com"
 
-func makeFakeAddUserRequest(name string, userName string, email string) *protocols.HttpRequest {
-	input := domaindto.NewAddUserInputDTO(name, userName, email)
-	jsonEntry, err := json.Marshal(input)
+type AddUserServiceMock struct {
+	Output *domaindto.AddUserOutputDTO
+	Error  error
+}
 
-	if err != nil {
-		panic("Error generating json")
+func (s *AddUserServiceMock) Add(input *domaindto.AddUserInputDTO) (*domaindto.AddUserOutputDTO, error) {
+	return s.Output, s.Error
+}
+
+func MakeFakeAddUserServiceMock() *AddUserServiceMock {
+	return &AddUserServiceMock{
+		Output: domaindto.NewAddUserOutputDTO("any_id", "any_name", "any_username", "any_valid_email@gmail.com"),
+		Error:  nil,
 	}
-
-	return protocols.NewHtppRequest(jsonEntry, nil)
 }
 
-func makeAddUserControllerSut() *controllers.AddUserController {
-	repo := repositories.NewInMemoryUserRepository()
-	service := services.NewAddUserService(repo)
-	sut := controllers.NewAddUserController(service, validators.MakeAddUserValidation())
-	return sut
+func makeAddUserControllerSut() (*controllers.AddUserController, *AddUserServiceMock, *controllermocks_test.ValidatorMock) {
+	serviceMock := MakeFakeAddUserServiceMock()
+	validatorMock := controllermocks_test.ValidatorMock{Output: nil}
+	sut := controllers.NewAddUserController(serviceMock, &validatorMock)
+	return sut, serviceMock, &validatorMock
 }
 
-func convertJsonToAccoutOutputDTO(data []byte) *domaindto.AddAccountOutputDTO {
-	var bodyObj domaindto.AddAccountOutputDTO
-	err := json.Unmarshal(data, &bodyObj)
-	if err != nil {
-		panic(err)
-	}
-	return &bodyObj
+func makeFakeAddUserRequest() *protocols.HttpRequest {
+	fakeBody := `{
+		"name":     "any_name",
+		"userName": "any_username",
+		"email":    "any_email@gmail.com"
+	}`
+
+	fakeRequest := protocols.NewHttpRequest([]byte(fakeBody), nil)
+	return fakeRequest
 }
 
-func TestAdduserController_WithCorrectInput(t *testing.T) {
-	sut := makeAddUserControllerSut()
-	fakeRequest := makeFakeAddUserRequest(fakeName, fakeUserName, fakeEmail)
+func TestAdduserController_ShouldReturnRightDataOnSuccess(t *testing.T) {
+	sut, serviceMock, _ := makeAddUserControllerSut()
 
-	httpResponse := sut.Handle(fakeRequest)
-	bodyObj := convertJsonToAccoutOutputDTO(httpResponse.JsonBody)
+	httpResponse := sut.Handle(makeFakeAddUserRequest())
 
-	require.Equal(t, 200, httpResponse.StatusCode)
-	require.NotNil(t, bodyObj.ID)
-	require.Equal(t, bodyObj.Email, fakeEmail)
-	require.Equal(t, bodyObj.UserName, fakeUserName)
+	require.Equal(t, http.StatusOK, httpResponse.StatusCode)
+	require.Equal(t, serviceMock.Output, httpResponse.Body)
 }
 
-func TestAdduserController_WithInvalidEmail(t *testing.T) {
-	sut := makeAddUserControllerSut()
-	fakeRequest := makeFakeAddUserRequest(fakeName, fakeUserName, "invalid email")
+func TestAdduserController_ShouldReturnBadRequestIfValidatorReturnsError(t *testing.T) {
+	sut, _, validatorMock := makeAddUserControllerSut()
+	validatorMock.Output = errors.New("validation error")
 
-	httpResponse := sut.Handle(fakeRequest)
+	httpResponse := sut.Handle(makeFakeAddUserRequest())
 
-	require.Equal(t, 400, httpResponse.StatusCode)
-	require.Equal(t, "Invalid email!", string(httpResponse.JsonBody))
-}
-
-func TestAdduserController_WithBlankFields(t *testing.T) {
-	sut := makeAddUserControllerSut()
-
-	fakeRequest := makeFakeAddUserRequest("", fakeUserName, fakeEmail)
-	httpResponse := sut.Handle(fakeRequest)
-	require.Equal(t, 400, httpResponse.StatusCode)
-	require.NotNil(t, httpResponse.JsonBody)
-
-	fakeRequest = makeFakeAddUserRequest(fakeName, "", fakeEmail)
-	httpResponse = sut.Handle(fakeRequest)
-	require.Equal(t, 400, httpResponse.StatusCode)
-	require.NotNil(t, httpResponse.JsonBody)
-
-	fakeRequest = makeFakeAddUserRequest(fakeName, fakeUserName, "")
-	httpResponse = sut.Handle(fakeRequest)
-	require.Equal(t, 400, httpResponse.StatusCode)
-	require.NotNil(t, httpResponse.JsonBody)
-}
-
-func TestAdduserController_WithInvalidJsonInput(t *testing.T) {
-	sut := makeAddUserControllerSut()
-	fakeRequest := protocols.NewHtppRequest([]byte("invalid json"), nil)
-
-	httpResponse := sut.Handle(fakeRequest)
-
-	require.Equal(t, 500, httpResponse.StatusCode)
-	require.NotNil(t, httpResponse.JsonBody)
+	require.Equal(t, http.StatusBadRequest, httpResponse.StatusCode)
+	require.Equal(t, validatorMock.Output.Error(), httpResponse.Body)
 }

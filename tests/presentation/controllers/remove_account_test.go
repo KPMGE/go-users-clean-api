@@ -1,43 +1,45 @@
 package controllers_test
 
 import (
+	"errors"
+	"net/http"
 	"testing"
 
-	"github.com/KPMGE/go-users-clean-api/src/application/services"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
-	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
 )
 
-func MakeSut() (*controllers.RemoveAccountController, *mocks_test.FakeAccountRepository) {
-	repo := mocks_test.NewFakeAccountRepository()
-	repo.DeleteAccountByIdOutput = true
-	service := services.NewRemoveAccountService(repo)
-	sut := controllers.NewRemoveAccountController(service)
-	return sut, repo
+type RemoveAccountServiceMock struct {
+	Output string
+	Error  error
 }
 
-func makeFakeRemoveAccountRequest(id string) *protocols.HttpRequest {
-	return protocols.NewHtppRequest(nil, []byte(id))
+func (r *RemoveAccountServiceMock) RemoveAccount(accountId string) (string, error) {
+	return r.Output, r.Error
 }
 
-func TestRemoveAccountController_WithCorrectID(t *testing.T) {
-	sut, _ := MakeSut()
-	request := makeFakeRemoveAccountRequest("any_valid_id")
-	httpResponse := sut.Handle(request)
-
-	require.Equal(t, httpResponse.StatusCode, 200)
-	require.Equal(t, string(httpResponse.JsonBody), "account deleted")
+func MakeSut() (*controllers.RemoveAccountController, *RemoveAccountServiceMock) {
+	serviceMock := &RemoveAccountServiceMock{Output: "account deleted", Error: nil}
+	sut := controllers.NewRemoveAccountController(serviceMock)
+	return sut, serviceMock
 }
 
-func TestRemoveAccountController_WithWrongID(t *testing.T) {
-	sut, repo := MakeSut()
-	repo.DeleteAccountByIdOutput = false
+func TestRemoveAccountController_ShouldReturnRightDataOnSuccess(t *testing.T) {
+	sut, serviceMock := MakeSut()
 
-	request := makeFakeRemoveAccountRequest("any_invalid_id")
-	httpResponse := sut.Handle(request)
+	httpResponse := sut.Handle(protocols.NewHttpRequest(nil, []byte("any_id")))
 
-	require.Equal(t, httpResponse.StatusCode, 400)
-	require.Equal(t, string(httpResponse.JsonBody), "there is no account with this id")
+	require.Equal(t, http.StatusOK, httpResponse.StatusCode)
+	require.Equal(t, serviceMock.Output, httpResponse.Body)
+}
+
+func TestRemoveAccountController_ShouldReturnBadRequestIfServiceReturnsError(t *testing.T) {
+	sut, serviceMock := MakeSut()
+	serviceMock.Error = errors.New("there is not account with this id")
+
+	httpResponse := sut.Handle(protocols.NewHttpRequest(nil, []byte("any_id")))
+
+	require.Equal(t, http.StatusBadRequest, httpResponse.StatusCode)
+	require.Equal(t, serviceMock.Error.Error(), httpResponse.Body)
 }

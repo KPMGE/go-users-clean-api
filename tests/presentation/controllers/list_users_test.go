@@ -1,54 +1,33 @@
 package controllers_test
 
 import (
-	"encoding/json"
+	"net/http"
 	"testing"
 
-	"github.com/KPMGE/go-users-clean-api/src/application/services"
 	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
-	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
-	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
-	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
 )
 
-func MakeListUsersSut() (*controllers.ListUsersController, *mocks_test.UserRepositorySpy) {
-	repo := mocks_test.NewUserRepositorySpy()
-	repo.ListUsersOutput = []*entities.User{}
-	service := services.NewListUsersService(repo)
-	sut := controllers.NewListUsersController(service)
-	return sut, repo
+type ListUsersServiceMock struct {
+	Output []*domaindto.ListUsersDTO
 }
 
-func TestListUsersController_WithNoUsers(t *testing.T) {
-	sut, _ := MakeListUsersSut()
-	fakeRequest := protocols.NewHtppRequest(nil, nil)
-	httpResponse := sut.Handle(fakeRequest)
-
-	var listObj []*domaindto.ListUsersDTO
-	json.Unmarshal(httpResponse.JsonBody, &listObj)
-
-	require.Equal(t, 200, httpResponse.StatusCode)
-	require.Equal(t, 0, len(listObj))
-	require.Equal(t, []*domaindto.ListUsersDTO{}, listObj)
+func (l *ListUsersServiceMock) List() []*domaindto.ListUsersDTO {
+	return l.Output
 }
 
-func TestListUsersController_WithTwoUsers(t *testing.T) {
-	sut, repo := MakeListUsersSut()
+func MakeListUsersSut() (*controllers.ListUsersController, *ListUsersServiceMock) {
+	serviceMock := ListUsersServiceMock{Output: []*domaindto.ListUsersDTO{}}
+	sut := controllers.NewListUsersController(&serviceMock)
+	return sut, &serviceMock
+}
 
-	fakeUser, _ := entities.NewUser("any_name", "any_username", "any_valid_email@gmail.com")
-	repo.ListUsersOutput = []*entities.User{fakeUser, fakeUser}
+func TestListUsersController_ShouldReturnFromService(t *testing.T) {
+	sut, serviceMock := MakeListUsersSut()
 
-	fakeRequest := protocols.NewHtppRequest(nil, nil)
-	httpResponse := sut.Handle(fakeRequest)
+	httpResponse := sut.Handle(nil)
 
-	var objBody []*domaindto.ListUsersDTO
-	err := json.Unmarshal(httpResponse.JsonBody, &objBody)
-	if err != nil {
-		panic(err)
-	}
-
-	require.Equal(t, 200, httpResponse.StatusCode)
-	require.Equal(t, 2, len(objBody))
+	require.Equal(t, http.StatusOK, httpResponse.StatusCode)
+	require.NotNil(t, serviceMock.Output, httpResponse.Body)
 }

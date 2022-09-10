@@ -1,18 +1,15 @@
 package controllers_test
 
 import (
-	"encoding/json"
 	"errors"
-	"log"
 	"testing"
 
 	"github.com/KPMGE/go-users-clean-api/src/application/services"
-	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
 	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
-	"github.com/KPMGE/go-users-clean-api/src/main/factories/validators"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
+	controllermocks_test "github.com/KPMGE/go-users-clean-api/tests/presentation/controller-mocks"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,21 +21,21 @@ var FAKE_ADD_BOOK_INPUT = `{
 	"userId": "any_user_id"
 }`
 
-var FAKE_REQUEST = protocols.NewHtppRequest([]byte(FAKE_ADD_BOOK_INPUT), nil)
+var FAKE_REQUEST = protocols.NewHttpRequest([]byte(FAKE_ADD_BOOK_INPUT), nil)
 
-func MakeAddBookControllerSut() (*controllers.AddBookController, *mocks_test.AddBookRepositorySpy) {
+func MakeAddBookControllerSut() (*controllers.AddBookController, *mocks_test.AddBookRepositorySpy, *controllermocks_test.ValidatorMock) {
 	bookRepo := mocks_test.NewAddBookRepositorySpy()
 	userRepo := mocks_test.NewUserRepositorySpy()
 	fakeUser, _ := entities.NewUser("any_name", "any_username", "any_email@gmail.com")
 	userRepo.GetByidOutput = fakeUser
 	service := services.NewAddBookService(bookRepo, userRepo)
-	validator := validators.MakeAddBookValidation()
+	validator := &controllermocks_test.ValidatorMock{Output: nil}
 	sut := controllers.NewAddBookController(service, validator)
-	return sut, bookRepo
+	return sut, bookRepo, validator
 }
 
 func TestAddBookController_ShouldCallUseCaseWithRightData(t *testing.T) {
-	sut, bookRepo := MakeAddBookControllerSut()
+	sut, bookRepo, _ := MakeAddBookControllerSut()
 
 	sut.Handle(FAKE_REQUEST)
 
@@ -49,38 +46,21 @@ func TestAddBookController_ShouldCallUseCaseWithRightData(t *testing.T) {
 }
 
 func TestAddBookController_ShouldReturnErrorIfUseCaseReturnsError(t *testing.T) {
-	sut, bookRepo := MakeAddBookControllerSut()
+	sut, bookRepo, _ := MakeAddBookControllerSut()
 	bookRepo.OutputError = errors.New("book repo error")
 
 	httpResponse := sut.Handle(FAKE_REQUEST)
 
 	require.Equal(t, 400, httpResponse.StatusCode)
-	require.Equal(t, "book repo error", string(httpResponse.JsonBody))
+	require.Equal(t, bookRepo.OutputError.Error(), httpResponse.Body)
 }
 
-func TestAddBookController_ShouldReturnRightDataOnSuccess(t *testing.T) {
-	sut, _ := MakeAddBookControllerSut()
+func TestAddBookController_ShouldReturnServerErrorIfValidatorReturnsError(t *testing.T) {
+	sut, _, validatorMock := MakeAddBookControllerSut()
+	validatorMock.Output = errors.New("validation error")
 
 	httpResponse := sut.Handle(FAKE_REQUEST)
 
-	var outputDto domaindto.AddBookUseCaseOutputDTO
-	err := json.Unmarshal(httpResponse.JsonBody, &outputDto)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	require.Equal(t, 200, httpResponse.StatusCode)
-	require.Equal(t, "any_author", outputDto.Author)
-	require.Equal(t, "any_description", outputDto.Description)
-	require.Equal(t, "any_title", outputDto.Title)
-	require.Equal(t, 123.3, outputDto.Price)
-}
-
-func TestAddBookController_ShouldReturnServerErrorIfInvalidBodyIsProvided(t *testing.T) {
-	sut, _ := MakeAddBookControllerSut()
-
-	httpResponse := sut.Handle(nil)
-
-	require.Equal(t, 500, httpResponse.StatusCode)
-	require.Equal(t, "Invalid body!", string(httpResponse.JsonBody))
+	require.Equal(t, 400, httpResponse.StatusCode)
+	require.Equal(t, validatorMock.Output.Error(), httpResponse.Body)
 }

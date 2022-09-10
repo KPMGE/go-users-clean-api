@@ -32,12 +32,7 @@ func (c *AddUserController) Handle(request *protocols.HttpRequest) *protocols.Ht
 	}
 
 	output := domaindto.NewAddUserOutputDTO(newUser.ID, newUser.Name, newUser.UserName, newUser.Email)
-	outputJson, err := json.Marshal(output)
-	if err != nil {
-		return helpers.ServerError(err)
-	}
-
-	return helpers.Ok(outputJson)
+	return helpers.Ok(output)
 }
 
 func NewAddUserController(service usecases.AddUserUseCase, validator protocols.Validator) *AddUserController {

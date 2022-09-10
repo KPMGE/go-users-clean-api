@@ -1,15 +1,15 @@
 package controllers_test
 
 import (
-	"encoding/json"
+	"errors"
+	"net/http"
 	"testing"
 
 	"github.com/KPMGE/go-users-clean-api/src/application/services"
-	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
 	"github.com/KPMGE/go-users-clean-api/src/infrasctructure/repositories"
-	"github.com/KPMGE/go-users-clean-api/src/main/factories/validators"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
+	controllermocks_test "github.com/KPMGE/go-users-clean-api/tests/presentation/controller-mocks"
 	"github.com/stretchr/testify/require"
 )
 
@@ -25,61 +25,49 @@ func NewFakeHasher() *FakeHasher {
 
 const fakePassword string = "any_password"
 
-func makeFakeRequest(userName string, email string, password string, confirm string) *protocols.HttpRequest {
-	inputObj := domaindto.NewAddAccountInputDTO(userName, email, password, confirm)
-	jsonObj, err := json.Marshal(inputObj)
-	if err != nil {
-		panic(err)
-	}
-	return protocols.NewHtppRequest(jsonObj, nil)
-}
-
-func makeSut() *controllers.AddAccountController {
+func makeSut() (*controllers.AddAccountController, *controllermocks_test.ValidatorMock) {
 	repo := repositories.NewInmemoryAccountRepository()
 	hasher := NewFakeHasher()
+	validatorMock := &controllermocks_test.ValidatorMock{Output: nil}
 	useCase := services.NewAddAccountService(repo, hasher)
-	sut := controllers.NewAddAccountController(useCase, validators.MakeAddAccountValidation())
-	return sut
+	sut := controllers.NewAddAccountController(useCase, validatorMock)
+	return sut, validatorMock
 }
 
 func TestAddAccountController_WithRightData(t *testing.T) {
-	sut := makeSut()
-	request := makeFakeRequest(fakeUserName, fakeEmail, fakePassword, fakePassword)
-	httpResponse := sut.Handle(request)
+	sut, _ := makeSut()
 
-	require.Equal(t, httpResponse.StatusCode, 200)
-	require.NotNil(t, httpResponse.JsonBody)
+	fakeInput := `{ 
+		"userName": "any_username",
+		"email": "any_email@gmail.com",
+		"password": "any_password",
+		"confirmPassword": "any_password"
+  }
+  `
+
+	fakeRequest := protocols.NewHttpRequest([]byte(fakeInput), nil)
+	httpResponse := sut.Handle(fakeRequest)
+
+	require.Equal(t, http.StatusOK, httpResponse.StatusCode)
+	require.NotNil(t, httpResponse.Body)
 }
 
-func TestAddAccountController_WithInvalidData(t *testing.T) {
-	sut := makeSut()
+func TestAddAccountController_ShouldReturnBadRequestValidatorReturnsError(t *testing.T) {
+	sut, validatorMock := makeSut()
+	validatorMock.Output = errors.New("validation error")
 
-	request := makeFakeRequest(fakeUserName, "any_invalid_email", fakePassword, fakePassword)
-	httpResponse := sut.Handle(request)
+	fakeInput := `{ 
+		"userName": "any_username",
+		"email": "any_email@gmail.com",
+		"password": "any_password",
+		"confirmPassword": "any_password"
+  }
+  `
 
-	require.Equal(t, httpResponse.StatusCode, 400)
-}
+	fakeRequest := protocols.NewHttpRequest([]byte(fakeInput), nil)
 
-func TestAddAccountController_ShouldReturnBadRequestIfFieldsAreMissing(t *testing.T) {
-	sut := makeSut()
+	httpResponse := sut.Handle(fakeRequest)
 
-	request := makeFakeRequest("", "any_valid_email@gmail.com", fakePassword, fakePassword)
-	httpResponse := sut.Handle(request)
-	require.Equal(t, httpResponse.StatusCode, 400)
-	require.Equal(t, string(httpResponse.JsonBody), "Missing field UserName!")
-
-	request = makeFakeRequest("any username", "", fakePassword, fakePassword)
-	httpResponse = sut.Handle(request)
-	require.Equal(t, httpResponse.StatusCode, 400)
-	require.Equal(t, string(httpResponse.JsonBody), "Missing field Email!")
-
-	request = makeFakeRequest("any username", "any_valid_email@gmail.com", fakePassword, "")
-	httpResponse = sut.Handle(request)
-	require.Equal(t, httpResponse.StatusCode, 400)
-	require.Equal(t, string(httpResponse.JsonBody), "Missing field ConfirmPassword!")
-
-	request = makeFakeRequest("any username", "any_valid_email@gmail.com", "", fakePassword)
-	httpResponse = sut.Handle(request)
-	require.Equal(t, httpResponse.StatusCode, 400)
-	require.Equal(t, string(httpResponse.JsonBody), "Missing field Password!")
+	require.Equal(t, http.StatusBadRequest, httpResponse.StatusCode)
+	require.Equal(t, validatorMock.Output.Error(), httpResponse.Body)
 }

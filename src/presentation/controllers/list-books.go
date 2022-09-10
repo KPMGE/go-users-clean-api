@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
-
 	usecases "github.com/KPMGE/go-users-clean-api/src/domain/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
@@ -18,13 +16,7 @@ func (controller *ListBooksController) Handle(request *protocols.HttpRequest) *p
 		return helpers.ServerError(err)
 	}
 
-	jsonBooks, err := json.Marshal(books)
-
-	if err != nil {
-		return helpers.ServerError(err)
-	}
-
-	return helpers.Ok(jsonBooks)
+	return helpers.Ok(books)
 }
 
 func NewListBooksController(service usecases.ListBooksUseCase) *ListBooksController {

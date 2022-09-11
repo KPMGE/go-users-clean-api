@@ -1,72 +1,47 @@
 package controllers_test
 
 import (
-	"encoding/json"
+	"errors"
+	"net/http"
 	"testing"
 
-	"github.com/KPMGE/go-users-clean-api/src/application/services"
 	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
-	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
-	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
 )
 
-func MakeRemoveBookControllerSut() (*controllers.RemoveBookController, *mocks_test.FindBookRepositorySpy, *mocks_test.RemoveBookRepositorySpy) {
-	removeBookRepo := mocks_test.NewRemoveBookRepositorySpy()
-
-	findBookRepo := mocks_test.NewFindBookRepositorySpy()
-	fakeBook, _ := entities.NewBook("any_title", "any_author", "any_description", 100, "any_user_id")
-	findBookRepo.FindOutput = fakeBook
-
-	userRepo := mocks_test.NewUserRepositorySpy()
-	fakeUser, _ := entities.NewUser("any_name", "any_username", "any_valid_email@gmail.com")
-	fakeUser.ID = "any_user_id"
-	fakeBook.ID = "any_book_id"
-	fakeUser.Books = append(fakeUser.Books, *fakeBook)
-	userRepo.GetByidOutput = fakeUser
-
-	service := services.NewRemoveBookService(removeBookRepo, findBookRepo, userRepo)
-	sut := controllers.NewRemoveBookController(service)
-
-	return sut, findBookRepo, removeBookRepo
+type RemoveBookServiceMock struct {
+	Output *domaindto.RemoveBookUseCaseOutputDTO
+	Error  error
 }
 
-func TestRemoveBookController_ShoulCallUseCaseWithRightBookId(t *testing.T) {
-	sut, findBookRepo, removeBookRepo := MakeRemoveBookControllerSut()
-
-	fakeRequest := protocols.NewHtppRequest(nil, []byte("any_book_id"))
-	sut.Handle(fakeRequest)
-
-	require.Equal(t, "any_book_id", findBookRepo.FindInput)
-	require.Equal(t, "any_book_id", removeBookRepo.RemoveInput)
+func (s *RemoveBookServiceMock) RemoveBook(bookId string) (*domaindto.RemoveBookUseCaseOutputDTO, error) {
+	return s.Output, s.Error
 }
 
-func TestRemoveBookController_ShoulReturnRightDataOnSuccess(t *testing.T) {
-	sut, _, _ := MakeRemoveBookControllerSut()
+func MakeRemoveBookControllerSut() (*controllers.RemoveBookController, *RemoveBookServiceMock) {
+	serviceMock := &RemoveBookServiceMock{}
+	sut := controllers.NewRemoveBookController(serviceMock)
 
-	fakeRequest := protocols.NewHtppRequest(nil, []byte("any_book_id"))
-	httpResponse := sut.Handle(fakeRequest)
-
-	var removedBook domaindto.RemoveBookUseCaseOutputDTO
-	json.Unmarshal(httpResponse.JsonBody, &removedBook)
-
-	require.Equal(t, 200, httpResponse.StatusCode)
-	require.Equal(t, "any_title", removedBook.Title)
-	require.Equal(t, "any_author", removedBook.Author)
-	require.Equal(t, "any_description", removedBook.Description)
-	require.Equal(t, 100.0, removedBook.Price)
-	require.Equal(t, "any_user_id", removedBook.UserId)
+	return sut, serviceMock
 }
 
-func TestRemoveBookController_ShoulReturnErrorIfUseCaseRetunsError(t *testing.T) {
-	sut, findBookRepo, _ := MakeRemoveBookControllerSut()
-	findBookRepo.FindOutput = nil
+func TestRemoveBookController_ShouldReturnRightDataOnSuccess(t *testing.T) {
+	sut, serviceMock := MakeRemoveBookControllerSut()
 
-	fakeRequest := protocols.NewHtppRequest(nil, []byte("any_book_id"))
-	httpResponse := sut.Handle(fakeRequest)
+	httpResponse := sut.Handle(protocols.NewHttpRequest(nil, []byte("any_id")))
 
-	require.Equal(t, 400, httpResponse.StatusCode)
-	require.Equal(t, "book not found!", string(httpResponse.JsonBody))
+	require.Equal(t, http.StatusOK, httpResponse.StatusCode)
+	require.Equal(t, serviceMock.Output, httpResponse.Body)
+}
+
+func TestRemoveBookController_ShouldReturnBadRequestIfServiceReturnsError(t *testing.T) {
+	sut, serviceMock := MakeRemoveBookControllerSut()
+	serviceMock.Error = errors.New("service error")
+
+	httpResponse := sut.Handle(protocols.NewHttpRequest(nil, []byte("any_id")))
+
+	require.Equal(t, http.StatusBadRequest, httpResponse.StatusCode)
+	require.Equal(t, serviceMock.Error.Error(), httpResponse.Body)
 }

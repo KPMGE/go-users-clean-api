@@ -1,43 +1,45 @@
 package controllers_test
 
 import (
+	"errors"
+	"net/http"
 	"testing"
 
-	"github.com/KPMGE/go-users-clean-api/src/application/services"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
-	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
 )
 
-const FAKE_OUT_MESSAGE string = "any_message_from_usecase"
-
-func MakeDeleteUserControllerSut() (*controllers.DeleteUserController, *mocks_test.UserRepositorySpy) {
-	repo := mocks_test.NewUserRepositorySpy()
-	repo.CheckByIdOuput = true
-	service := services.NewDeleteUserService(repo)
-	sut := controllers.NewDeleteUserController(service)
-	return sut, repo
+type DeleteUserServiceMock struct {
+	Output string
+	Error  error
 }
 
-func TestDeleteUserController_WhenCalledWithRightData(t *testing.T) {
-	sut, _ := MakeDeleteUserControllerSut()
-	fakeRequest := protocols.NewHtppRequest(nil, []byte("any_valid_id"))
-
-	httpResponse := sut.Handle(fakeRequest)
-
-	require.Equal(t, 200, httpResponse.StatusCode)
-	require.Equal(t, "user deleted successfully", string(httpResponse.JsonBody))
+func (s *DeleteUserServiceMock) DeleteUser(userId string) (string, error) {
+	return s.Output, s.Error
 }
 
-func TestDeleteUserController_WhenCalledWithWrongData(t *testing.T) {
-	sut, repo := MakeDeleteUserControllerSut()
-	repo.CheckByIdOuput = false
+func MakeDeleteUserControllerSut() (*controllers.DeleteUserController, *DeleteUserServiceMock) {
+	serviceMock := &DeleteUserServiceMock{Output: "user deleted successfully", Error: nil}
+	sut := controllers.NewDeleteUserController(serviceMock)
+	return sut, serviceMock
+}
 
-	fakeRequest := protocols.NewHtppRequest(nil, []byte("any_invalid_id"))
+func TestRemoveUserController_ShouldReturnRightDataOnSuccess(t *testing.T) {
+	sut, serviceMock := MakeDeleteUserControllerSut()
 
-	httpResponse := sut.Handle(fakeRequest)
+	httpResponse := sut.Handle(protocols.NewHttpRequest(nil, []byte("any_id")))
 
-	require.Equal(t, 400, httpResponse.StatusCode)
-	require.Equal(t, "No user with the provided id!", string(httpResponse.JsonBody))
+	require.Equal(t, http.StatusOK, httpResponse.StatusCode)
+	require.Equal(t, serviceMock.Output, httpResponse.Body)
+}
+
+func TestRemoveUserController_ShouldReturnBadRequestIfServiceReturnsError(t *testing.T) {
+	sut, serviceMock := MakeDeleteUserControllerSut()
+	serviceMock.Error = errors.New("service error")
+
+	httpResponse := sut.Handle(protocols.NewHttpRequest(nil, []byte("any_id")))
+
+	require.Equal(t, http.StatusBadRequest, httpResponse.StatusCode)
+	require.Equal(t, serviceMock.Error.Error(), httpResponse.Body)
 }

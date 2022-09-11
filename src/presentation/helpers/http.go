@@ -1,24 +1,35 @@
 package helpers
 
-import "github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
+import (
+	"net/http"
 
-func Ok(jsonData []byte) *protocols.HttpResponse {
+	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
+)
+
+func Ok(data any) *protocols.HttpResponse {
 	return &protocols.HttpResponse{
-		StatusCode: 200,
-		JsonBody:   jsonData,
+		StatusCode: http.StatusOK,
+		Body:       data,
 	}
 }
 
 func BadRequest(err error) *protocols.HttpResponse {
 	return &protocols.HttpResponse{
-		StatusCode: 400,
-		JsonBody:   []byte(err.Error()),
+		StatusCode: http.StatusBadRequest,
+		Body:       err.Error(),
+	}
+}
+
+func NotFound(err error) *protocols.HttpResponse {
+	return &protocols.HttpResponse{
+		StatusCode: http.StatusNotFound,
+		Body:       err.Error(),
 	}
 }
 
 func ServerError(err error) *protocols.HttpResponse {
 	return &protocols.HttpResponse{
-		StatusCode: 500,
-		JsonBody:   []byte(err.Error()),
+		StatusCode: http.StatusInternalServerError,
+		Body:       err.Error(),
 	}
 }

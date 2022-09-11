@@ -26,6 +26,7 @@ type AddAccountRequest struct {
 
 func (c *AddAccountController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
 	var accountInput domaindto.AddAccountInputDTO
+
 	err := json.Unmarshal(request.Body, &accountInput)
 	if err != nil {
 		return helpers.ServerError(err)
@@ -40,9 +41,5 @@ func (c *AddAccountController) Handle(request *protocols.HttpRequest) *protocols
 	if err != nil {
 		return helpers.BadRequest(err)
 	}
-	outputJson, err := json.Marshal(output)
-	if err != nil {
-		panic(err)
-	}
-	return helpers.Ok(outputJson)
+	return helpers.Ok(output)
 }

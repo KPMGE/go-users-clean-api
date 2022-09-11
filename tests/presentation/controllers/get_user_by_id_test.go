@@ -1,77 +1,60 @@
 package controllers_test
 
 import (
-	"encoding/json"
 	"errors"
-	"log"
+	"net/http"
 	"testing"
 
-	"github.com/KPMGE/go-users-clean-api/src/application/services"
 	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
-	"github.com/KPMGE/go-users-clean-api/src/domain/entities"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
-	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
 	"github.com/stretchr/testify/require"
 )
 
 const FAKE_USER_ID string = "any_user_id"
 
-func MakeGetUserByIdController() (*controllers.GetUserByIdController, *mocks_test.UserRepositorySpy) {
-	repo := mocks_test.NewUserRepositorySpy()
-	service := services.NewGetUserByIdService(repo)
-	sut := controllers.NewGetUserByIdController(service)
-	return sut, repo
+type GetUserByIdServiceMock struct {
+	Output *domaindto.GetUserByIdUseCaseOutputDTO
+	Error  error
 }
 
-func TestGetUserByIdController_ShouldCallUseCaseWithRightData(t *testing.T) {
-	sut, repo := MakeGetUserByIdController()
-	fakeRequest := protocols.NewHtppRequest(nil, []byte(FAKE_USER_ID))
-
-	sut.Handle(fakeRequest)
-
-	require.Equal(t, FAKE_USER_ID, repo.GetByidInput)
+func (g *GetUserByIdServiceMock) GetUserById(userId string) (*domaindto.GetUserByIdUseCaseOutputDTO, error) {
+	return g.Output, g.Error
 }
 
-func TestGetUserByIdController_ShouldReturnErrorIfParamsIsBlank(t *testing.T) {
-	sut, _ := MakeGetUserByIdController()
-	fakeRequest := protocols.NewHtppRequest(nil, []byte(""))
-
-	httpResponse := sut.Handle(fakeRequest)
-
-	require.Equal(t, 400, httpResponse.StatusCode)
-	require.Equal(t, "Blank userId!", string(httpResponse.JsonBody))
+func MakeGetUserByIdControllerSut() (*controllers.GetUserByIdController, *GetUserByIdServiceMock) {
+	fakeOutput := domaindto.GetUserByIdUseCaseOutputDTO{ID: "any_id", Name: "any_name", Email: "any_email@gmail.com", UserName: "any_username", Books: nil}
+	serviceMock := &GetUserByIdServiceMock{Error: nil, Output: &fakeOutput}
+	sut := controllers.NewGetUserByIdController(serviceMock)
+	return sut, serviceMock
 }
 
-func TestGetUserByIdController_ShouldReturnErrorIfUseCaseReturnsError(t *testing.T) {
-	sut, repo := MakeGetUserByIdController()
-	repo.GetByidError = errors.New("some server error")
-	fakeRequest := protocols.NewHtppRequest(nil, []byte(FAKE_USER_ID))
+func TestGetUserByIdController_ShouldReturnRightDataOnSuccess(t *testing.T) {
+	sut, serviceMock := MakeGetUserByIdControllerSut()
 
-	httpResponse := sut.Handle(fakeRequest)
+	httpResponse := sut.Handle(protocols.NewHttpRequest(nil, []byte("any_id")))
 
-	require.Equal(t, 500, httpResponse.StatusCode)
-	require.Equal(t, "some server error", string(httpResponse.JsonBody))
+	require.Equal(t, http.StatusOK, httpResponse.StatusCode)
+	require.Equal(t, serviceMock.Output, httpResponse.Body)
 }
 
-func TestGetUserByIdController_ShouldReturnDataOnSuccess(t *testing.T) {
-	sut, repo := MakeGetUserByIdController()
-	fakeUser, _ := entities.NewUser(fakeName, fakeUserName, fakeEmail)
-	repo.GetByidOutput = fakeUser
-	fakeRequest := protocols.NewHtppRequest(nil, []byte(FAKE_USER_ID))
+func TestGetUserByIdController_ShouldReturnNotFoundIfServiceReturnsNull(t *testing.T) {
+	sut, serviceMock := MakeGetUserByIdControllerSut()
+	serviceMock.Output = nil
+	expectedError := errors.New("user not found")
 
-	httpResponse := sut.Handle(fakeRequest)
+	httpResponse := sut.Handle(protocols.NewHttpRequest(nil, []byte("any_id")))
 
-	// convert json to struct
-	var outputObj *domaindto.GetUserByIdUseCaseOutputDTO
-	err := json.Unmarshal(httpResponse.JsonBody, &outputObj)
-	if err != nil {
-		log.Fatal(err)
-	}
+	require.Equal(t, http.StatusNotFound, httpResponse.StatusCode)
+	require.Equal(t, expectedError.Error(), httpResponse.Body)
+}
 
-	require.Equal(t, 200, httpResponse.StatusCode)
-	require.Equal(t, fakeUser.ID, outputObj.ID)
-	require.Equal(t, fakeUser.Email, outputObj.Email)
-	require.Equal(t, fakeUser.Name, outputObj.Name)
-	require.Equal(t, fakeUser.UserName, outputObj.UserName)
+func TestGetUserByIdController_ShouldReturnServerErrorIfServiceReturnsError(t *testing.T) {
+	sut, serviceMock := MakeGetUserByIdControllerSut()
+	serviceMock.Error = errors.New("service error")
+
+	httpResponse := sut.Handle(protocols.NewHttpRequest(nil, []byte("any_id")))
+
+	require.Equal(t, http.StatusInternalServerError, httpResponse.StatusCode)
+	require.Equal(t, serviceMock.Error.Error(), httpResponse.Body)
 }

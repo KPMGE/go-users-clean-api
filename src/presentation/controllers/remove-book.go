@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
-
 	usecases "github.com/KPMGE/go-users-clean-api/src/domain/useCases"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
@@ -23,9 +21,5 @@ func (controller *RemoveBookController) Handle(request *protocols.HttpRequest) *
 	if err != nil {
 		return helpers.BadRequest(err)
 	}
-	removedBookJson, err := json.Marshal(removedBook)
-	if err != nil {
-		return helpers.ServerError(err)
-	}
-	return helpers.Ok(removedBookJson)
+	return helpers.Ok(removedBook)
 }

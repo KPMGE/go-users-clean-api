@@ -2,7 +2,7 @@ package protocols
 
 type HttpResponse struct {
 	StatusCode int
-	JsonBody   []byte
+	Body       any
 }
 
 type HttpRequest struct {
@@ -10,7 +10,7 @@ type HttpRequest struct {
 	Body   []byte
 }
 
-func NewHtppRequest(body []byte, params []byte) *HttpRequest {
+func NewHttpRequest(body []byte, params []byte) *HttpRequest {
 	return &HttpRequest{
 		Body:   body,
 		Params: params,

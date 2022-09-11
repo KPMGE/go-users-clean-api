@@ -1,7 +1,6 @@
 package controllers_test
 
 import (
-	"encoding/json"
 	"errors"
 	"testing"
 
@@ -24,29 +23,22 @@ func MakeListBoooksControllerSut() (*controllers.ListBooksController, *mocks_tes
 }
 
 func TestListBooksController_shouldReturnRightDataOnSuccess(t *testing.T) {
-	sut, _ := MakeListBoooksControllerSut()
+	sut, serviceStub := MakeListBoooksControllerSut()
 
-	fakeRequest := protocols.NewHtppRequest(nil, nil)
+	fakeRequest := protocols.NewHttpRequest(nil, nil)
 	httpResponse := sut.Handle(fakeRequest)
 
-	var books []*entities.Book
-	json.Unmarshal(httpResponse.JsonBody, &books)
-
 	require.Equal(t, 200, httpResponse.StatusCode)
-	require.Equal(t, "any_title", books[0].Title)
-	require.Equal(t, "any_description", books[0].Description)
-	require.Equal(t, "any_user_id", books[0].UserID)
-	require.Equal(t, "any_author", books[0].Author)
-	require.Equal(t, 200.2, books[0].Price)
+	require.Equal(t, serviceStub.Output, httpResponse.Body)
 }
 
 func TestListBooksController_shouldServerErrorIfRepositoryReturnsError(t *testing.T) {
 	sut, repo := MakeListBoooksControllerSut()
 	repo.OutputError = errors.New("repo error")
 
-	fakeRequest := protocols.NewHtppRequest(nil, nil)
+	fakeRequest := protocols.NewHttpRequest(nil, nil)
 	httpResponse := sut.Handle(fakeRequest)
 
 	require.Equal(t, 500, httpResponse.StatusCode)
-	require.Equal(t, "repo error", string(httpResponse.JsonBody))
+	require.Equal(t, repo.OutputError.Error(), httpResponse.Body)
 }

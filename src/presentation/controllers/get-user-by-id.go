@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"errors"
 
 	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
@@ -31,6 +30,10 @@ func (controller *GetUserByIdController) Handle(request *protocols.HttpRequest) 
 		return helpers.ServerError(err)
 	}
 
+	if foundUser == nil {
+		return helpers.NotFound(errors.New("user not found"))
+	}
+
 	outputDto := domaindto.NewGetUserByIdUseCaseOutputDTO(
 		foundUser.ID,
 		foundUser.Name,
@@ -38,11 +41,5 @@ func (controller *GetUserByIdController) Handle(request *protocols.HttpRequest) 
 		foundUser.UserName,
 		foundUser.Books)
 
-	jsonOutputDto, err := json.Marshal(outputDto)
-
-	if err != nil {
-		return helpers.ServerError(err)
-	}
-
-	return helpers.Ok(jsonOutputDto)
+	return helpers.Ok(outputDto)
 }

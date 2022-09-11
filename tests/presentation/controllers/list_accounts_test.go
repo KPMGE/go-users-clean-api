@@ -1,6 +1,7 @@
 package controllers_test
 
 import (
+	"net/http"
 	"testing"
 
 	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
@@ -24,6 +25,6 @@ func TestListAccountsController_ShouldReturnFromService(t *testing.T) {
 
 	httpResponse := sut.Handle(nil)
 
-	require.Equal(t, 200, httpResponse.StatusCode)
-	require.NotNil(t, httpResponse.JsonBody)
+	require.Equal(t, http.StatusOK, httpResponse.StatusCode)
+	require.NotNil(t, httpResponse.Body)
 }

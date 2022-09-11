@@ -40,6 +40,6 @@ func TestListBooksUseCase_ShoulReturnErrorIfRepositoryReturnsError(t *testing.T)
 	books, err := sut.ListBooks()
 
 	require.Error(t, err)
-	require.Equal(t, "repo error", err.Error())
+	require.Equal(t, repo.OutputError, err)
 	require.Nil(t, books)
 }

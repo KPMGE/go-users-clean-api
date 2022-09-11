@@ -9,14 +9,20 @@ func FiberRouteAdapter(controller protocols.Controller) func(c *fiber.Ctx) error
 	return func(c *fiber.Ctx) error {
 		params := c.Route().Params
 		if params == nil {
-			request := protocols.NewHtppRequest(c.Body(), nil)
+			request := protocols.NewHttpRequest(c.Body(), nil)
 			httpResponse := controller.Handle(request)
-			return c.Status(httpResponse.StatusCode).Send(httpResponse.JsonBody)
+			return c.Status(httpResponse.StatusCode).JSON(httpResponse.Body)
 		}
 		paramName := params[0]
 		paramValue := c.Params(paramName)
-		request := protocols.NewHtppRequest(c.Body(), []byte(paramValue))
+		request := protocols.NewHttpRequest(c.Body(), []byte(paramValue))
 		httpResponse := controller.Handle(request)
-		return c.Status(httpResponse.StatusCode).Send(httpResponse.JsonBody)
+
+		if httpResponse.StatusCode < 299 {
+			return c.Status(httpResponse.StatusCode).JSON(httpResponse.Body)
+		}
+		return c.Status(httpResponse.StatusCode).JSON(map[string]any{
+			"error": httpResponse.Body,
+		})
 	}
 }

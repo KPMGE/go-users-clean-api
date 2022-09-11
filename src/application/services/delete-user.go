@@ -12,7 +12,7 @@ type DeleteUserService struct {
 func (s *DeleteUserService) DeleteUser(userId string) (string, error) {
 	userExists := s.userRepository.CheckById(userId)
 	if !userExists {
-		return "", errors.New("No user with the provided id!")
+		return "", errors.New("there is no user with the provided id")
 	}
 	err := s.userRepository.Delete(userId)
 	if err != nil {

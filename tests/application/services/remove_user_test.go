@@ -39,14 +39,14 @@ func TestDeleteUserUseCase_ShouldCallDelteUserRepositoryWithRightId(t *testing.T
 	require.Equal(t, FAKE_USER_ID, repo.DeleteInput)
 }
 
-func TestDeleteUserUseCase_ShouldReturnErrorIfWrongIdIIsProvided(t *testing.T) {
+func TestDeleteUserUseCase_ShouldReturnErrorIfWrongIdIsProvided(t *testing.T) {
 	sut, repo := MakeDeleteUserSut()
 	repo.CheckByIdOuput = false
 
 	message, err := sut.DeleteUser("any_wrong_id")
 
 	require.Error(t, err)
-	require.Equal(t, "No user with the provided id!", err.Error())
+	require.Equal(t, "there is no user with the provided id", err.Error())
 	require.Equal(t, "", message)
 }
 

@@ -7,20 +7,9 @@ import (
 	"github.com/KPMGE/go-users-clean-api/src/application/protocols"
 	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
 	mocks_test "github.com/KPMGE/go-users-clean-api/tests/application/mocks"
+	fakedtos "github.com/KPMGE/go-users-clean-api/tests/domain/fake-dtos"
 	"github.com/stretchr/testify/require"
 )
-
-type TokenProviderStub struct {
-	Output string
-	Error  error
-}
-
-func makeFakeLoginInputDTO() *domaindto.LoginInputDTO {
-	return &domaindto.LoginInputDTO{
-		Email:    "any@email.com",
-		Password: "any password",
-	}
-}
 
 type LoginService struct {
 	tk   protocols.TokenProvider
@@ -47,10 +36,6 @@ func (l *LoginService) Login(input *domaindto.LoginInputDTO) (string, error) {
 	return token, nil
 }
 
-func (t *TokenProviderStub) Generate(data any) (string, error) {
-	return t.Output, t.Error
-}
-
 func NewLoginService(tk protocols.TokenProvider, hs protocols.Hasher, repo protocols.AccountRepository) *LoginService {
 	return &LoginService{
 		tk:   tk,
@@ -59,8 +44,8 @@ func NewLoginService(tk protocols.TokenProvider, hs protocols.Hasher, repo proto
 	}
 }
 
-func makeLoginServiceSut() (*LoginService, *TokenProviderStub, *mocks_test.FakeAccountRepository) {
-	tokenStub := &TokenProviderStub{Output: "some token", Error: nil}
+func makeLoginServiceSut() (*LoginService, *mocks_test.TokenProviderStub, *mocks_test.FakeAccountRepository) {
+	tokenStub := &mocks_test.TokenProviderStub{Output: "some token", Error: nil}
 	fakeHasher := mocks_test.NewHasherSpy()
 	fakeAccountRepo := mocks_test.NewFakeAccountRepository()
 	fakeAccountRepo.CheckAccountOutput = true
@@ -71,7 +56,7 @@ func makeLoginServiceSut() (*LoginService, *TokenProviderStub, *mocks_test.FakeA
 func TestLoginService_ShouldReturnTokenFromProvider(t *testing.T) {
 	sut, tokenStub, _ := makeLoginServiceSut()
 
-	token, err := sut.Login(makeFakeLoginInputDTO())
+	token, err := sut.Login(fakedtos.MakeFakeLoginInputDTO())
 
 	require.Nil(t, err)
 	require.Equal(t, tokenStub.Output, token)
@@ -81,7 +66,7 @@ func TestLoginService_ShouldReturnErrorIfTokenProviderReturnsError(t *testing.T)
 	sut, tokenStub, _ := makeLoginServiceSut()
 	tokenStub.Error = errors.New("token provider error")
 
-	token, err := sut.Login(makeFakeLoginInputDTO())
+	token, err := sut.Login(fakedtos.MakeFakeLoginInputDTO())
 
 	require.Equal(t, "", token)
 	require.Equal(t, tokenStub.Error, err)
@@ -91,7 +76,7 @@ func TestLoginService_ShouldReturnErrorIfAccountDoesNotExit(t *testing.T) {
 	sut, _, accountRepo := makeLoginServiceSut()
 	accountRepo.CheckAccountOutput = false
 
-	token, err := sut.Login(makeFakeLoginInputDTO())
+	token, err := sut.Login(fakedtos.MakeFakeLoginInputDTO())
 
 	expectedError := errors.New("account does not exit!")
 

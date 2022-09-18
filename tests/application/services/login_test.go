@@ -54,7 +54,7 @@ func (l *LoginService) Login(input *LoginInputDTO) (string, error) {
 	token, err := l.tk.generate(input)
 
 	if err != nil {
-		return "", errors.New("token generation failed!")
+		return "", err
 	}
 
 	return token, nil
@@ -88,4 +88,14 @@ func TestLoginService_ShouldReturnTokenFromProvider(t *testing.T) {
 
 	require.Nil(t, err)
 	require.Equal(t, tokenStub.Output, token)
+}
+
+func TestLoginService_ShouldReturnErrorIfTokenProviderReturnsError(t *testing.T) {
+	sut, tokenStub := makeLoginServiceSut()
+	tokenStub.Error = errors.New("token provider error")
+
+	token, err := sut.Login(makeFakeLoginInputDTO())
+
+	require.Equal(t, "", token)
+	require.Equal(t, tokenStub.Error, err)
 }

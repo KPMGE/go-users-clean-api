@@ -72,17 +72,17 @@ func NewLoginService(tk TokenProvider, hs protocols.Hasher, repo protocols.Accou
 	}
 }
 
-func makeLoginServiceSut() (*LoginService, *TokenProviderStub) {
+func makeLoginServiceSut() (*LoginService, *TokenProviderStub, *mocks_test.FakeAccountRepository) {
 	tokenStub := &TokenProviderStub{Output: "some token", Error: nil}
 	fakeHasher := mocks_test.NewHasherSpy()
 	fakeAccountRepo := mocks_test.NewFakeAccountRepository()
 	fakeAccountRepo.CheckAccountOutput = true
 	sut := NewLoginService(tokenStub, fakeHasher, fakeAccountRepo)
-	return sut, tokenStub
+	return sut, tokenStub, fakeAccountRepo
 }
 
 func TestLoginService_ShouldReturnTokenFromProvider(t *testing.T) {
-	sut, tokenStub := makeLoginServiceSut()
+	sut, tokenStub, _ := makeLoginServiceSut()
 
 	token, err := sut.Login(makeFakeLoginInputDTO())
 
@@ -91,11 +91,23 @@ func TestLoginService_ShouldReturnTokenFromProvider(t *testing.T) {
 }
 
 func TestLoginService_ShouldReturnErrorIfTokenProviderReturnsError(t *testing.T) {
-	sut, tokenStub := makeLoginServiceSut()
+	sut, tokenStub, _ := makeLoginServiceSut()
 	tokenStub.Error = errors.New("token provider error")
 
 	token, err := sut.Login(makeFakeLoginInputDTO())
 
 	require.Equal(t, "", token)
 	require.Equal(t, tokenStub.Error, err)
+}
+
+func TestLoginService_ShouldReturnErrorIfAccountDoesNotExit(t *testing.T) {
+	sut, _, accountRepo := makeLoginServiceSut()
+	accountRepo.CheckAccountOutput = false
+
+	token, err := sut.Login(makeFakeLoginInputDTO())
+
+	expectedError := errors.New("account does not exit!")
+
+	require.Equal(t, "", token)
+	require.Equal(t, expectedError, err)
 }

@@ -1,7 +1,7 @@
 package domaindto
 
 type LoginInputDTO struct {
-	UserName string
-	Email    string
-	Password string
+	UserName string `json:"userName"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }

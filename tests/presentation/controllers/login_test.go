@@ -10,6 +10,7 @@ import (
 	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 	fakedtos "github.com/KPMGE/go-users-clean-api/tests/domain/fake-dtos"
+	controllermocks_test "github.com/KPMGE/go-users-clean-api/tests/presentation/controller-mocks"
 	"github.com/stretchr/testify/require"
 )
 
@@ -33,7 +34,8 @@ func NewLoginServiceMock() *LoginServiceMock {
 }
 
 type LoginController struct {
-	srv usecases.LoginUseCase
+	srv       usecases.LoginUseCase
+	validator protocols.Validator
 }
 
 func (c *LoginController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
@@ -59,9 +61,15 @@ func FakeLoginRequest() *protocols.HttpRequest {
 	return protocols.NewHttpRequest(inputJson, nil)
 }
 
-func TestLoginController_ShouldReturnOkOnSuccess(t *testing.T) {
+func MakeLoginControllerSut() (*LoginController, *LoginServiceMock, *controllermocks_test.ValidatorMock) {
 	serviceMock := NewLoginServiceMock()
+	validatorMock := &controllermocks_test.ValidatorMock{Output: nil}
 	sut := NewLoginController(serviceMock)
+	return sut, serviceMock, validatorMock
+}
+
+func TestLoginController_ShouldReturnOkOnSuccess(t *testing.T) {
+	sut, serviceMock, _ := MakeLoginControllerSut()
 
 	httpRequest := sut.Handle(FakeLoginRequest())
 

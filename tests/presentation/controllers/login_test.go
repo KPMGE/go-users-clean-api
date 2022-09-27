@@ -7,8 +7,7 @@ import (
 	"testing"
 
 	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
-	usecases "github.com/KPMGE/go-users-clean-api/src/domain/useCases"
-	"github.com/KPMGE/go-users-clean-api/src/presentation/helpers"
+	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	presentationerrors "github.com/KPMGE/go-users-clean-api/src/presentation/presentation-errors"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
 	fakedtos "github.com/KPMGE/go-users-clean-api/tests/domain/fake-dtos"
@@ -35,44 +34,6 @@ func NewLoginServiceMock() *LoginServiceMock {
 	}
 }
 
-type LoginController struct {
-	srv       usecases.LoginUseCase
-	validator protocols.Validator
-}
-
-func (c *LoginController) Handle(request *protocols.HttpRequest) *protocols.HttpResponse {
-	if request == nil || request.Body == nil {
-		return helpers.BadRequest(presentationerrors.NewBlankBodyError())
-	}
-
-	var input domaindto.LoginInputDTO
-	err := json.Unmarshal(request.Body, &input)
-
-	if err != nil {
-		return helpers.ServerError(errors.New("error when parsing json body!"))
-	}
-
-	err = c.validator.Validate(&input)
-	if err != nil {
-		return helpers.BadRequest(err)
-	}
-
-	token, err := c.srv.Login(&input)
-
-	if err != nil {
-		return helpers.ServerError(err)
-	}
-
-	return helpers.Ok(token)
-}
-
-func NewLoginController(srv usecases.LoginUseCase, validator protocols.Validator) *LoginController {
-	return &LoginController{
-		srv:       srv,
-		validator: validator,
-	}
-}
-
 func FakeLoginRequest() *protocols.HttpRequest {
 	inputJson, err := json.Marshal(fakedtos.MakeFakeLoginInputDTO())
 	if err != nil {
@@ -81,10 +42,10 @@ func FakeLoginRequest() *protocols.HttpRequest {
 	return protocols.NewHttpRequest(inputJson, nil)
 }
 
-func MakeLoginControllerSut() (*LoginController, *LoginServiceMock, *controllermocks_test.ValidatorMock) {
+func MakeLoginControllerSut() (*controllers.LoginController, *LoginServiceMock, *controllermocks_test.ValidatorMock) {
 	serviceMock := NewLoginServiceMock()
 	validatorMock := &controllermocks_test.ValidatorMock{Output: nil}
-	sut := NewLoginController(serviceMock, validatorMock)
+	sut := controllers.NewLoginController(serviceMock, validatorMock)
 	return sut, serviceMock, validatorMock
 }
 

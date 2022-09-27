@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"testing"
 
-	domaindto "github.com/KPMGE/go-users-clean-api/src/domain/domain-dto"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/controllers"
 	presentationerrors "github.com/KPMGE/go-users-clean-api/src/presentation/presentation-errors"
 	"github.com/KPMGE/go-users-clean-api/src/presentation/protocols"
@@ -14,25 +13,6 @@ import (
 	controllermocks_test "github.com/KPMGE/go-users-clean-api/tests/presentation/controller-mocks"
 	"github.com/stretchr/testify/require"
 )
-
-type LoginServiceMock struct {
-	Input  *domaindto.LoginInputDTO
-	Output string
-	Error  error
-}
-
-func (s *LoginServiceMock) Login(input *domaindto.LoginInputDTO) (string, error) {
-	s.Input = input
-	return s.Output, s.Error
-}
-
-func NewLoginServiceMock() *LoginServiceMock {
-	return &LoginServiceMock{
-		Input:  nil,
-		Output: "token",
-		Error:  nil,
-	}
-}
 
 func FakeLoginRequest() *protocols.HttpRequest {
 	inputJson, err := json.Marshal(fakedtos.MakeFakeLoginInputDTO())
@@ -42,8 +22,8 @@ func FakeLoginRequest() *protocols.HttpRequest {
 	return protocols.NewHttpRequest(inputJson, nil)
 }
 
-func MakeLoginControllerSut() (*controllers.LoginController, *LoginServiceMock, *controllermocks_test.ValidatorMock) {
-	serviceMock := NewLoginServiceMock()
+func MakeLoginControllerSut() (*controllers.LoginController, *controllermocks_test.LoginServiceMock, *controllermocks_test.ValidatorMock) {
+	serviceMock := controllermocks_test.NewLoginServiceMock()
 	validatorMock := &controllermocks_test.ValidatorMock{Output: nil}
 	sut := controllers.NewLoginController(serviceMock, validatorMock)
 	return sut, serviceMock, validatorMock

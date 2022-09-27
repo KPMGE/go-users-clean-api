@@ -57,7 +57,11 @@ func (c *LoginController) Handle(request *protocols.HttpRequest) *protocols.Http
 		return helpers.BadRequest(err)
 	}
 
-	token, _ := c.srv.Login(&input)
+	token, err := c.srv.Login(&input)
+
+	if err != nil {
+		return helpers.ServerError(err)
+	}
 
 	return helpers.Ok(token)
 }
